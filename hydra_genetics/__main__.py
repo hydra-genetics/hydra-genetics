@@ -59,7 +59,7 @@ def cli(verbose, log_file):
 
 def validate_wf_name_prompt(ctx, opts, value):
     """Force the workflow name to meet the hydra-core requirements"""
-    if not re.match(r"^[a-z_]+$", value):
+    if not re.match(r"^[a-z_-]+$", value):
         click.echo("Invalid workflow name: must be lowercase without punctuation.")
         value = click.prompt(opts.prompt)
         return validate_wf_name_prompt(ctx, opts, value)
@@ -80,12 +80,13 @@ def validate_wf_name_prompt(ctx, opts, value):
 @click.option("-a", "--author", prompt=True, required=True, type=str, help="Name of the main author(s)")
 @click.option("-e", "--email", prompt=True, required=True, type=str, help="E-mail(s) of the main author(s)")
 @click.option("--version", type=str, default="0.0.1", help="The initial version number to use")
+@click.option("--min-snakemake-version", type=str, default="6.8.0", help="Min snakemake version")
 @click.option("-g", "--git-user", prompt=True, required=True, help="User name of main git user(s)")
-@click.option("--nogit", is_flag=True, default=False, help="Do not create git repo")
+@click.option("--no-git", is_flag=True, default=False, help="Do not create git repo")
 @click.option("-f", "--force", is_flag=True, default=False, help="Overwrite output directory if it already exists")
 @click.option("-o", "--outdir", type=str, help="Output directory for new pipeline (default: pipeline name)")
-def create(name, description, author, email, version, git_user, nogit, force, outdir):
-    pipeline = PipelineCreate(name, description, author, email, version, git_user, nogit, force, outdir)
+def create(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
+    pipeline = PipelineCreate(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir)
     pipeline.init_pipeline()
 
 

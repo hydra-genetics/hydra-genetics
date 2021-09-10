@@ -1,4 +1,4 @@
-name: Lint and Test
+name: small integration test
 
 # Controls when the action will run.
 on:
@@ -7,17 +7,13 @@ on:
     branches:
      - develop
      - master
-  pull_request:
-    branches:
-     - develop
-     - master
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  python_code:
-    name: check pycodestyle
+  integration-small:
+    name: integration small data set
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,8 +26,15 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Install dependencies
         run: |
+          conda install -c conda-forge mamba
+      - name: Install requirements.txt
+        run: |
           pip install -r requirements.txt
-      - name: Check pycodestyle
-        run: pycodestyle --max-line-length=130 --statistics ./
-      #- name: run pytest
-      #  run: pytest tests/lib/python/test_utils.py
+      - name: Install requirements.test.txt
+        run: |
+          pip install -r requirements.test.txt
+      - name: Integration test - small dataset
+        working-directory: .tests/integration
+        run: |
+          mamba install -c conda-forge -c bioconda snakemake singularity
+          snakemake -s ../../workflow/Snakefile -j 1 --use-singularity

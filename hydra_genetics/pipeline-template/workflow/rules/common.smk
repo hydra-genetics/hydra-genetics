@@ -10,7 +10,7 @@ import pandas as pd
 from snakemake.utils import validate
 from snakemake.utils import min_version
 
-min_version("{{ snakemake_version }}")
+min_version("{{ min_snakemake_version }}")
 
 ### Set and validate config file
 

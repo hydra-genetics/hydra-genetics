@@ -61,10 +61,10 @@ jobs:
           conda install -c conda-forge mamba
       - name: Install requirements.txt
         run: |
-          mamba install --file requirements.txt
+          pip install -r requirements.txt
       - name: Install requirements.test.txt
         run: |
-          mamba install --file requirements.test.txt
+          pip install -r requirements.test.txt
       - name: Check python syntax lib
         run: pycodestyle --max-line-length=130 --statistics workflow/scripts
       - name: pytest

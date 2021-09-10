@@ -33,7 +33,7 @@ jobs:
           conda install -c conda-forge mamba
       - name: Install requirements.txt
         run: |
-          mamba install --file requirements.txt
+          pip install -r requirements.txt
       - name: Check pycodestyle
         run: pycodestyle --max-line-length=130 --statistics ./
       #- name: run pytest

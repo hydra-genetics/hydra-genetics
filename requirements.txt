@@ -1,0 +1,5 @@
+click==8.0.1
+jinja2==3.0.1
+rich==10.9.0
+pycodestyle
+pytest

@@ -1,0 +1,7 @@
+---
+
+ samples: "samples.tsv"
+ units: "units.tsv"
+
+ tools:
+   common: "docker://hydra/common:1.1.0"

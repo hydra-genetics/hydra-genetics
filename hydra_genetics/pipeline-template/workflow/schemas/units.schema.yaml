@@ -1,0 +1,32 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+description: row represents one dataset
+properties:
+  sample:
+    type: string
+    description: sample id
+  unit:
+    type: string
+    description: type of sample
+  run:
+    type: string
+    description: sequencing run id
+  lane:
+    type: string
+    description: lane number
+  fastq1:
+    type: string
+    description: absolute path to R1 fastq file
+  fastq2:
+    type: string
+    description: absolute path to R2 fastq file
+  adapter:
+    type: string
+    description: one or more sequence, separated by ","
+required:
+  - sample
+  - unit
+  - run
+  - lane
+  - fq1
+  - fq2
+  - adapter

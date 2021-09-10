@@ -1,1 +1,0 @@
-# Folder to store different kind of scripts, python, R,  and so forth

@@ -27,6 +27,6 @@ required:
   - unit
   - run
   - lane
-  - fq1
-  - fq2
+  - fastq1
+  - fastq2
   - adapter

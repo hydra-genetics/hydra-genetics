@@ -3,44 +3,52 @@
 organization's specification based on a template.
 """
 
+from datetime import date
+import git
 import logging
 import jinja2
 import pathlib
 import os
 import sys
+import hydra_genetics
 
 log = logging.getLogger(__name__)
 
 
 class PipelineCreate(object):
-    """Creates a hydra-core pipeline.
+    """Creates a hydra-genetics pipeline.
     Args:
         name (str): Name for the pipeline.
         description (str): Description for the pipeline.
-        author (str): Authors name of the pipeline.
+        author (str): Authors name
+        email (str): Authors email
         version (str): Version flag. Semantic versioning only. Defaults to `1.0dev`.
+        snakemake_version (str): min snakemake version
+        git_user: (str) username on github
         no_git (bool): Prevents the creation of a local Git repository for the pipeline. Defaults to False.
         force (bool): Overwrites a given workflow directory with the same name. Defaults to False.
             May the force be with you.
         outdir (str): Path to the local output directory.
     """
-    def __init__(self, name, description, author, email, version="0.0.1", git_user=None, nogit=False, force=False, outdir=None):
-        self.short_name = name.lower().replace(r"/\s+/", "-").replace("hydra_core/", "").replace("/", "-")
-        self.name = f"hydra_core/{self.short_name}"
+    def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version="6.8.0", git_user=None, no_git=False, force=False, outdir=None):
+        self.short_name = name.lower().replace(r"/\s+/", "-").replace("hydra-genetics/", "").replace("/", "-")
+        self.name = f"hydra_genetics/{self.short_name}"
         self.description = description
         self.author = author
         self.email = email
         self.version = version
+        self.min_snakemake_version = min_snakemake_version
         self.git_user = git_user
         self.no_git = no_git
         self.force = force
+        self.year = date.today().year
         self.outdir = outdir
         if not self.outdir:
             self.outdir = os.path.join(os.getcwd(), self.name)
 
     def init_pipeline(self):
-        """Creates the hydra_core pipeline."""
-
+        """Creates the hydra_genetics pipeline."""
+        log.info(f"Creating pipeline: {self.short_name}")
         if os.path.exists(self.outdir):
             if self.force:
                 log.warning(f"Output directory '{self.outdir}' exists - continuing as --force specified")
@@ -52,15 +60,14 @@ class PipelineCreate(object):
             os.makedirs(self.outdir)
 
         env = jinja2.Environment(
-           loader=jinja2.PackageLoader("hydra_core", "pipeline-template"), keep_trailing_newline=True
+           loader=jinja2.PackageLoader("hydra_genetics", "pipeline-template"), keep_trailing_newline=True
         )
 
         template_dir = os.path.join(os.path.dirname(__file__), "../pipeline-template")
         object_attrs = vars(self)
         template_files = list(pathlib.Path(template_dir).glob("**/*"))
-        template_files += list(pathlib.Path(template_dir).glob("*"))
         ignore_strs = [".pyc", "__pycache__", ".pyo", ".pyd", ".DS_Store", ".egg", ".snakemake"]
-
+        log.info("Adding folder and files")
         for template_fn_path_obj in template_files:
             template_fn_path = str(template_fn_path_obj)
             if any([s in template_fn_path for s in ignore_strs]):
@@ -91,3 +98,21 @@ class PipelineCreate(object):
             with open(output_path, "w") as fh:
                 log.debug(f"Writing to output file: '{output_path}'")
                 fh.write(rendered_output)
+
+        if not self.no_git:
+            self.git_init_pipeline()
+
+    def git_init_pipeline(self):
+        """Initialises the new pipeline as a Git repository and submits first commit."""
+        log.info("Initialising pipeline git repository")
+        repo = git.Repo.init(self.outdir)
+        repo.git.add(A=True)
+        repo.index.commit(f"initial template build from hydra-genetics/tools, version {hydra_genetics.__version__}")
+        # Add TEMPLATE branch to git repository
+        repo.git.branch("develop")
+        log.info(
+            "Done. Remember to add a remote and push to GitHub:\n"
+            f"[white on grey23] cd {self.outdir} \n"
+            " git remote add origin git@github.com:USERNAME/REPO_NAME.git \n"
+            " git push --all origin                                       "
+        )

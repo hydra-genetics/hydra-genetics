@@ -13,6 +13,10 @@ report: "report/workflow.rst"
 rule dummy:
     output:
         "dummy.txt"
+    log:
+        "logs/{{ short_name }}/bash/dummy/test.log"
+    conda:
+        "envs/dummay.yaml"
     shell:
         """
         touch dummy.txt

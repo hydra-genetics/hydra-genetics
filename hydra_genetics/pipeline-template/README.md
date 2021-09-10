@@ -1,8 +1,15 @@
 # {{ short_name }}
 
-# {{ description }}
+{{ description }}
 
-![Snakefmt](PATH_TO_ACTION_BADGE)
+![Lint](https://github.com/hydra-genetics/{{ short_name }}/actions/workflows/lint.yaml/badge.svg?branch=develop)
+![Snakefmt](https://github.com/hydra-genetics/{{ short_name }}/actions/workflows/snakefmt.yaml/badge.svg?branch=develop)
+
+![pycodestyle](https://github.com/hydra-genetics/{{ short_name }}/actions/workflows/pycodestyl.yaml/badge.svg?branch=develop)
+![pytest](https://github.com/hydra-genetics/{{ short_name }}/actions/workflows/pytest.yaml/badge.svg?branch=develop)
+
+![integration test](https://github.com/hydra-genetics/{{ short_name }}/actions/workflows/integration1.yaml/badge.svg?branch=develop)
+
 [![License: GPL-3](https://img.shields.io/badge/License-GPL3-yellow.svg)](https://opensource.org/licenses/gpl-3.0.html)
 
 ## :speech_balloon: Introduction
@@ -11,8 +18,8 @@
 
 To run this workflow, the following tools need to be available:
 
-![python](https://img.shields.io/badge/python-3.8-blue)
-[![snakemake](https://img.shields.io/badge/snakemake-5.32.0-blue)](https://snakemake.readthedocs.io/en/stable/)
+[![python](https://img.shields.io/badge/python-3.8-blue)
+[![snakemake](https://img.shields.io/badge/snakemake-{{ min_snakemake_version }}-blue)](https://snakemake.readthedocs.io/en/stable/)
 [![singularity](https://img.shields.io/badge/singularity-3.7-blue)](https://sylabs.io/docs/)
 
 ## :school_satchel: Preparations

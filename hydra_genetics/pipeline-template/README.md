@@ -18,7 +18,7 @@
 
 To run this workflow, the following tools need to be available:
 
-[![python](https://img.shields.io/badge/python-3.8-blue)
+![python](https://img.shields.io/badge/python-3.8-blue)
 [![snakemake](https://img.shields.io/badge/snakemake-{{ min_snakemake_version }}-blue)](https://snakemake.readthedocs.io/en/stable/)
 [![singularity](https://img.shields.io/badge/singularity-3.7-blue)](https://sylabs.io/docs/)
 

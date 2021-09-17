@@ -29,7 +29,7 @@ validate(samples, schema="../schemas/samples.schema.yaml")
 ### Read and validate units file
 
 units = pd.read_table(config["units"], dtype=str).set_index(
-    ["sample", "unit", "run", "lane"], drop=False
+    ["sample", "type", "run", "lane"], drop=False
 )
 validate(units, schema="../schemas/units.schema.yaml")
 
@@ -41,13 +41,13 @@ wildcard_constraints:
 
 def get_fastq(wildcards):
     fastqs = units.loc[
-        (wildcards.sample, wildcards.unit, wildcards.run, wildcards.lane), ["fastq1", "fastq2"]
+        (wildcards.sample, wildcards.type, wildcards.run, wildcards.lane), ["fastq1", "fastq2"]
     ].dropna()
     return {"fwd": fastqs.fastq1, "rev": fastqs.fastq2}
 
 
 def get_sample_fastq(wildcards):
-    fastqs = units.loc[(wildcards.sample, wildcards.unit), ["fastq1", "fastq2"]].dropna()
+    fastqs = units.loc[(wildcards.sample, wildcards.type), ["fastq1", "fastq2"]].dropna()
     return {"fwd": fastqs["fastq1"].tolist(), "rev": fastqs["fastq2"].tolist()}
 
 def compile_output_list(wildcards):

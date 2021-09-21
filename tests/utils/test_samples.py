@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import unittest
-import pandas
+import pandas as pandas
 
 
 class TestSampleUtils(unittest.TestCase):

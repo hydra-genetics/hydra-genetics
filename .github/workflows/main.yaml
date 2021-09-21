@@ -31,7 +31,13 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+      - name: Install dependencies tests
+        run: |
+          pip install -r requirements.test.txt
       - name: Check pycodestyle
         run: pycodestyle --max-line-length=130 --statistics ./
+      - name: install hydra_genetics
+        run: |
+          pip install -e .
       - name: run pytest
-        run: pytest tests
+        run: python -m pytest

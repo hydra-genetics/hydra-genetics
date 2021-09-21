@@ -17,7 +17,7 @@ on:
 
 jobs:
   python_code:
-    name: check pycodestyle
+    name: check pycodestyle and unittest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

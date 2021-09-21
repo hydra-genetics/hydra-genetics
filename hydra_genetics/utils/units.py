@@ -3,6 +3,7 @@
 import pandas
 import snakemake
 
+
 def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pandas.Series:
     """
     function used to extract one unit(row) from units.tsv
@@ -36,7 +37,7 @@ def get_fastq_file(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, r
     """
     unit = get_unit(units, wildcards)
     if read_pair not in ["fastq1", "fastq2"]:
-        raise ValueError("Incorrect input value error {}: expected {} or {}".format(read_pair,"fastq1", "fastq2"))
+        raise ValueError("Incorrect input value error {}: expected {} or {}".format(read_pair, "fastq1", "fastq2"))
     return unit[read_pair]
 
 

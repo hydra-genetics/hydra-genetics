@@ -14,6 +14,7 @@ import rich.traceback
 # Submodules should all traverse back to this
 log = logging.getLogger()
 
+
 def rich_force_colors():
     """
     Check if any environment variables are set to force Rich to use coloured output

@@ -108,6 +108,7 @@ def create_module(name, description, author, email, version, min_snakemake_versi
     pipeline = PipelineCreate(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir)
     pipeline.init_pipeline()
 
+
 @cli.command(short_help="add rule to project")
 @click.option(
     "-n",
@@ -125,7 +126,8 @@ def create_module(name, description, author, email, version, min_snakemake_versi
     required=True,
     callback=validate_wf_name_prompt,
     type=str,
-    help="name module/workflow where rule will be added. Expected folder structure is module_name/workflow/, the rule will be added to a subfolder named rules, env.yaml to a subfolder named envs.",
+    help="name module/workflow where rule will be added. Expected folder structure is module_name/workflow/, "
+         " the rule will be added to a subfolder named rules, env.yaml to a subfolder named envs.",
 )
 @click.option("-a", "--author", prompt=True, required=True, type=str, help="Name of the main author(s)")
 @click.option("-e", "--email", prompt=True, required=True, type=str, help="E-mail(s) of the main author(s)")

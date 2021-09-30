@@ -118,6 +118,7 @@ class PipelineCreate(object):
             " git push --all origin                                       "
         )
 
+
 class RuleCreate(object):
     """Creates a hydra-genetics rule.
     Args:
@@ -179,7 +180,7 @@ class RuleCreate(object):
             template_fn = os.path.relpath(template_fn_path, template_dir)
             output_path = os.path.join(outdir, template_fn)
             if template_fn in rename_files:
-               output_path = os.path.join(outdir, rename_files[template_fn])
+                output_path = os.path.join(outdir, rename_files[template_fn])
 
             log.debug(f"Rendering template file: '{template_fn}'")
             j_template = env.get_template(template_fn)

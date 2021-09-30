@@ -11,3 +11,9 @@ Python tool with helper functions for setting up new pipeline and preparing refe
 
 * create
 * reference
+
+
+Example of how to generate a new project
+```
+ hydra-genetics create -n misc -d "Module containing rules that are general and most likely will be used by  multiple modules." -a "Patrik Smeds" -e patrik.smeds@scilifelab.uu.se -g Smeds -o misc
+```

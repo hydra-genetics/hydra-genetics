@@ -4,9 +4,9 @@ properties:
   sample:
     type: string
     description: sample id
-  unit:
+  type:
     type: string
-    description: type of sample
+    description: type of sample (N|T|R)
   run:
     type: string
     description: sequencing run id
@@ -24,7 +24,7 @@ properties:
     description: one or more sequence, separated by ","
 required:
   - sample
-  - unit
+  - type
   - run
   - lane
   - fastq1

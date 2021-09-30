@@ -1,6 +1,7 @@
 
 import click
 import logging
+import os
 import re
 import sys
 
@@ -13,6 +14,15 @@ import rich.traceback
 # Set up logging as the root logger
 # Submodules should all traverse back to this
 log = logging.getLogger()
+
+
+def rich_force_colors():
+    """
+    Check if any environment variables are set to force Rich to use coloured output
+    """
+    if os.getenv("GITHUB_ACTIONS") or os.getenv("FORCE_COLOR") or os.getenv("PY_COLORS"):
+        return True
+    return None
 
 
 def run():

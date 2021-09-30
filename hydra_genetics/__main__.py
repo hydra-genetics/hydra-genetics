@@ -5,7 +5,7 @@ import re
 import sys
 
 import hydra_genetics.utils
-from hydra_genetics.commands.create import PipelineCreate
+from hydra_genetics.commands.create import PipelineCreate, RuleCreate
 import rich.console
 import rich.logging
 import rich.traceback
@@ -59,10 +59,19 @@ def cli(verbose, log_file):
 
 def validate_wf_name_prompt(ctx, opts, value):
     """Force the workflow name to meet the hydra-core requirements"""
-    if not re.match(r"^[a-z_-]+$", value):
+    if not re.match(r"^[a-z_]+$", value):
         click.echo("Invalid workflow name: must be lowercase without punctuation.")
         value = click.prompt(opts.prompt)
         return validate_wf_name_prompt(ctx, opts, value)
+    return value
+
+
+def validate_rule_name_prompt(ctx, opts, value):
+    """Force the rule name to meet the hydra-core requirements"""
+    if not re.match(r"^[a-z0-9_]+$", value):
+        click.echo("Invalid workflow name: must be lowercase ('_' is allowed) without punctuation.")
+        value = click.prompt(opts.prompt)
+        return validate_rule_name_prompt(ctx, opts, value)
     return value
 
 
@@ -85,9 +94,35 @@ def validate_wf_name_prompt(ctx, opts, value):
 @click.option("--no-git", is_flag=True, default=False, help="Do not create git repo")
 @click.option("-f", "--force", is_flag=True, default=False, help="Overwrite output directory if it already exists")
 @click.option("-o", "--outdir", type=str, help="Output directory for new pipeline (default: pipeline name)")
-def create(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
+def create_module(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
     pipeline = PipelineCreate(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir)
     pipeline.init_pipeline()
+
+@cli.command(short_help="add rule to project")
+@click.option(
+    "-n",
+    "--name",
+    prompt="rule name",
+    required=True,
+    callback=validate_rule_name_prompt,
+    type=str,
+    help="name of rule that will be added",
+)
+@click.option(
+    "-m",
+    "--module",
+    prompt="name of module/workflow",
+    required=True,
+    callback=validate_wf_name_prompt,
+    type=str,
+    help="name module/workflow where rule will be added. Expected folder structure is module_name/workflow/, the rule will be added to a subfolder named rules, env.yaml to a subfolder named envs.",
+)
+@click.option("-a", "--author", prompt=True, required=True, type=str, help="Name of the main author(s)")
+@click.option("-e", "--email", prompt=True, required=True, type=str, help="E-mail(s) of the main author(s)")
+@click.option("-o", "--outdir", type=str, help="Output directory for where rule will be added (default: current dir)")
+def create_rule(name, module, author, email, outdir):
+    rule = RuleCreate(name, module, author, email, outdir)
+    rule.init_rule()
 
 
 @cli.command(short_help="download reference data")

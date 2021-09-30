@@ -6,24 +6,24 @@ __copyright__ = "Copyright {{ year }}, {{ author }}"
 __email__ = "{{ email }}"
 __license__ = "GPL-3"
 
-rule {{ rule_name }}:
+rule {{ name }}:
     input:
         ...
     output:
-        "{{ module_name }}/{{ rule_name }}/{sample}_{unit}.output.txt"
+        "{{ module_name }}/{{ name }}/{sample}_{unit}.output.txt"
     params:
-        extra=config.get("{{ rule_name }}", {}).get("extra", ""),
+        extra=config.get("{{ name }}", {}).get("extra", ""),
     log:
-        "{{ module_name }}/{{ rule_name }}/{sample}_{unit}.output.log"
+        "{{ module_name }}/{{ name }}/{sample}_{unit}.output.log"
     benchmark:
-       repeat("{{ module_name }}/{{ rule_name }}/{sample}_{unit}.output.benchmark.tsv", config.get("{{ rule_name }}", {}).get("benchmark_repeats", 1),)
+       repeat("{{ module_name }}/{{ name }}/{sample}_{unit}.output.benchmark.tsv", config.get("{{ name }}", {}).get("benchmark_repeats", 1),)
     threads: # optional
-       config.get("{{ rule_name }}", config["default_resources"])["threads"]
+       config.get("{{ name }}", config["default_resources"])["threads"]
     container:
-       config.get("{{ rule_name }}", {}).get("container", config["default_container"])
+       config.get("{{ name }}", {}).get("container", config["default_container"])
     conda:
-       "../envs/{{ rule_name }}.yaml"
+       "../envs/{{ name }}.yaml"
     message:
-       "{rule}: Do stuff on {{ module_name }}//{rule}/{wildcards.sample}_{wildcards.unit}.input"
+       "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.unit}.input"
     wrapper:
         "..."

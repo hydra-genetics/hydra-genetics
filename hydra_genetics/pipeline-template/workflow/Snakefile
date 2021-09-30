@@ -20,7 +20,7 @@ rule dummy:
     benchmark:
        repeat("module/dummy/{sample}_{unit}.output.benchmark.tsv", config.get("dummy", {}).get("benchmark_repeats", 1),)
     threads: # optional
-       config.get("dummy", config["default_resources"])["cores"]
+       config.get("dummy", config["default_resources"])["threads"]
     container:
        config.get("dummy", {}).get("container", config["default_container"])
     conda:

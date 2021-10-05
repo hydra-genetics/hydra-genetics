@@ -27,7 +27,7 @@ def rich_force_colors():
 
 def run():
     # Set up rich stderr console
-    stderr = rich.console.Console(stderr=True, force_terminal=hydra_genetics.utils.rich_force_colors())
+    stderr = rich.console.Console(stderr=True, force_terminal=rich_force_colors())
 
     # Set up the rich traceback
     rich.traceback.install(console=stderr, width=200, word_wrap=True, extra_lines=1)

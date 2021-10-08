@@ -6,24 +6,26 @@ __copyright__ = "Copyright {{ year }}, {{ author }}"
 __email__ = "{{ email }}"
 __license__ = "GPL-3"
 
+
 rule {{ name }}:
     input:
-        ...
+        "...",
     output:
-        "{{ module_name }}/{{ name }}/{sample}_{unit}.output.txt"
+        "{{ module_name }}/{{ name }}/{sample}_{unit}.output.txt",
     params:
         extra=config.get("{{ name }}", {}).get("extra", ""),
     log:
         "{{ module_name }}/{{ name }}/{sample}_{unit}.output.log"
     benchmark:
-       repeat("{{ module_name }}/{{ name }}/{sample}_{unit}.output.benchmark.tsv", config.get("{{ name }}", {}).get("benchmark_repeats", 1),)
-    threads: # optional
-       config.get("{{ name }}", config["default_resources"])["threads"]
+        repeat(
+            "{{ module_name }}/{{ name }}/{sample}_{unit}.output.benchmark.tsv", config.get("{{ name }}", {}).get("benchmark_repeats", 1)
+        )
+    threads: config.get("{{ name }}", config["default_resources"])["threads"]
     container:
-       config.get("{{ name }}", {}).get("container", config["default_container"])
+        config.get("{{ name }}", {}).get("container", config["default_container"])
     conda:
-       "../envs/{{ name }}.yaml"
+        "../envs/{{ name }}.yaml"
     message:
-       "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.unit}.input"
+        "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.unit}.input"
     wrapper:
         "..."

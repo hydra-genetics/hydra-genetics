@@ -47,7 +47,7 @@ wildcard_constraints:
 
 def compile_output_list(wildcards):
     return [
-        "{{ short_name }}/dummy/{}_{}.dummy.txt".format(sample, t)
+        "{{ short_name }}/dummy/%s_%s.dummy.txt" % (sample, t)
         for sample in get_samples(samples)
         for t in get_unit_types(units, sample)
     ]

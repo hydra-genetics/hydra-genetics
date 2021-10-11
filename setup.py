@@ -4,17 +4,15 @@ from setuptools import setup, find_packages
 
 version = "0.1"
 
-with open("README.md") as f:
-    readme = f.read()
-
-with open("LICENSE.md") as f:
-    license = f.read()    
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
     
 setup(
     name="hydra-genetics",
     version=version,
     description="Helper tools for use with hydra-genetics pipelines.",
-    long_description=readme,
+    long_description=long_description,
     long_description_content_type="text/markdown",
     keywords=[
         "hydra-genetics",

@@ -1,0 +1,2 @@
+bwa_mem:
+  extra: "some settings"

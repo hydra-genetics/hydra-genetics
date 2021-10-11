@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-    Main hydra_genetics module file.
+    hydra_genetics library
 """
 
 import pkg_resources

@@ -17,7 +17,7 @@ on:
 
 jobs:
   python_code:
-    name: check pycodestyle
+    name: check pycodestyle and unittest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,7 +31,13 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+      - name: Install dependencies tests
+        run: |
+          pip install -r requirements.test.txt
       - name: Check pycodestyle
         run: pycodestyle --max-line-length=130 --statistics ./
-      #- name: run pytest
-      #  run: pytest tests/lib/python/test_utils.py
+      - name: install hydra_genetics
+        run: |
+          pip install -e .
+      - name: run pytest
+        run: python -m pytest

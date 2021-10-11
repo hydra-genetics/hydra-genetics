@@ -6,14 +6,14 @@ properties:
     type: string
   units:
     type: string
-  containers:
-    type: object
-    properties:
-      common:
-        type: string
-    required:
-      - common
+  resources:
+    type: string
+    description: Path to resources.yaml file
+  default_container:
+    type: string
+    description: name or path to a default docker/singularity container
   required:
     - samples
     - units
-    - containers
+    - resources
+    - default_container

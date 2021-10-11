@@ -16,5 +16,4 @@ properties:
     - samples
     - units
     - resources
-    - containers
     - default_container

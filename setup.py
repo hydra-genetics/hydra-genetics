@@ -7,6 +7,9 @@ version = "0.1"
 with open("README.md") as f:
     readme = f.read()
 
+with open("LICENSE.md") as f:
+    license = f.read()    
+    
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
@@ -31,7 +34,7 @@ setup(
     author="Patrik Smeds",
     author_email="patrik.smeds@scilifelab.uu.se",
     url="https://github.com/hydra-genetics/tools",
-    license=('LICENSE.md',),
+    license=license,
     entry_points={"console_scripts": ["hydra-genetics=hydra_genetics.__main__:run"]},
     install_requires=required,
     setup_requires=["twine>=1.11.0", "setuptools>=38.6."],

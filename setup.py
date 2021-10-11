@@ -31,7 +31,7 @@ setup(
     author="Patrik Smeds",
     author_email="patrik.smeds@scilifelab.uu.se",
     url="https://github.com/hydra-genetics/tools",
-    license="MIT",
+    license=('LICENSE.md',),
     entry_points={"console_scripts": ["hydra-genetics=hydra_genetics.__main__:run"]},
     install_requires=required,
     setup_requires=["twine>=1.11.0", "setuptools>=38.6."],

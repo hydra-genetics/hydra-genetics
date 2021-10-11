@@ -1,3 +1,4 @@
+resources: "resources.yaml"
 samples: "samples.tsv"
 units: "units.tsv"
 

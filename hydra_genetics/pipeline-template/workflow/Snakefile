@@ -12,13 +12,13 @@ report: "report/workflow.rst"
 
 rule dummy:
     output:
-        "{{ short_name }}/dummy/{sample}_{unit}.dummy.txt"
+        "{{ short_name }}/dummy/{sample}_{type}.dummy.txt"
     params:
         extra=config.get("dummy", {}).get("extra", ""),
     log:
-        "{{ short_name }}/dummy/{sample}_{unit}.output.log"
+        "{{ short_name }}/dummy/{sample}_{type}.output.log"
     benchmark:
-       repeat("module/dummy/{sample}_{unit}.output.benchmark.tsv", config.get("dummy", {}).get("benchmark_repeats", 1),)
+       repeat("module/dummy/{sample}_{type}.output.benchmark.tsv", config.get("dummy", {}).get("benchmark_repeats", 1),)
     threads: # optional
        config.get("dummy", config["default_resources"])["threads"]
     container:
@@ -26,7 +26,7 @@ rule dummy:
     conda:
        "../envs/dummy.yaml"
     message:
-       "{rule}: Do stuff on module/{rule}/{wildcards.sample}_{wildcards.unit}.input"
+       "{rule}: Do stuff on module/{rule}/{wildcards.sample}_{wildcards.type}.input"
     shell:
         """
         touch {output}

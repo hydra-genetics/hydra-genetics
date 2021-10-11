@@ -2,19 +2,15 @@ $schema: "http://json-schema.org/draft-04/schema#"
 description: snakemake configuration file
 type: object
 properties:
-  samples:
-    type: string
-  units:
-    type: string
-  resources:
-    type: string
-    description: Path to resources.yaml file
-  default_container:
-    type: string
-    description: name or path to a default docker/singularity container
-required:
-  - samples
-  - units
-  - resources
-  - containers
-  - default_container
+  default_resources:
+    type: object
+    properties:
+      threads:
+        type: integer
+        description: default number of threads that will be used by a rule
+      time:
+        type: string
+        description: default max execution time for a rule
+
+  required:
+    - default_resources

@@ -5,4 +5,4 @@
 
 import pkg_resources
 
-__version__ = pkg_resources.get_distribution("hydra_genetics_tools").version
+__version__ = pkg_resources.get_distribution("hydra_genetics").version

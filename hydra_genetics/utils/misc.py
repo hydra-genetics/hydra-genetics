@@ -14,3 +14,10 @@ def merge(dict1, dict2):
         else:
             result[key] = deepcopy(dict2[key])
     return result
+
+
+def extract_chr(file, filter_out=["chrM"]):
+    chr = None
+    with open(file) as lines:
+        chr = [line.split("\t")[0] for line in lines]
+    return [c for c in chr if c not in filter_out]

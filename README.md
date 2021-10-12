@@ -15,5 +15,9 @@ Python tool with helper functions for setting up new pipeline and preparing refe
 
 Example of how to generate a new project
 ```
- hydra-genetics create -n misc -d "Module containing rules that are general and most likely will be used by  multiple modules." -a "Patrik Smeds" -e patrik.smeds@scilifelab.uu.se -g Smeds -o misc
+ virtualenv -p python3.9 venv
+ source venv/bin/activate
+ pip install hydra-genetics
+ hydra-genetics create-module -n snv -d "Collection of callers" -a "Patrik S" -e "p.s@mail.se" -g patrik -o snv
+ hydra-genetics create-rule -n rule2 -m snv -a test2 -e "test@test"
 ```

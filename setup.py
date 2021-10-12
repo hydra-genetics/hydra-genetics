@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-
-version = "0.1"
-
 from pathlib import Path
+
+version = "0.0.1"
+
+
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
-    
+
 setup(
     name="hydra-genetics",
     version=version,
@@ -29,7 +30,7 @@ setup(
     author="Patrik Smeds",
     author_email="patrik.smeds@scilifelab.uu.se",
     url="https://github.com/hydra-genetics/tools",
-    license='GPL-3,
+    license='GPL-3',
     entry_points={"console_scripts": ["hydra-genetics=hydra_genetics.__main__:run"]},
     install_requires=[
         'pandas==1.3.1',

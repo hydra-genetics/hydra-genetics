@@ -29,7 +29,7 @@ setup(
     author="Patrik Smeds",
     author_email="patrik.smeds@scilifelab.uu.se",
     url="https://github.com/hydra-genetics/tools",
-    license='GPL-3,
+    license='GPL-3',
     entry_points={"console_scripts": ["hydra-genetics=hydra_genetics.__main__:run"]},
     install_requires=[
         'pandas==1.3.1',

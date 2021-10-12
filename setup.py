@@ -10,7 +10,7 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(
-    name="hydra-genetics-tools",
+    name="hydra-genetics",
     version=version,
     description="Helper tools for use with hydra-genetics pipelines.",
     long_description=long_description,

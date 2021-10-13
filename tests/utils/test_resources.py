@@ -7,7 +7,7 @@ import yaml
 class TestMiscUtils(unittest.TestCase):
     def setUp(self):
         with open("tests/utils/files/configs.yaml") as file:
-            self.config = yaml.load(file)
+            self.config = yaml.load(file, Loader=yaml.FullLoader)
 
     def tearDown(self):
         pass

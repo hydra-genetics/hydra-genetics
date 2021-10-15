@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import collections
+from collections.abc import Mapping
 from copy import deepcopy
 
 
@@ -9,7 +9,7 @@ def merge(dict1, dict2):
 
     result = deepcopy(dict1)
     for key, value in dict2.items():
-        if isinstance(value, collections.Mapping):
+        if isinstance(value, Mapping):
             result[key] = merge(result.get(key, {}), value)
         else:
             result[key] = deepcopy(dict2[key])

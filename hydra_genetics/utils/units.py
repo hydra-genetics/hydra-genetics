@@ -2,6 +2,7 @@
 
 import pandas
 import snakemake
+import warnings
 
 
 def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pandas.Series:

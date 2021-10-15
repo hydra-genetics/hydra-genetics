@@ -10,4 +10,4 @@ def load_resources(config, file: str = "resources.yaml") -> dict:
     """
     from hydra_genetics.utils.misc import merge
     with open(file) as file:
-        return merge(config, yaml.load(file))
+        return merge(config, yaml.load(file, Loader=yaml.FullLoader))

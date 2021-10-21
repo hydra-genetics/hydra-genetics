@@ -2,6 +2,7 @@
 
 import typing
 import pandas
+import snakemake
 
 
 def get_sample(samples: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pandas.Series:

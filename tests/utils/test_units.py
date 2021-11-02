@@ -302,3 +302,14 @@ class TestUnitUtils(unittest.TestCase):
             get_unit_types(self.units, Wildcards(fromdict={'sample': 'BE12878'})),
             {'N', 'T', 'R'}
         )
+
+    def test_get_units_per_run(self):
+        from hydra_genetics.utils.units import get_units_per_run
+        self.assertEqual(
+            len(get_units_per_run(self.units, Wildcards(fromdict={"run": "1"}))),
+            4
+        )
+        self.assertEqual(
+            len(get_units_per_run(self.units, Wildcards(fromdict={"run": "2"}))),
+            3
+        )

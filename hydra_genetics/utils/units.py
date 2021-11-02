@@ -113,3 +113,19 @@ def get_unit_types(units: pandas.DataFrame, sample: str) -> set[str]:
         raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
     """
     return set([u.type for u in units.loc[(sample,)].dropna().itertuples()])
+
+
+def get_units_per_run(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards):
+    """
+    function used to extract all sample and type combinations for one sequencing run
+    Args:
+        units: DataFrame generate by importing a file following schema defintion
+               found in pre-alignment/workflow/schemas/units.schema.tsv
+        wildcards: wildcards object with at least the following wildcard names
+               sample, run.
+    Returns:
+        tuple with sample and type
+    Raises:
+        raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
+    """
+    return set([(u.sample, u.type) for u in units[units.run == wildcards.run].itertuples()])

@@ -20,10 +20,10 @@ rule {{ name }}:
         repeat(
             "{{ module_name }}/{{ name }}/{sample}_{type}.output.benchmark.tsv", config.get("{{ name }}", {}).get("benchmark_repeats", 1)
         )
-    threads: config.get("{{ name }}", config["default_resources"])["threads"]
+    threads: config.get("{{ name }}", {}).get("threads", config["default_resources"]["threads"])
     resources:
-        threads=config.get("{{ name }}", config["default_resources"])["threads"],
-        time=config.get("{{ name }}", config["default_resources"])["time"],
+        threads=config.get("{{ name }}", {}).get("threads", config["default_resources"]["threads"]),
+        time=config.get("{{ name }}", {}).get("time", config["default_resources"]["time"]),
     container:
         config.get("{{ name }}", {}).get("container", config["default_container"])
     conda:

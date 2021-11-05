@@ -1,9 +1,9 @@
 
 # Tools
 
-Python tool with helper functions for setting up new pipeline and preparing reference data
+Command line interface to create new modules/pipelines or adding a new rule to a existing project. Provides libraries used to make it easier for people not used to pandas to extract information from samples and units dataframes, dataframes generate from [units.tsv](https://github.com/hydra-genetics/tools/blob/develop/hydra_genetics/pipeline-template/workflow/schemas/units.schema.yaml) and [samples.tsv](https://github.com/hydra-genetics/prealignment/blob/develop/workflow/schemas/samples.schema.yaml) files which are used as input. 
 
-[![Lint and Test](https://github.com/hydra-genetics/tools/actions/workflows/main.yaml/badge.svg?branch=master)](https://github.com/hydra-genetics/tools/actions/workflows/main.yaml)
+[![Lint and Test](https://github.com/hydra-genetics/tools/actions/workflows/main.yaml/badge.svg?branch=develop)](https://github.com/hydra-genetics/tools/actions/workflows/main.yaml)
 
 ![python](https://img.shields.io/badge/python-3.8-blue)
 

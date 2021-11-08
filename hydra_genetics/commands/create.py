@@ -33,7 +33,7 @@ class PipelineCreate(object):
     def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version="6.8.0",
                  git_user=None, no_git=False, force=False, outdir=None):
         self.short_name = name.lower().replace(r"/\s+/", "-").replace("hydra-genetics/", "").replace("/", "-")
-        self.name = f"hydra_genetics/{self.short_name}"
+        self.name = f"{self.short_name}"
         self.description = description
         self.author = author
         self.email = email

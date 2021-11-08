@@ -99,7 +99,7 @@ def get_fastq_files(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, 
     return [getattr(file, wildcards.read) for file in get_units(units, wildcards, type)]
 
 
-def get_unit_types(units: pandas.DataFrame, sample: str) -> set[str]:
+def get_unit_types(units: pandas.DataFrame, sample: str) -> set:
     """
     function used to extract all types of units found for a sample in units.tsv (N,T,R)
     Args:

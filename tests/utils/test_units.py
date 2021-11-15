@@ -14,6 +14,10 @@ class TestUnitUtils(unittest.TestCase):
             "tests/utils/files/units.tsv",
             dtype=str
         ).set_index(["sample", "type", "run", "lane"], drop=False)
+        self.units_2 = pandas.read_table(
+            "tests/utils/files/units_2.tsv",
+            dtype=str
+        ).set_index(["sample", "type"], drop=False)
         self.sample_NA12878 = {
             "L1": Wildcards(fromdict={'sample': 'NA12878', "run": "1", "type": "N", "lane": "1"}),
             "L2": Wildcards(fromdict={'sample': 'NA12878', "run": "1", "type": "N", "lane": "2"})
@@ -226,6 +230,10 @@ class TestUnitUtils(unittest.TestCase):
         )
         self.assertEqual(
             len(get_units(self.units, Wildcards(fromdict={'sample': 'BE12878', "type": "R"}))),
+            1
+        )
+        self.assertEqual(
+            len(get_units(self.units_2, Wildcards(fromdict={'sample': 'NA12878', "type": "N"}))),
             1
         )
 

@@ -79,7 +79,9 @@ def get_units(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: 
     else:
         file = units.loc[(wildcards.sample, types)].dropna()
     if isinstance(files, pandas.Series):
-        files = pandas.DataFrame([[f[1] for f in files.iteritems()], ], columns=[f[0] for f in files.iteritems()]).set_index(units.index.names)
+        files = pandas.DataFrame(
+            [[f[1] for f in files.iteritems()], ], columns=[f[0] for f in files.iteritems()]
+        ).set_index(units.index.names)
     return [file for file in files.itertuples()]
 
 

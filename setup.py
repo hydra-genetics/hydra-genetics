@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-version = "0.0.9"
+version = "0.1.0"
 
 
 this_directory = Path(__file__).parent

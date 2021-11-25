@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-version = "0.1.0"
+version = "0.1.1"
 
 
 this_directory = Path(__file__).parent
@@ -33,7 +33,7 @@ setup(
     license='GPL-3',
     entry_points={"console_scripts": ["hydra-genetics=hydra_genetics.__main__:run"]},
     install_requires=[
-        'pandas==1.3.1',
+        'pandas>=1.3.1',
         'click==7.1.2',
         'jinja2==3.0.1',
         'rich==10.9.0',

@@ -300,6 +300,17 @@ class TestUnitUtils(unittest.TestCase):
             ['input/9_R2_L4.fq.gz']
         )
 
+    def test_get_unit_platforms(self):
+        from hydra_genetics.utils.units import get_unit_platforms
+        self.assertEqual(
+            get_unit_platforms(self.units, Wildcards(fromdict={'sample': 'NA12878', 'type': "N"})),
+            {'nextseq'}
+        )
+        self.assertEqual(
+            get_unit_platforms(self.units, Wildcards(fromdict={'sample': 'BE12878', 'type': "N"})),
+            {'miniseq', 'novaseq'}
+        )
+
     def test_get_unit_types(self):
         from hydra_genetics.utils.units import get_unit_types
         self.assertEqual(

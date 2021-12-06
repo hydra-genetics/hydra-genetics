@@ -103,6 +103,22 @@ def get_fastq_files(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, 
     return [getattr(file, wildcards.read) for file in get_units(units, wildcards, type)]
 
 
+def get_unit_platforms(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> set:
+    """
+    function used to extract all uniq platform values for a sample and type combination found in units.tsv
+    Args:
+        units: DataFrame generate by importing a file following schema defintion
+               found in pre-alignment/workflow/schemas/units.schema.tsv
+        wildcards: wildcards object with at least the following wildcard names
+               sample, type.
+    Returns:
+        set of string
+    Raises:
+        raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
+    """
+    return set([u.platform for u in units.loc[(wildcards.sample,wildcards.type)].dropna().itertuples()])
+
+
 def get_unit_types(units: pandas.DataFrame, sample: str) -> set:
     """
     function used to extract all types of units found for a sample in units.tsv (N,T,R)

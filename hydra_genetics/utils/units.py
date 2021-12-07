@@ -116,7 +116,7 @@ def get_unit_platforms(units: pandas.DataFrame, wildcards: snakemake.io.Wildcard
     Raises:
         raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
     """
-    return set([u.platform for u in units.loc[(wildcards.sample,wildcards.type)].dropna().itertuples()])
+    return set([u.platform for u in units.loc[(wildcards.sample, wildcards.type)].dropna().itertuples()])
 
 
 def get_unit_types(units: pandas.DataFrame, sample: str) -> set:

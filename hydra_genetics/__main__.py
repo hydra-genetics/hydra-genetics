@@ -228,7 +228,7 @@ def create_input_files(directory, outdir, post_file_modifier, platform, run, sam
                        sample_regex, read_number_regex, lane_identifier, adapters, tc, force):
     input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, run, sample_type,
                                    sample_regex, read_number_regex, lane_identifier, adapters, tc, force)
-    input_files.init_rule()
+    input_files.init()
 
 
 @cli.command(short_help="download reference data")

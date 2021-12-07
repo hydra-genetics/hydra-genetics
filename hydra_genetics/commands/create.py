@@ -243,7 +243,7 @@ class CreateInputFiles(object):
         if not self.outdir:
             self.outdir = os.getcwd()
 
-    def init_rule(self):
+    def init(self):
         """Creates the hydra_genetics rule."""
         log.info(f"Searching for fastq-files:")
         file_dict = {}

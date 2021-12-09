@@ -13,11 +13,11 @@ class TestUnitUtils(unittest.TestCase):
         self.units = pandas.read_table(
             "tests/utils/files/units.tsv",
             dtype=str
-        ).set_index(["sample", "type", "run", "lane"], drop=False)
+        ).set_index(["sample", "type", "run", "lane"], drop=False).sort_index()
         self.units_2 = pandas.read_table(
             "tests/utils/files/units_2.tsv",
             dtype=str
-        ).set_index(["sample", "type"], drop=False)
+        ).set_index(["sample", "type"], drop=False).sort_index()
         self.sample_NA12878 = {
             "L1": Wildcards(fromdict={'sample': 'NA12878', "run": "1", "type": "N", "lane": "1"}),
             "L2": Wildcards(fromdict={'sample': 'NA12878', "run": "1", "type": "N", "lane": "2"})

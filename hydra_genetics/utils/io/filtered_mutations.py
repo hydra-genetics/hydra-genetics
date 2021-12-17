@@ -77,6 +77,7 @@ def generate_filtered_mutations(sample,
         for report in reports:
             for hotspot in reports[report]:
                 for index, variant in enumerate(hotspot.VARIANTS):
+                    # even though no variants were found print hotspot and region all entries
                     if not variant['variants'] and not variant['extended']:
                         depth = utils.get_depth(g_variants,
                                                 sample,
@@ -96,6 +97,7 @@ def generate_filtered_mutations(sample,
                             writer.write("\t{}\t{}\t{}".format(depth, "-", "-"))
                             print_columns(writer, variant, hotspot, columns, annotation_extractor, depth, levels)
                     else:
+                        # print found variants that overlap with hotspot positions
                         for var in variant['variants']:
                             depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop)
                             writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
@@ -110,6 +112,7 @@ def generate_filtered_mutations(sample,
                                                                ",".join(map(str, var.samples[sample]['AD'][1:]))))
                             print_columns(writer, var, hotspot, columns, annotation_extractor, depth, levels)
         for var in other:
+            # print variants that doesn't overlap with a hotspot
             writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
                                                                chr_translater.get_nc_value(var.chrom),
                                                                var.start,
@@ -125,38 +128,32 @@ def generate_filtered_mutations(sample,
 
 
 def print_columns(writer, var, hotspot, columns, annotation_extractor, depth, levels):
+    """
+        print extra columns defined by a yaml file. Data from variant, hotspot or annotations
+    """
     for c in columns["columns"]:
-        if "fields" in columns["columns"][c]:
-            for sub_field in columns["columns"][c]['fields']:
-                if columns["columns"][c]['from'] == "vep":
-                    writer.write("\t{}".format(annotation_extractor(var, columns["columns"][c]['field'])))
-                elif columns["columns"][c]['fields'][sub_field]['from'] == "hotspot":
-                    writer.write("\t{}", getattr(hotspot, sub_field))
-                else:
-                    writer.write("\t{}", locals()[sub_field])
-        else:
-            if columns["columns"][c]['from'] == "vep":
-                writer.write("\t{}".format(annotation_extractor(var,  columns["columns"][c]['field'])))
-            elif columns["columns"][c]['from'] == "hotspot":
-                if hotspot is None:
-                    writer.write("\t-")
-                else:
-                    writer.write("\t{}".format(getattr(hotspot, columns["columns"][c]['field'])))
-            elif columns["columns"][c]['from'] == "function":
-                function = getattr(utils, columns["columns"][c]['name'])
-                variables = ()
-                if 'variables' in columns["columns"][c]:
-                    variables = []
-                    for v in columns["columns"][c]['variables']:
-                        variables.append(locals().get(v, v))
-                    value = function(*variables)
-                else:
-                    function()
-                if 'column' in columns["columns"][c]:
-                    writer.write("\t{}".format(value[columns["columns"][c]['column']]))
-                else:
-                    writer.write("\t{}".format(value))
-            elif columns["columns"][c]['from'] == 'variable':
-                writer.write("\t{}".format(locals()[columns["columns"][c]['field']]))
+        if columns["columns"][c]['from'] == "vep":
+            writer.write("\t{}".format(annotation_extractor(var,  columns["columns"][c]['field'])))
+        elif columns["columns"][c]['from'] == "hotspot":
+            if hotspot is None:
+                writer.write("\t-")
             else:
-                raise Exception("Undhandledd cased: " + columns["columns"][c]['field'])
+                writer.write("\t{}".format(getattr(hotspot, columns["columns"][c]['field'])))
+        elif columns["columns"][c]['from'] == "function":
+            function = getattr(utils, columns["columns"][c]['name'])
+            variables = ()
+            if 'variables' in columns["columns"][c]:
+                variables = []
+                for v in columns["columns"][c]['variables']:
+                    variables.append(locals().get(v, v))
+                value = function(*variables)
+            else:
+                function()
+            if 'column' in columns["columns"][c]:
+                writer.write("\t{}".format(value[columns["columns"][c]['column']]))
+            else:
+                writer.write("\t{}".format(value))
+        elif columns["columns"][c]['from'] == 'variable':
+            writer.write("\t{}".format(locals()[columns["columns"][c]['field']]))
+        else:
+            raise Exception("Undhandledd cased: " + columns["columns"][c]['field'])

@@ -284,7 +284,8 @@ class CreateInputFiles(object):
                 except AttributeError:
                     log.debug("Couldn't extract sample name from: %s" % temp_filename)
             if dir_files_found == 0:
-                log.warning("No fastq files found in \"{}\", please make sure regex '{}' matches your file names!".format(d, self.sample_regex))
+                log.warning("No fastq files found in '{}', "
+                            "please make sure regex '{}' matches your file names!".format(d, self.sample_regex))
             else:
                 log.info("{} fastq files found".format(dir_files_found))
 

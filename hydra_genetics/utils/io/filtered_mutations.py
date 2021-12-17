@@ -13,7 +13,6 @@ import yaml
 
 log = logging.getLogger()
 
-
 def generate_filtered_mutations(sample,
                                 caller,
                                 output,
@@ -35,6 +34,7 @@ def generate_filtered_mutations(sample,
     variants = VariantFile(vcf_file)
     other = []
 
+    log.info("Processing variants")
     for variant in variants:
         # ToDo make sure that empty variants are handled better!!!
         if variant is None:
@@ -46,34 +46,49 @@ def generate_filtered_mutations(sample,
         for report in reports:
             for hotspot in reports[report]:
                 if hotspot.add_variant(variant, chr_translater):
+                    log.debug("Adding variant {}:{}-{} {} {} to hotspot: {}".format(variant.chrom,
+                                                                                    variant.start,
+                                                                                    variant.stop,
+                                                                                    variant.ref,
+                                                                                    ",".join(variant.alts),
+                                                                                    hotspot))
                     added = True
                     break
             if added:
                 break
         if not added:
             other.append(variant)
+    log.info("Open genomic vcf")
     g_variants = VariantFile(gvcf_file)
     sample_format_index_mapper = {sample: index + 1 for index, sample in enumerate(g_variants.header.samples)}
 
     columns = {'columns': []}
     if column_yaml_file is not None:
+        log.info("Process yaml for: {}".format(column_yaml_file))
         with open(column_yaml_file) as file:
             columns = yaml.load(file, Loader=yaml.FullLoader)
 
+    log.info("Process vcf header: {}".format(vcf_file))
     for record in variants.header.records:
         if record.type == "INFO":
             if record['ID'] == "CSQ":
+                log.info(" -- found vep information: {}".format(vcf_file))
+                log.debug(" -- -- {}".format(record['Description'].split("Format: ")[1].split("|")))
                 vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
                 annotation_extractor = utils.get_annoation_data_vep(vep_fields)
 
+    log.info("open output file: {}".format(output))
     with open(output, "w") as writer:
         writer.write("sample\tchr\tstart\tend\treport\tgvcf_depth")
+        log.info("Printing header: {}".format(output))
         for c in columns["columns"]:
             if "fields" in columns["columns"][c]:
                 for sub_field in columns["columns"][c]['fields']:
                     writer.write("\t{}".format(sub_field))
             else:
                 writer.write("\t{}".format(c))
+        log.info("Printing hotspot information: {}".format(output))
+        counter = 0
         for report in reports:
             for hotspot in reports[report]:
                 for index, variant in enumerate(hotspot.VARIANTS):
@@ -96,6 +111,7 @@ def generate_filtered_mutations(sample,
                                                                                hotspot.REPORT))
                             writer.write("\t{}\t{}\t{}".format(depth, "-", "-"))
                             print_columns(writer, variant, hotspot, columns, annotation_extractor, depth, levels)
+                            counter+=1
                     else:
                         # print found variants that overlap with hotspot positions
                         for var in variant['variants']:
@@ -111,6 +127,10 @@ def generate_filtered_mutations(sample,
                                                                var.samples[sample]['AD'][0],
                                                                ",".join(map(str, var.samples[sample]['AD'][1:]))))
                             print_columns(writer, var, hotspot, columns, annotation_extractor, depth, levels)
+                            counter+=1
+        log.info("-- hotspot entries: {}".format(counter))
+        log.info("Printing variants that aren't hotspot: {}".format(output))
+        counter = 0
         for var in other:
             # print variants that doesn't overlap with a hotspot
             writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
@@ -125,6 +145,8 @@ def generate_filtered_mutations(sample,
                                                var.samples[sample]['AD'][0],
                                                ",".join(map(str, var.samples[sample]['AD'][1:]))))
             print_columns(writer, var, None, columns, annotation_extractor, depth, levels)
+            counter+=1
+            log.info("-- non-hotspot entries: {}".format(counter))
 
 
 def print_columns(writer, var, hotspot, columns, annotation_extractor, depth, levels):

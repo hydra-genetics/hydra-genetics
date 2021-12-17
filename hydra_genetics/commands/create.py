@@ -252,6 +252,7 @@ class CreateInputFiles(object):
         run = self.run
         run_is_regex = True if re.search(".*[(].+[)].*", run) else False
         for d in self.directory:
+            dir_files_found = 0
             log.info(f"Dir: %s" % d)
             for f in glob.glob('%s/**/*.fastq.gz' % d, recursive=True):
                 if "Undetermined" in f:
@@ -275,11 +276,17 @@ class CreateInputFiles(object):
                                     "Trying to add read (%s) for sample %s multiple times\n%s\n%s" %
                                     (read, samplename, f, file_dict[samplename][read]))
                         file_dict[run_value][samplename].append(f)
+                        dir_files_found += 1
                     else:
                         file_dict[run_value][samplename] = [f]
+                        dir_files_found += 1
                     log.info("    found: %s" % f)
                 except AttributeError:
                     log.debug("Couldn't extract sample name from: %s" % temp_filename)
+            if dir_files_found == 0:
+                log.warning("No fastq files found in \"{}\", please make sure regex '{}' matches your file names!".format(d, self.sample_regex))
+            else:
+                log.info("{} fastq files found".format(dir_files_found))
 
         def lane_identifier(x): return self.lane_identifier
 

@@ -116,6 +116,38 @@ class TestWp1Reports(unittest.TestCase):
             gvcf.write("\n")
             gvcf.write(r"chr2	29445282	.	G	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:519,1:520:-5.233e+00")
             gvcf.write("\n")
+            gvcf.write(r"chr7	140498354	.	C	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:107,2:109:-4.250e+00")
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498355	.	C	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:106,3:109:-4.639e+00")
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498356	.	G	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:107,2:109:-4.250e+00")
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498357	.	G	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:110,0:110:-2.045e+00")
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498358	.	C	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:99,12:111:-8.536e-01")
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498359	.	CTTTT	C,CTT,CT,CTTT,CGTTTT,CTTTTT,CTTTTTT,CTGTTTT,<NON_REF>	.	.	AS_SB_TABLE=9,21|0,0|11,6|0,1|3,9|0,0|2,4|1,1|0,0|0,0;DP=138;ECNT=17;MBQ=20,0,20,21,20,0,17,36,0,0;MFRL=240,0,249,517,240,0,259,204,0,0;MMQ=60,60,60,60,60,60,60,60,60,60;MPOS=50,29,8,12,50,12,33,50,50;POPAF=7.30,7.30,7.30,7.30,7.30,7.30,7.30,7.30,7.30;TLOD=-1.183e+00,9.11,-9.608e-01,0.845,-1.120e+00,1.11,-7.262e-01,-1.157e+00,-1.140e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2/3/4/5/6/7/8/9:30,0,17,1,12,0,6,2,0,0:7.250e-03,0.178,0.011,0.115,8.482e-03,0.075,0.022,7.724e-03,8.060e-03:68:10,0,4,1,2,0,1,1,0,0:9,0,9,0,5,0,2,0,0,0:9,21,17,21")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498360	.	T	G,TG,<NON_REF>	.	.	AS_SB_TABLE=62,37|0,6|0,0|0,0;DP=126;ECNT=17;MBQ=27,14,0,0;MFRL=246,264,0,0;MMQ=60,60,60,60;MPOS=12,50,50;POPAF=7.30,7.30,7.30;TLOD=-1.407e+00,-1.486e+00,-1.451e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2/3:99,6,0,0:0.012,8.216e-03,9.160e-03:105:33,0,0,0:24,0,0,0:62,37,0,6")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498361	.	T	G,<NON_REF>	.	.	AS_SB_TABLE=62,45|0,3|0,0;DP=128;ECNT=17;MBQ=20,14,0;MFRL=250,221,0;MMQ=60,60,60;MPOS=14,50;POPAF=7.30,7.30;TLOD=-1.531e+00,-1.569e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2:107,3,0:0.010,9.201e-03:110:35,0,0:30,0,0:62,45,0,3")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498362	.	T	G,<NON_REF>	.	.	AS_SB_TABLE=63,56|0,0|0,0;DP=133;ECNT=17;MBQ=20,0,0;MFRL=256,0,0;MMQ=60,60,60;MPOS=50,50;POPAF=7.30,7.30;TLOD=-1.583e+00,-1.631e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2:119,0,0:8.446e-03,7.765e-03:119:43,0,0:44,0,0:63,56,0,0")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498363	.	TT	GT,AA,<NON_REF>	.	.	AS_SB_TABLE=64,59|0,1|0,0|0,0;DP=132;ECNT=17;MBQ=20,14,0,0;MFRL=256,517,0,0;MMQ=60,60,60,60;MPOS=9,50,50;POPAF=7.30,7.30,7.30;TLOD=-1.394e+00,-1.504e+00,-1.503e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2/3:123,1,0,0:0.011,7.812e-03,7.819e-03:124:55,0,0,0:49,0,0,0:64,59,0,1")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498364	.	TT	GT,AA,<NON_REF>	.	.	AS_SB_TABLE=62,66|0,0|0,0|0,0;DP=130;ECNT=17;MBQ=20,0,0,0;MFRL=250,0,0,0;MMQ=60,60,60,60;MPOS=50,50,50;POPAF=7.30,7.30,7.30;TLOD=-1.505e+00,-1.503e+00,-1.503e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2/3:128,0,0,0:7.833e-03,7.871e-03,7.868e-03:128:60,0,0,0:53,0,0,0:62,66,0,0")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498365	.	T	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:124,2:126:-4.548e+00")
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498366	.	T	TAA,<NON_REF>	.	.	AS_SB_TABLE=60,65|0,1|0,0;DP=132;ECNT=17;MBQ=20,14,0;MFRL=249,517,0;MMQ=60,60,60;MPOS=14,50;POPAF=7.30,7.30;TLOD=-1.695e+00,-1.793e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2:125,1,0:0.010,7.921e-03:126:59,0,0:59,0,0:60,65,0,1")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498367	.	T	TAA,<NON_REF>	.	.	AS_SB_TABLE=60,66|0,0|0,0;DP=135;ECNT=17;MBQ=24,0,0;MFRL=249,0,0;MMQ=60,60,60;MPOS=50,50;POPAF=7.30,7.30;TLOD=-1.805e+00,-1.805e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2:126,0,0:7.863e-03,7.863e-03:126:64,0,0:57,0,0:60,66,0,0")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498368	.	T	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:129,2:131:-1.758e+00")
+            gvcf.write("\n")
+            gvcf.write(r"chr7	140498369	.	T	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:130,2:132:-2.769e+00")
+            gvcf.write("\n")
             gvcf.write(r"chr8	145738765	.	C	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:1615,1:1616:-6.047e+00")
             gvcf.write("\n")
             gvcf.write(r"chr8	145738766	.	C	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:1616,3:1619:-1.159e+01")
@@ -149,12 +181,14 @@ class TestWp1Reports(unittest.TestCase):
             gvcf.write(r"chr8	145738781	.	G	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:1958,5:1963:-1.577e+01")
             gvcf.write("\n")
             gvcf.write(r"chr8	145738782	.	C	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:1957,2:1959:-5.811e+00")
+            gvcf.write("\n")
+            gvcf.write(r"chr16	81954788	.	T	TG,<NON_REF>	.	.	AS_SB_TABLE=654,461|15,14|0,0;DP=1179;ECNT=3;MBQ=20,20,0;MFRL=178,168,0;MMQ=60,60,60;MPOS=39,50;POPAF=7.30,7.30;TLOD=1.84,-2.582e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2:1115,29,0:0.015,1.254e-03:1144:560,13,0:515,14,0:654,461,15,14")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr16	81954789	.	C	G,T,<NON_REF>	.	.	AS_SB_TABLE=0,1|652,457|17,17|0,0;DP=1198;ECNT=3;MBQ=14,20,20,0;MFRL=199,179,168,0;MMQ=60,60,60,60;MPOS=38,34,50;POPAF=7.30,7.30,7.30;TLOD=1736.74,6.51,-2.428e+00	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/2/3:1,1109,34,0:0.977,0.020,1.223e-03:1144:0,569,16,0:0,514,16,0:0,1,669,474")  # noqa
+            gvcf.write("\n")
+            gvcf.write(r"chr16	81954790	.	T	<NON_REF>	.	.	.	GT:AD:DP:TLOD	0/0:1291,11:1302:-3.793e+00")
 
         tabix_index(self.gvcf, preset="vcf")
-
-        self.multibp = os.path.join(self.tempdir, "multibp")
-        with open(os.path.join(self.tempdir, "multibp"), 'w') as multibp:
-            multibp.write("NC_000007.13\t55242465\t55242479\tGGAATTAAGAGAAGC\t-\tEGFR\tc.2235_2249del\tp.E746_A750del\tNM_005228.3\n")  # noqa
 
         self.hotspot = os.path.join(self.tempdir, "hotspot")
         with open(self.hotspot, 'w') as hotspots:
@@ -166,6 +200,7 @@ class TestWp1Reports(unittest.TestCase):
             hotspots.write("NC_000007.13\t116412043\t116412043\tMET\tc.G3082\tp.D1028\thotspot\t-\texon14\tNM_001127500\n")
             hotspots.write("NC_000008.11\t145738765\t145738779\t-\t-\t-\tregion_all\t-\texon1\t-\n")
             hotspots.write("NC_000008.11\t145742510\t145742524\t-\t-\t-\tregion\t-\texon1\t-\n")
+            hotspots.write("NC_000016.11\t81954785\t81954795\t-\t-\t-\tindel\t-\texon1\t-\n")
 
         self.vcf_vep = os.path.join(self.tempdir, "vcf_vep.vcf")
         with open(self.vcf_vep, "w", encoding="ascii") as vcf:
@@ -259,6 +294,11 @@ class TestWp1Reports(unittest.TestCase):
             vcf.write(r"chr8	145738768	.	G	C	154	PASS	ADJAF=0;AF=0.0333;BIAS=2:2;CALLERS=vardict;DP=812;DUPRATE=0;HIAF=0.033;HICNT=26;HICOV=788;LSEQ=CACCGTGGCCACCACCACCC;MQ=60;MSI=2;MSILEN=1;NM=2.6;ODDRATIO=1.94917;PMEAN=33.4;PSTD=1;QSTD=1;QUAL=32.4;REFBIAS=4:1;RSEQ=GCAACTGGCCCTGCATGAAG;SAMPLE=UP-VAL-79_T;SBF=0.51196;SHIFT3=0;SN=26;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=24:3;VD=27;CSQ=C|upstream_gene_variant|MODIFIER|LRRC14|9684|Transcript|NM_001272036.1|protein_coding||||||||||rs199605511|4581|1||SNV|EntrezGene||YES||||NP_001258965.1|||||G|G|OK||||||||||||1.672e-05|0|0|0|0|0|2.76e-05|0|3.281e-05|3.281e-05|gnomAD_SAS||||||||	GT:DP:VD:AD:AF:RD:ALD	0/1:812:27:5,27:0.0333:4,1:24,3")  # noqa
             vcf.write("\n")
             vcf.write(r"chr8	145742514	.	A	G	335	PASS	ADJAF=0.0166;AF=0.9941;BIAS=0:2;CALLERS=vardict,mutect2;DP=844;DUPRATE=0;HIAF=0.9976;HICNT=817;HICOV=819;LSEQ=GCGGCTCCGCCCTGGCGTAG;MQ=60;MSI=1;MSILEN=1;NM=1.6;ODDRATIO=0;PMEAN=35.9;PSTD=1;QSTD=1;QUAL=34.5;REFBIAS=0:0;RSEQ=CTGTGGACTCTTGGTCGCAG;SAMPLE=UP-VAL-79_T;SBF=1;SHIFT3=0;SN=37.136;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=410:429;VD=839;CSQ=G|synonymous_variant|LOW|RECQL4|9401|Transcript|NM_004260.3|protein_coding|4/21||NM_004260.3:c.274T>C|NP_004251.3:p.Pro92%3D|316|274|92|P|Cct/Cct|rs2721190||-1||SNV|EntrezGene||YES||||NP_004251.3|||||A|G|OK||||||0.9433|0.9781|0.9222|0.8065|0.998|0.9959|0.9697|0.9819|0.9021|1|0.803|0.9968|0.9994|0.9809|0.9985|1|gnomAD_ASJ|||1|24728327||||	GT:DP:VD:AD:AF:RD:ALD	1/1:844:839:0,839:0.9941:0,0:410,429")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr16	81954789	.	C	GT	165	PASS	ADJAF=0;AF=0.024;BIAS=2:2;CALLERS=vardict;DP=1207;DUPRATE=0;HIAF=0.0254;HICNT=29;HICOV=1140;LSEQ=ATTATTCCATTTCTTTCTTT;MQ=60;MSI=0;MSILEN=0;NM=0.5;ODDRATIO=1.04315;PMEAN=45;PSTD=1;QSTD=1;QUAL=34.1;REFBIAS=699:473;RSEQ=TTTTTTTTTCCAGGAAAGAG;SAMPLE=UP-VAL-74_T;SBF=1;SHIFT3=0;SN=58;SPANPAIR=0;SPLITREAD=0;TYPE=Complex;VARBIAS=17:12;VD=29;CSQ=GT|intron_variant|MODIFIER|PLCG2|5336|Transcript|NM_002661.3|protein_coding||20/32|NM_002661.3:c.2236-14delinsGT|||||||||1||indel|EntrezGene||YES||||NP_002652.2|||||C|C|||||||||||||||||||||||||||||||	GT:DP:VD:AD:AF:RD:ALD	0/1:1207:29:1172,29:0.024:699,473:17,12")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr16	81954789	.	C	G	292	PASS	ADJAF=0;AF=0.4044;BIAS=2:2;CALLERS=vardict,mutect2;DP=863;DUPRATE=0;HIAF=0.448;HICNT=340;HICOV=759;LSEQ=ATTATTCCATTTCTTTCTTT;MQ=60;MSI=9;MSILEN=1;NM=1.4;ODDRATIO=1.03992;PMEAN=39.9;PSTD=1;QSTD=1;QUAL=34.6;REFBIAS=255:187;RSEQ=TTTTTTTTTCCAGGAAAGAG;SAMPLE=UP-VAL-77_T;SBF=0.82815;SHIFT3=0;SN=37.778;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=198:151;VD=349;CSQ=G|intron_variant|MODIFIER|PLCG2|5336|Transcript|NM_002661.3|protein_coding||20/32|NM_002661.3:c.2236-14C>G|||||||rs12446127||1||SNV|EntrezGene||YES||||NP_002652.2|||||C|C||||||||0.171|0.7032|0.7788|0.5567|0.5562|0.5946|0.2338|0.7249|0.6063|0.7799|0.5725|0.5863|0.606|0.5575|0.7799|gnomAD_EAS|benign|||24033266||||	GT:DP:VD:AD:AF:RD:ALD	0/1:863:349:442,349:0.4044:255,187:198,151")  # noqa
+
         tabix_index(self.vcf_vep, preset="vcf")
 
         self.reference = os.path.join(self.tempdir, "reference_info")
@@ -273,6 +313,7 @@ class TestWp1Reports(unittest.TestCase):
             reference.write("chr7\tNC_000007.13\tchr7#NC_000007.13#1#159138663#-1\t159138663\n")
             reference.write("chr8\tNC_000008.11\tchr7#NC_000007.13#1#159138663#-1\t159138663\n")
             reference.write("chr12\tNC_000012.11\tchr12#NC_000012.11#1#133851895#-1\t133851895\n")
+            reference.write("chr16\tNC_000016.11\tchr18#NC_000016.11#1#n90354753#-1\t90354753\n")
             reference.write("chr17\tNC_000017.10\tchr17#NC_000017.10#1#81195210#-1\t81195210")
 
     def tearDown(self):
@@ -298,7 +339,6 @@ class TestWp1Reports(unittest.TestCase):
 
         report = os.path.join(self.tempdir, "filtered.report")
         generate_filtered_mutations("sample1",
-                                    "variant_caller",
                                     report,
                                     levels,
                                     self.hotspot,
@@ -313,6 +353,8 @@ class TestWp1Reports(unittest.TestCase):
         # chr7	140498359	.	CTTT	C (3)
         # chr8	145738768	.	G	C (6)
         # chr8	145742514	.	A	G
+        # chr16 81954789	.	C	GT
+        # chr16	81954789	.	C	G
         #
         # Hotspot
         # 1 - NC_000002.11  29445271    29445271    hotspot
@@ -322,27 +364,29 @@ class TestWp1Reports(unittest.TestCase):
         # 5 - NC_000007.13  116412043   116412043   hotspot
         # 6 - NC_000008.11  145738765    145738779    region_all
         # 7 - NC_000008.11  145742510    145742524    region
+        # 8 - NC_000016.11  81954785    81954795    indel
         #
         with open(report, 'r') as report_result:
             head = report_result.readline()
             self.assertEqual(head.rstrip(), "\t".join(["sample", "chr", "start", "end", "report", 'gvcf_depth']))
             result = report_result.readlines()
-            self.assertEqual(len(result), 11)
-            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445270	29445270	G	A	1-hotspot	620	359	4")
-            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498358	140498361	CTTT	C	2-indel	0	27	4")
-            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	hotspot	0	-	-")
+            self.assertEqual(len(result), 13)
+            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359	4")
+            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27	4")
+            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	hotspot	89	-	-")
             self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	hotspot	0	-	-")
             self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	hotspot	0	-	-")
             self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	region_all	221	-	-")
             self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	region_all	182	-	-")
-            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738767	145738767	G	C	3-check	1571	5	27")
+            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5	27")
             self.assertEqual(result[8].rstrip(), "sample1	NC_000008.11	145738776	145738776	-	-	region_all	0	-	-")
-            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742513	145742513	A	G	3-check	0	0	839")
-            self.assertEqual(result[10].rstrip(), "sample1	NC_000002.11	29445281	29445281	G	A	4-other	520	284	3")
+            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839")
+            self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29")
+            self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3")
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349")
 
         report = os.path.join(self.tempdir, "filtered.report")
         generate_filtered_mutations("sample1",
-                                    "variant_caller",
                                     report,
                                     levels,
                                     self.hotspot,
@@ -354,19 +398,20 @@ class TestWp1Reports(unittest.TestCase):
             head = report_result.readline()
             self.assertEqual(head.rstrip(), "\t".join(["sample", "chr", "start", "end", "report", 'gvcf_depth', 'Analyzable', 'Min_read_depth300', 'Gene', 'Variant_type', 'Consequence', 'Callers', 'Comment']))  # noqa
             result = report_result.readlines()
-            self.assertEqual(len(result), 11)
-            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445270	29445270	G	A	1-hotspot	620	359	4	yes	ok	ALK	protein_coding	synonymous_variant	vardict	resistance_mutation")  # noqa
-            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498358	140498361	CTTT	C	2-indel	0	27	4	not analyzable	low	BRAF	protein_coding	intron_variant	mutect2	-")  # noqa
-            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	hotspot	0	-	-	not analyzable	low	-	-	-	-	-")   # noqa
+            self.assertEqual(len(result), 13)
+            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359	4	yes	ok	ALK	protein_coding	synonymous_variant	vardict	resistance_mutation")  # noqa
+            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27	4	yes	low	BRAF	protein_coding	intron_variant	mutect2	-")  # noqa
+            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	hotspot	89	-	-	yes	low	-	-	-	-	-")   # noqa
             self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	hotspot	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
             self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	hotspot	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
             self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	region_all	221	-	-	yes	low	-	-	-	-	-")  # noqa
             self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	region_all	182	-	-	yes	low	-	-	-	-	-")  # noqa
-            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738767	145738767	G	C	3-check	1571	5	27	yes	ok	LRRC14	protein_coding	upstream_gene_variant	vardict	-")  # noqa
+            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5	27	yes	ok	LRRC14	protein_coding	upstream_gene_variant	vardict	-")  # noqa
             self.assertEqual(result[8].rstrip(), "sample1	NC_000008.11	145738776	145738776	-	-	region_all	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
-            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742513	145742513	A	G	3-check	0	0	839	not analyzable	low	RECQL4	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
-            self.assertEqual(result[10].rstrip(), "sample1	NC_000002.11	29445281	29445281	G	A	4-other	520	284	3	yes	ok	ALK	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
-        exit(1)
+            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
+            self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	protein_coding	intron_variant	vardict	-")  # noqa
+            self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	PLCG2	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
 
 
 if __name__ == '__main__':

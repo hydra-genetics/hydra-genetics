@@ -14,6 +14,13 @@ _chr_pattern = re.compile(r'^chr[XYM0-9]+$|^[XYM0-9]+$')
 _nc_pattern = re.compile(r'^NC_0+\d+\.\d+$')
 
 
+def is_indel(variant):
+    if len(variant.alleles) != 2:
+        raise Exception("Unhandled case: " + str(variant.alleles))
+    return (len(variant.alleles[0]) == 1 and len(variant.alleles[1]) > 1) or \
+           (len(variant.alleles[1]) == 1 and len(variant.alleles[0]) > 1)
+
+
 @unique
 class VariantClass(Enum):
     hotspot = 1
@@ -127,6 +134,8 @@ class Hotspot(object):
             v_stop = variant.stop + 1
 
             if self.check_overlapp(chr_translater.get_nc_value(variant.chrom), self.START, self.END, v_start, v_stop):
+                if self.REPORT == ReportClass.indel and not is_indel(variant):
+                    return False
                 if self.EXTENDED_END < v_stop or v_start < self.EXTENDED_START:
                     if variant.start < self.EXTENDED_START or self.EXTENDED_END < variant.stop:
                         new_start = min(v_start, self.EXTENDED_START)

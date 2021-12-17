@@ -16,7 +16,6 @@ columns:
     Gene:
         from: 'vep'
         field: 'SYMBOL'
-        colum: 0
     Variant_type:
         from: 'vep'
         field: 'BIOTYPE'

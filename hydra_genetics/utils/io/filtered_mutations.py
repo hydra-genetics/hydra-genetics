@@ -13,8 +13,8 @@ import yaml
 
 log = logging.getLogger()
 
+
 def generate_filtered_mutations(sample,
-                                caller,
                                 output,
                                 levels,
                                 hotspot_file,
@@ -82,11 +82,7 @@ def generate_filtered_mutations(sample,
         writer.write("sample\tchr\tstart\tend\treport\tgvcf_depth")
         log.info("Printing header: {}".format(output))
         for c in columns["columns"]:
-            if "fields" in columns["columns"][c]:
-                for sub_field in columns["columns"][c]['fields']:
-                    writer.write("\t{}".format(sub_field))
-            else:
-                writer.write("\t{}".format(c))
+            writer.write("\t{}".format(c))
         log.info("Printing hotspot information: {}".format(output))
         counter = 0
         for report in reports:
@@ -111,15 +107,15 @@ def generate_filtered_mutations(sample,
                                                                                hotspot.REPORT))
                             writer.write("\t{}\t{}\t{}".format(depth, "-", "-"))
                             print_columns(writer, variant, hotspot, columns, annotation_extractor, depth, levels)
-                            counter+=1
+                            counter += 1
                     else:
                         # print found variants that overlap with hotspot positions
                         for var in variant['variants']:
                             depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop)
                             writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
                                                                                chr_translater.get_nc_value(var.chrom),
-                                                                               var.start,
-                                                                               var.stop - 1,
+                                                                               var.start + 1,
+                                                                               var.stop,
                                                                                var.ref,
                                                                                ",".join(var.alts),
                                                                                utils.get_report_type(var, hotspot)))
@@ -127,7 +123,7 @@ def generate_filtered_mutations(sample,
                                                                var.samples[sample]['AD'][0],
                                                                ",".join(map(str, var.samples[sample]['AD'][1:]))))
                             print_columns(writer, var, hotspot, columns, annotation_extractor, depth, levels)
-                            counter+=1
+                            counter += 1
         log.info("-- hotspot entries: {}".format(counter))
         log.info("Printing variants that aren't hotspot: {}".format(output))
         counter = 0
@@ -135,8 +131,8 @@ def generate_filtered_mutations(sample,
             # print variants that doesn't overlap with a hotspot
             writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
                                                                chr_translater.get_nc_value(var.chrom),
-                                                               var.start,
-                                                               var.stop - 1,
+                                                               var.start + 1,
+                                                               var.stop,
                                                                var.ref,
                                                                ",".join(var.alts),
                                                                "4-other"))
@@ -145,7 +141,7 @@ def generate_filtered_mutations(sample,
                                                var.samples[sample]['AD'][0],
                                                ",".join(map(str, var.samples[sample]['AD'][1:]))))
             print_columns(writer, var, None, columns, annotation_extractor, depth, levels)
-            counter+=1
+            counter += 1
             log.info("-- non-hotspot entries: {}".format(counter))
 
 

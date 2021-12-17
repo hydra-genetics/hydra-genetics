@@ -280,9 +280,14 @@ class CreateInputFiles(object):
                     log.info("    found: %s" % f)
                 except AttributeError:
                     log.debug("Couldn't extract sample name from: %s" % temp_filename)
-        lane = def f(x): return self.lane_identifier
+
+        def lane_identifier(x): return self.lane_identifier
+
         if re.search(".*[(].+[)].*", self.lane_identifier):
-            lane = def f(x): return re.search(self.lane_identifier, x).group(1)
+            def lane_identifier(x): return re.search(self.lane_identifier, x).group(1)
+
+        lane = lane_identifier
+
         for run_key in file_dict:
             for sample in file_dict[run_key]:
                 if len(file_dict[run_key][sample]) % 2 != 0:

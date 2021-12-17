@@ -177,7 +177,7 @@ def create_rule(name, module, author, email, outdir):
         "--run",
         type=str,
         help="Sequence run id, something used to identify where data originate from, ex data, flowcell id. Could also be a regex "
-             "used to extract run id from file path (need to contain '(' and ')', ex \".*([0-0]+_[A_Z]+).*\".",
+             "used to extract run id from file path (need to contain '(' and ')', ex \".*([0-9]+_[A_Z]+).*\".",
         default="RUN")
 @click.option(
         "-l",

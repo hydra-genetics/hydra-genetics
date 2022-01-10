@@ -38,7 +38,8 @@ setup(
         'jinja2==3.0.1',
         'rich==10.9.0',
         'pysam',
-        'gitpython'
+        'gitpython',
+        'pyaml'
     ],
     setup_requires=["twine>=1.11.0", "setuptools>=38.6."],
     packages=find_packages(exclude=("docs")),

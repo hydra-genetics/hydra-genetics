@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-version = "0.2.2"
+version = "0.2.3"
 
 
 this_directory = Path(__file__).parent
@@ -38,7 +38,8 @@ setup(
         'jinja2==3.0.1',
         'rich==10.9.0',
         'pysam',
-        'gitpython'
+        'gitpython',
+        'pyaml'
     ],
     setup_requires=["twine>=1.11.0", "setuptools>=38.6."],
     packages=find_packages(exclude=("docs")),

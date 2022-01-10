@@ -37,6 +37,7 @@ setup(
         'click==7.1.2',
         'jinja2==3.0.1',
         'rich==10.9.0',
+        'pysam',
         'gitpython'
     ],
     setup_requires=["twine>=1.11.0", "setuptools>=38.6."],

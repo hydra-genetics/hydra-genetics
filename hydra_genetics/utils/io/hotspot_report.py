@@ -14,7 +14,7 @@ import yaml
 log = logging.getLogger()
 
 
-def generate_filtered_mutations(sample,
+def generate_hotspot_report(sample,
                                 output,
                                 levels,
                                 hotspot_file,
@@ -68,6 +68,30 @@ def generate_filtered_mutations(sample,
         with open(column_yaml_file) as file:
             columns = yaml.load(file, Loader=yaml.FullLoader)
 
+    output_order = []
+    hotspot_columns = ['sample', 'chr', 'start', 'stop', 'ref', 'alt', 'report', 'gvcf_depth', 'ref_depth', 'alt_depth']
+    report_header = []
+
+    biggest_order = -1
+    for entry in columns['columns']:
+        if 'order' in columns['columns'][entry]:
+            if entry in hotspot_columns:
+                hotspot_columns.remove(entry)
+            output_order.append((columns['columns'][entry]['order'], entry))
+            report_header.append((columns['columns'][entry]['order'], entry))
+            biggest_order = max(biggest_order, columns['columns'][entry]['order'])
+    for entry in hotspot_columns:
+        biggest_order += 1
+        output_order.append((biggest_order, entry))
+        report_header.append((biggest_order, entry))
+    for entry in columns['columns']:
+        if 'order' not in columns['columns'][entry]:
+            biggest_order += 1
+            output_order.append((biggest_order, entry))
+            report_header.append((biggest_order, entry))
+    output_order = sorted(output_order, key=lambda tup: tup[0])
+    report_header = sorted(report_header, key=lambda tup: tup[0])
+
     log.info("Process vcf header: {}".format(vcf_file))
     for record in variants.header.records:
         if record.type == "INFO":
@@ -79,10 +103,8 @@ def generate_filtered_mutations(sample,
 
     log.info("open output file: {}".format(output))
     with open(output, "w") as writer:
-        writer.write("sample\tchr\tstart\tend\treport\tgvcf_depth")
+        writer.write("\t".join([name[1] for name in report_header]))
         log.info("Printing header: {}".format(output))
-        for c in columns["columns"]:
-            writer.write("\t{}".format(c))
         log.info("Printing hotspot information: {}".format(output))
         counter = 0
         for report in reports:
@@ -98,80 +120,86 @@ def generate_filtered_mutations(sample,
                         if hotspot.REPORT == ReportClass.region_all and depth > 299:
                             continue
                         elif hotspot.ALWAYS_PRINT:
-                            writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
-                                                                               hotspot.CHROMOSOME,
-                                                                               hotspot.EXTENDED_START + index,
-                                                                               hotspot.EXTENDED_START + index,
-                                                                               "-",
-                                                                               "-",
-                                                                               hotspot.REPORT))
-                            writer.write("\t{}\t{}\t{}".format(depth, "-", "-"))
-                            print_columns(writer, variant, hotspot, columns, annotation_extractor, depth, levels)
+                            data = {'sample': sample,
+                                    'chr': hotspot.CHROMOSOME,
+                                    'start': hotspot.EXTENDED_START + index,
+                                    'stop': hotspot.EXTENDED_START + index,
+                                    'ref': '-',
+                                    'alt': '-',
+                                    'report':  hotspot.REPORT,
+                                    'gvcf_depth': depth,
+                                        'ref_depth': '-',
+                                    'alt_depth': '-'}
+                            add_columns(data, None, hotspot, columns, annotation_extractor, depth, levels)
+                            writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))
                             counter += 1
                     else:
                         # print found variants that overlap with hotspot positions
                         for var in variant['variants']:
                             depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop)
-                            writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
-                                                                               chr_translater.get_nc_value(var.chrom),
-                                                                               var.start + 1,
-                                                                               var.stop,
-                                                                               var.ref,
-                                                                               ",".join(var.alts),
-                                                                               utils.get_report_type(var, hotspot)))
-                            writer.write("\t{}\t{}\t{}".format(depth,
-                                                               var.samples[sample]['AD'][0],
-                                                               ",".join(map(str, var.samples[sample]['AD'][1:]))))
-                            print_columns(writer, var, hotspot, columns, annotation_extractor, depth, levels)
+                            data = {'sample': sample,
+                                    'chr': chr_translater.get_nc_value(var.chrom),
+                                    'start': var.start + 1,
+                                    'stop': var.stop,
+                                    'ref': var.ref,
+                                    'alt': ",".join(var.alts),
+                                    'report': utils.get_report_type(var, hotspot),
+                                    'gvcf_depth': depth,
+                                    'ref_depth': var.samples[sample]['AD'][0],
+                                    'alt_depth': ",".join(map(str, var.samples[sample]['AD'][1:]))}
+                            add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels)
+                            writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))
                             counter += 1
         log.info("-- hotspot entries: {}".format(counter))
         log.info("Printing variants that aren't hotspot: {}".format(output))
         counter = 0
         for var in other:
             # print variants that doesn't overlap with a hotspot
-            writer.write("\n{}\t{}\t{}\t{}\t{}\t{}\t{}".format(sample,
-                                                               chr_translater.get_nc_value(var.chrom),
-                                                               var.start + 1,
-                                                               var.stop,
-                                                               var.ref,
-                                                               ",".join(var.alts),
-                                                               "4-other"))
             depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop)
-            writer.write("\t{}\t{}\t{}".format(depth,
-                                               var.samples[sample]['AD'][0],
-                                               ",".join(map(str, var.samples[sample]['AD'][1:]))))
-            print_columns(writer, var, None, columns, annotation_extractor, depth, levels)
+            data = {'sample': sample,
+                    'chr': chr_translater.get_nc_value(var.chrom),
+                    'start': var.start + 1,
+                    'stop': var.stop,
+                    'ref': var.ref,
+                    'alt': ",".join(var.alts),
+                    'report': "4-other",
+                    'gvcf_depth': depth,
+                    'ref_depth': var.samples[sample]['AD'][0],
+                    'alt_depth': ",".join(map(str, var.samples[sample]['AD'][1:]))}
+            add_columns(data, var, None, columns, annotation_extractor, depth, levels)
+            writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))
             counter += 1
             log.info("-- non-hotspot entries: {}".format(counter))
 
 
-def print_columns(writer, var, hotspot, columns, annotation_extractor, depth, levels):
+def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels):
     """
         print extra columns defined by a yaml file. Data from variant, hotspot or annotations
     """
     for c in columns["columns"]:
-        if columns["columns"][c]['from'] == "vep":
-            writer.write("\t{}".format(annotation_extractor(var,  columns["columns"][c]['field'])))
-        elif columns["columns"][c]['from'] == "hotspot":
-            if hotspot is None:
-                writer.write("\t-")
+        if 'from' in columns["columns"][c]:
+            if columns["columns"][c]['from'] == "vep":
+                data[c] = annotation_extractor(var,  columns["columns"][c]['field'])
+            elif columns["columns"][c]['from'] == "hotspot":
+                if hotspot is None:
+                    data[c] = "-"
+                else:
+                    data[c] = getattr(hotspot, columns["columns"][c]['field'])
+            elif columns["columns"][c]['from'] == "function":
+                function = getattr(utils, columns["columns"][c]['name'])
+                variables = ()
+                if 'variables' in columns["columns"][c]:
+                    variables = []
+                    for v in columns["columns"][c]['variables']:
+                        variables.append(locals().get(v, v))
+                    value = function(*variables)
+                else:
+                    function()
+                if 'column' in columns["columns"][c]:
+                    data[c] = value[columns["columns"][c]['column']]
+                else:
+                    data[c] = value
+            elif columns["columns"][c]['from'] == 'variable':
+                data[c] = locals()[columns["columns"][c]['field']]
             else:
-                writer.write("\t{}".format(getattr(hotspot, columns["columns"][c]['field'])))
-        elif columns["columns"][c]['from'] == "function":
-            function = getattr(utils, columns["columns"][c]['name'])
-            variables = ()
-            if 'variables' in columns["columns"][c]:
-                variables = []
-                for v in columns["columns"][c]['variables']:
-                    variables.append(locals().get(v, v))
-                value = function(*variables)
-            else:
-                function()
-            if 'column' in columns["columns"][c]:
-                writer.write("\t{}".format(value[columns["columns"][c]['column']]))
-            else:
-                writer.write("\t{}".format(value))
-        elif columns["columns"][c]['from'] == 'variable':
-            writer.write("\t{}".format(locals()[columns["columns"][c]['field']]))
-        else:
-            raise Exception("Undhandledd cased: " + columns["columns"][c]['field'])
+                raise Exception("Undhandledd cased: " + columns["columns"][c]['field'])

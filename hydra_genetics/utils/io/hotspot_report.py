@@ -15,13 +15,13 @@ log = logging.getLogger()
 
 
 def generate_hotspot_report(sample,
-                                output,
-                                levels,
-                                hotspot_file,
-                                vcf_file,
-                                gvcf_file,
-                                chr_mapping,
-                                column_yaml_file=None):
+                            output,
+                            levels,
+                            hotspot_file,
+                            vcf_file,
+                            gvcf_file,
+                            chr_mapping,
+                            column_yaml_file=None):
     reports = OrderedDict(((ReportClass.hotspot, []),
                           (ReportClass.region_all, []),
                           (ReportClass.region, []),
@@ -98,8 +98,6 @@ def generate_hotspot_report(sample,
     output_order = sorted(output_order, key=lambda tup: tup[0])
     report_header = sorted(report_header, key=lambda tup: tup[0])
 
-
-
     log.info("Process vcf header: {}".format(vcf_file))
     for record in variants.header.records:
         if record.type == "INFO":
@@ -136,7 +134,7 @@ def generate_hotspot_report(sample,
                                     'alt': '-',
                                     'report':  hotspot.REPORT,
                                     'gvcf_depth': depth,
-                                        'ref_depth': '-',
+                                    'ref_depth': '-',
                                     'alt_depth': '-'}
                             add_columns(data, None, hotspot, columns, annotation_extractor, depth, levels)
                             writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))

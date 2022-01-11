@@ -80,17 +80,25 @@ def generate_hotspot_report(sample,
             output_order.append((columns['columns'][entry]['order'], entry))
             report_header.append((columns['columns'][entry]['order'], entry))
             biggest_order = max(biggest_order, columns['columns'][entry]['order'])
+        elif columns['columns'][entry].get('visible', 1) == 0:
+            if entry in hotspot_columns:
+                hotspot_columns.remove(entry)
     for entry in hotspot_columns:
+
         biggest_order += 1
         output_order.append((biggest_order, entry))
         report_header.append((biggest_order, entry))
     for entry in columns['columns']:
         if 'order' not in columns['columns'][entry]:
+            if columns['columns'][entry].get('visible', 1) == 0:
+                continue
             biggest_order += 1
             output_order.append((biggest_order, entry))
             report_header.append((biggest_order, entry))
     output_order = sorted(output_order, key=lambda tup: tup[0])
     report_header = sorted(report_header, key=lambda tup: tup[0])
+
+
 
     log.info("Process vcf header: {}".format(vcf_file))
     for record in variants.header.records:

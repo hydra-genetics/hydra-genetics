@@ -54,7 +54,7 @@ def get_info_field(variant, info_name):
             if data is None:
                 return "-"
             if isinstance(data, tuple):
-                return ",".join(data)
+                return ",".join(map(str,data))
             return data
         except KeyError:
             return "-"

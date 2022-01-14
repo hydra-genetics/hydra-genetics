@@ -152,7 +152,7 @@ def create_rule(name, module, author, email, outdir):
     rule.init_rule()
 
 
-@cli.command(short_help="create inpu-files, samples.tsv and units.tsv")
+@cli.command(short_help="create input-files, samples.tsv and units.tsv")
 @click.option(
     "-d",
     "--directory",
@@ -224,10 +224,25 @@ def create_rule(name, module, author, email, outdir):
         help="tumor contet",
         type=float,
         default=1.0)
+@click.option(
+        "--validate",
+        help="see if fastq contain multipl runs/lanes by comparing first and last read. Note will take time since whole file need to be parsed.",
+        is_flag=True)
+@click.option(
+        "--th",
+        help="if occurences of a concesuns base in barcode is below this value a warning will be printed",
+        type=float,
+        default=0.9)
+@click.option(
+        "--nreads",
+        help="number of reads that will be used to generate consensus barcode.",
+        type=int,
+        default=200)
 def create_input_files(directory, outdir, post_file_modifier, platform, run, sample_type,
-                       sample_regex, read_number_regex, lane_identifier, adapters, tc, force):
+                       sample_regex, read_number_regex, lane_identifier, adapters, tc, force, validate, th, nreads):
+    print(validate)
     input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, run, sample_type,
-                                   sample_regex, read_number_regex, lane_identifier, adapters, tc, force)
+                                   sample_regex, read_number_regex, lane_identifier, adapters, tc, force, validate, th, nreads)
     input_files.init()
 
 

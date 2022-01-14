@@ -6,6 +6,7 @@ organization's specification based on a template.
 from datetime import date
 import git
 import glob
+import gzip
 import logging
 import jinja2
 import pathlib
@@ -226,7 +227,10 @@ class CreateInputFiles(object):
                  lane_identifier="_(L[0-9]+)_",
                  adapters="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
                  tc=1.0,
-                 force=False):
+                 force=False,
+                 validate_run_information=False,
+                 occurrences_warning_th=0.9,
+                 number_of_reads=200):
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier
@@ -239,6 +243,9 @@ class CreateInputFiles(object):
         self.adapters = adapters
         self.tc = tc
         self.force = force
+        self.validate_run_information = validate_run_information
+        self.occurrences_warning_th = occurrences_warning_th
+        self.number_of_reads = number_of_reads
 
         if not self.outdir:
             self.outdir = os.getcwd()
@@ -350,14 +357,14 @@ class CreateInputFiles(object):
                             raise ValueError("Incorrect number of fastq-files: {}:\n - {}".format(
                                 len(data[sample][lane].keys()), "\n - ".join(
                                     "{}: {}".format(k, data[lane][k]) for k in data[lane])))
-                        log.info("Processing {} for run information".format(str(data[lane]["1"]))
-                        machine, flowcell, lane_id, barcode = extract_run_information(str(data[lane]["1"])
+                        log.info("Processing {} for run information".format(str(data[lane]["1"])))
+                        machine, flowcell, lane_id, barcode = extract_run_information(str(data[lane]["1"]), self.number_of_reads, self.occurrences_warning_th, self.validate_run_information)
                         output.write("\n"+"\t".join([sample, self.sample_type, self.platform, machine, flowcell, lane_id,
                                      str(data[lane]["1"]),
                                      str(data[lane]["2"]),
                                      self.adapters]))
 
-def extract_run_information(file_path, number_of_reads = 200, warning_threshold = 0.9, compare_first_and_last_read=False):
+def extract_run_information(file_path, number_of_reads = 200, warning_threshold = 0.9, compare_first_and_last_read = False):
     """
     extract information from provided fastq.gz file and creates a consensus create_barcode
 
@@ -446,9 +453,9 @@ def extract_run_information(file_path, number_of_reads = 200, warning_threshold 
             max_base = max(data[i], key=data[i].get)
             max_base_n = data[i][max_base]
             if max_base_n / number_of_reads < warning_threshold:
-                logging.warning('Consesuns base {} occurences {:.1%} at position {} in barcode'.format(max_base, max_base_n / number_of_reads, i))
+                logging.warning('Consesuns base {} occurences {:.1%} at position {} in barcode, file {}'.format(max_base, max_base_n / number_of_reads, i, file_path))
             barcode += max_base
-    return barcode
+        return barcode
 
     def skip_read_information(reader_it):
         """
@@ -472,26 +479,26 @@ def extract_run_information(file_path, number_of_reads = 200, warning_threshold 
         # data structure used to store counts for each barcode
         data = [{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} for i in range(length)]
         data = count_bases(data, barcode, length)
-            for line in reader_it:
-                if every == 0:
-                    every = 1000
-                    line = line.rstrip()
-                    data = count_bases(data, extract_barcode(line), length)
-                    skip_read_information(reader_it)
-                    counter -= 1
-                    if counter == 0:
-                        break
-                    continue
-                every -= 1
-            if compare_first_and_last_read:
-                for last_read in reader_it:
-                    skip_read_information(reader_it)
-                run_information_last_read = extract_run_informatio(last_read)
-                if run_information_last_read[0] != run_information[0]:
-                    raise Exception("Multiple machines found in fastq file, {} and {}".format(run_information_last_read[0], run_information[0]))
-                if run_information_last_read[1] != run_information[1]:
-                    raise Exception("Multiple flowcells found in fastq file, {} and {}".format(run_information_last_read[1], run_information[1]))
-                if run_information_last_read[2] != run_information[2]:
-                    logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".format(run_information[2], run_information_last_read[2]))
-                return (run_information[0], run_information[1], 0, create_barcode(data, length, number_of_reads))
-            return run_information + (create_barcode(data, length, number_of_reads),)
+        for line in reader_it:
+            if every == 0:
+                every = 1000
+                line = line.rstrip()
+                data = count_bases(data, extract_barcode(line), length)
+                skip_read_information(reader_it)
+                counter -= 1
+                if counter == 0:
+                    break
+                continue
+            every -= 1
+        if compare_first_and_last_read:
+            for last_read in reader_it:
+                skip_read_information(reader_it)
+            run_information_last_read = extract_run_informatio(last_read)
+            if run_information_last_read[0] != run_information[0]:
+                raise Exception("Multiple machines found in fastq file, {} and {}".format(run_information_last_read[0], run_information[0]))
+            if run_information_last_read[1] != run_information[1]:
+                raise Exception("Multiple flowcells found in fastq file, {} and {}".format(run_information_last_read[1], run_information[1]))
+            if run_information_last_read[2] != run_information[2]:
+                logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".format(run_information[2], run_information_last_read[2]))
+            return (run_information[0], run_information[1], 0, create_barcode(data, length, number_of_reads, warning_threshold))
+        return run_information + (create_barcode(data, length, number_of_reads, warning_threshold),)

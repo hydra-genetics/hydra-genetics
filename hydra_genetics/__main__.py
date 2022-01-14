@@ -173,20 +173,6 @@ def create_rule(name, module, author, email, outdir):
         help="Sequence platform that the data originate from, ex nextseq, miseq. Default Illumina",
         default="Illumina")
 @click.option(
-        "-r",
-        "--run",
-        type=str,
-        help="Sequence run id, something used to identify where data originate from, ex data, flowcell id. Could also be a regex "
-             "used to extract run id from file path (need to contain '(' and ')', ex \".*([0-9]+_[A_Z]+).*\".",
-        default="RUN")
-@click.option(
-        "-l",
-        "--lane-identifier",
-        type=str,
-        help="Identifier for lane, either a string or a regex that will extract lane identifier from file "
-             "name, ex \"_(L[0-9]*)_\"",
-        default="L000")
-@click.option(
         "-t",
         "--sample-type",
         type=str,
@@ -196,8 +182,8 @@ def create_rule(name, module, author, email, outdir):
         "-s",
         "--sample-regex",
         type=str,
-        help="Regex used to extract sample from filename, default '([A-Za-z0-9-]+)_S[0-9]+_R[12]{1}_001.fastq.gz$'",
-        default="^([A-Za-z0-9-]+)_S[0-9]+_(R[12]{1})_001.fastq.gz")
+        help="Regex used find fastq files and to extract samplefrom filename, default '([A-Za-z0-9-]+)_.+.gz$'",
+        default="^([A-Za-z0-9-]+)_.+\.fastq.gz")
 @click.option(
         "-n",
         "--read-number-regex",
@@ -238,11 +224,10 @@ def create_rule(name, module, author, email, outdir):
         help="number of reads that will be used to generate consensus barcode.",
         type=int,
         default=200)
-def create_input_files(directory, outdir, post_file_modifier, platform, run, sample_type,
-                       sample_regex, read_number_regex, lane_identifier, adapters, tc, force, validate, th, nreads):
-    print(validate)
-    input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, run, sample_type,
-                                   sample_regex, read_number_regex, lane_identifier, adapters, tc, force, validate, th, nreads)
+def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
+                       sample_regex, read_number_regex, adapters, tc, force, validate, th, nreads):
+    input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
+                                   sample_regex, read_number_regex, adapters, tc, force, validate, th, nreads)
     input_files.init()
 
 

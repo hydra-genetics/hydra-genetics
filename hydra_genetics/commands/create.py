@@ -220,11 +220,9 @@ class CreateInputFiles(object):
                  outdir=None,
                  post_file_modifier=None,
                  platform="Illumina",
-                 run="RUN",
                  sample_type="T",
-                 sample_regex="^([A-Za-z0-9-]+)_S[0-9]+_R[12]{1}_001.fastq.gz",
-                 read_number_regex="^[A-Za-z0-9-]+_S[0-9]+_(R[12]{1})_001.fastq.gz",
-                 lane_identifier="_(L[0-9]+)_",
+                 sample_regex="^([A-Za-z0-9-]+)_.*\.fastq.gz",
+                 read_number_regex="_(R[12]{1})_",
                  adapters="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
                  tc=1.0,
                  force=False,
@@ -234,12 +232,10 @@ class CreateInputFiles(object):
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier
-        self.run = run
         self.platform = platform
         self.sample_type = sample_type
         self.sample_regex = sample_regex
         self.read_number_regex = read_number_regex
-        self.lane_identifier = lane_identifier
         self.adapters = adapters
         self.tc = tc
         self.force = force
@@ -257,8 +253,6 @@ class CreateInputFiles(object):
         file_dict = {}
         platform = self.platform
         sample_type = self.sample_type
-        run = self.run
-        run_is_regex = True if re.search(".*[(].+[)].*", run) else False
         for d in self.directory:
             dir_files_found = 0
             log.info(f"Dir: %s" % d)
@@ -267,27 +261,19 @@ class CreateInputFiles(object):
                     continue
                 temp_filename = os.path.basename(f)
                 try:
-                    run_value = run
-                    if run_is_regex:
-                        run_value = re.search(run, f)
-                        if run_value:
-                            run_value = run_value.group(1)
-                        else:
-                            raise ValueError("Unable to extract run info from:\n{}\nwith regex: {}".format(temp_filename, run))
                     samplename = re.search(self.sample_regex, temp_filename).group(1)
                     read = re.search(self.read_number_regex, temp_filename).group(1)
-                    if run_value not in file_dict:
-                        file_dict[run_value] = {}
-                    if samplename in file_dict[run_value]:
-                        if read in file_dict[run_value][samplename]:
-                            raise Exception(
+                    first_part = re.split(self.read_number_regex, temp_filename)[0]
+                    if samplename not in file_dict:
+                        file_dict[samplename] = {}
+                    if first_part not in file_dict[samplename]:
+                        file_dict[samplename][first_part] = {}
+                    if read in file_dict[samplename][first_part]:
+                        raise Exception(
                                     "Trying to add read (%s) for sample %s multiple times\n%s\n%s" %
-                                    (read, samplename, f, file_dict[samplename][read]))
-                        file_dict[run_value][samplename].append(f)
-                        dir_files_found += 1
-                    else:
-                        file_dict[run_value][samplename] = [f]
-                        dir_files_found += 1
+                                    (read, samplename, f, file_dict[samplename][first_part][read]))
+                    file_dict[samplename][first_part][read] = f
+                    dir_files_found += 1
                     log.info("    found: %s" % f)
                 except AttributeError:
                     log.debug("Couldn't extract sample name from: %s" % temp_filename)
@@ -296,35 +282,50 @@ class CreateInputFiles(object):
                             "please make sure regex '{}' matches your file names!".format(d, self.sample_regex))
             else:
                 log.info("{} fastq files found".format(dir_files_found))
-
-        def lane_identifier(x): return self.lane_identifier
-
-        if re.search(".*[(].+[)].*", self.lane_identifier):
-            def lane_identifier(x): return re.search(self.lane_identifier, x).group(1)
-
-        lane = lane_identifier
-
-        for run_key in file_dict:
-            for sample in file_dict[run_key]:
-                if len(file_dict[run_key][sample]) % 2 != 0:
-                    raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[run_key][sample])))
-                lane_dict = dict()
-                no_index_counter = 0
-                for f in file_dict[run_key][sample]:
-                    read_number = re.search(self.read_number_regex, f).group(1)
-                    lane_id = lane(f)
-                    if lane_id in lane_dict:
-                        if read_number in lane_dict[lane_id]:
-                            raise ValueError(
-                                "s index and read number combination found multiple times: index {} read {}:\n - {}".format(
-                                     lane_id,
-                                     read_number,
-                                     "\n - ".join(
-                                         [f, lane_dict[lane_id][read_number]])))
-                        lane_dict[lane_id][read_number] = f
+        result_dict = {}
+        if self.validate_run_information:
+            log.info("NOTE: fastq file will be parsed until end, could take some time for big files")
+        log.info("Processing  found files, extracting run information and validation number of found reads:".format(str(f)))
+        for sample in file_dict:
+            for files in file_dict[sample]:
+                if len(file_dict[sample][files]) % 2 != 0:
+                    raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
+                for read_number, f in file_dict[sample][files].items():
+                    log.info("\t - {} for run information".format(str(f)))
+                    machine_id, flowcell, lane_id, barcode = extract_run_information(f, self.number_of_reads, self.occurrences_warning_th, self.validate_run_information)
+                    file_dict = dict()
+                    no_index_counter = 0
+                    if sample in result_dict:
+                        if flowcell in result_dict[sample]:
+                            if lane_id in result_dict[sample][flowcell]:
+                                if 'reads' in result_dict[sample][flowcell][lane_id]:
+                                    if read_number in result_dict[sample][flowcell][lane_id]['reads']:
+                                        raise ValueError(
+                                            "s index and read number combination found multiple times: sample {} flowcell {} lane {} read {}:\n - {}".format(
+                                            sample,
+                                            flowcell,
+                                            lane_id,
+                                            read_number,
+                                            "\n - ".join(
+                                             [f, lane_dict[lane_id]['reads'][read_number]])))
+                                    else:
+                                        result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
+                                else:
+                                    file_dict[sample][flowcell][lane_id]['reads'] = {read_number: f}
+                                    file_dict[sample][flowcell][lane_id]['machine'] = machine_id
+                                    file_dict[sample][flowcell][lane_id]['barcode'] = barcode
+                            else:
+                                result_dict[sample][flowcell][lane_id] = {'reads': {read_number: f},
+                                                                          'machine': machine_id,
+                                                                          'barcode': barcode}
+                        else:
+                            result_dict[sample][flowcell] = {lane_id: {'reads': {read_number: f},
+                                                                       'machine': machine_id,
+                                                                       'barcode': barcode}}
                     else:
-                        lane_dict[lane_id] = {read_number: f}
-                file_dict[run_key][sample] = lane_dict
+                        result_dict[sample] = {flowcell: {lane_id: {'reads': {read_number: f},
+                                                                    'machine': machine_id,
+                                                                    'barcode': barcode}}}
         samples_file_name = "samples.tsv"
         if self.post_file_modifier is not None:
             samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
@@ -349,20 +350,25 @@ class CreateInputFiles(object):
             else:
                 log.warn("File exists {} overwriting!!!".format(units_file_name))
         with open(units_file_name, "w") as output:
-            output.write("\t".join(["sample", "type", "platform", "machine", "run", "lane", "fastq1", "fastq2", "adapter"]))
-            for run_key, values in sorted(file_dict.items()):
-                for sample, data in sorted(file_dict[run_key].items()):
-                    for lane in data:
-                        if len(data[lane].keys()) != 2:
+            output.write("\t".join(["sample", "type", "platform", "barcode", "machine", "run", "lane", "fastq1", "fastq2", "adapter"]))
+            for sample in sorted(result_dict):
+                for flowcell in sorted(result_dict[sample]):
+                    for lane, data in sorted(result_dict[sample][flowcell].items()):
+                        if len(data['reads'].keys()) != 2:
                             raise ValueError("Incorrect number of fastq-files: {}:\n - {}".format(
-                                len(data[sample][lane].keys()), "\n - ".join(
-                                    "{}: {}".format(k, data[lane][k]) for k in data[lane])))
-                        log.info("Processing {} for run information".format(str(data[lane]["1"])))
-                        machine, flowcell, lane_id, barcode = extract_run_information(str(data[lane]["1"]), self.number_of_reads, self.occurrences_warning_th, self.validate_run_information)
-                        output.write("\n"+"\t".join([sample, self.sample_type, self.platform, machine, flowcell, lane_id,
-                                     str(data[lane]["1"]),
-                                     str(data[lane]["2"]),
-                                     self.adapters]))
+                                len(data['reads'].keys()), "\n - ".join(
+                                    "{}: {}".format(k, data['reads'][k]) for k in data['reads'])))
+
+                        output.write("\n"+"\t".join([sample,
+                                                     self.sample_type,
+                                                     self.platform,
+                                                     data['barcode'],
+                                                     data['machine'],
+                                                     flowcell,
+                                                     "L" + lane.rjust(3,'0'),
+                                                     str(data['reads']["1"]),
+                                                     str(data['reads']["2"]),
+                                                     self.adapters]))
 
 def extract_run_information(file_path, number_of_reads = 200, warning_threshold = 0.9, compare_first_and_last_read = False):
     """
@@ -500,5 +506,5 @@ def extract_run_information(file_path, number_of_reads = 200, warning_threshold 
                 raise Exception("Multiple flowcells found in fastq file, {} and {}".format(run_information_last_read[1], run_information[1]))
             if run_information_last_read[2] != run_information[2]:
                 logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".format(run_information[2], run_information_last_read[2]))
-            return (run_information[0], run_information[1], 0, create_barcode(data, length, number_of_reads, warning_threshold))
+            return (run_information[0], run_information[1], "0", create_barcode(data, length, number_of_reads, warning_threshold))
         return run_information + (create_barcode(data, length, number_of_reads, warning_threshold),)

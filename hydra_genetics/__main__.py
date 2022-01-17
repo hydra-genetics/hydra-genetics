@@ -152,7 +152,7 @@ def create_rule(name, module, author, email, outdir):
     rule.init_rule()
 
 
-@cli.command(short_help="create inpu-files, samples.tsv and units.tsv")
+@cli.command(short_help="create input-files, samples.tsv and units.tsv")
 @click.option(
     "-d",
     "--directory",
@@ -173,20 +173,6 @@ def create_rule(name, module, author, email, outdir):
         help="Sequence platform that the data originate from, ex nextseq, miseq. Default Illumina",
         default="Illumina")
 @click.option(
-        "-r",
-        "--run",
-        type=str,
-        help="Sequence run id, something used to identify where data originate from, ex data, flowcell id. Could also be a regex "
-             "used to extract run id from file path (need to contain '(' and ')', ex \".*([0-9]+_[A_Z]+).*\".",
-        default="RUN")
-@click.option(
-        "-l",
-        "--lane-identifier",
-        type=str,
-        help="Identifier for lane, either a string or a regex that will extract lane identifier from file "
-             "name, ex \"_(L[0-9]*)_\"",
-        default="L000")
-@click.option(
         "-t",
         "--sample-type",
         type=str,
@@ -196,8 +182,8 @@ def create_rule(name, module, author, email, outdir):
         "-s",
         "--sample-regex",
         type=str,
-        help="Regex used to extract sample from filename, default '([A-Za-z0-9-]+)_S[0-9]+_R[12]{1}_001.fastq.gz$'",
-        default="^([A-Za-z0-9-]+)_S[0-9]+_(R[12]{1})_001.fastq.gz")
+        help="Regex used find fastq files and to extract samplefrom filename, default '([A-Za-z0-9-]+)_.+.gz$'",
+        default=r"([A-Za-z0-9-]+)_.+\.fastq.gz")
 @click.option(
         "-n",
         "--read-number-regex",
@@ -216,6 +202,7 @@ def create_rule(name, module, author, email, outdir):
         help="add string to output files",
         default=None)
 @click.option(
+        "-f",
         "--force",
         help="overwrite existing files",
         is_flag=True)
@@ -224,10 +211,34 @@ def create_rule(name, module, author, email, outdir):
         help="tumor contet",
         type=float,
         default=1.0)
-def create_input_files(directory, outdir, post_file_modifier, platform, run, sample_type,
-                       sample_regex, read_number_regex, lane_identifier, adapters, tc, force):
-    input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, run, sample_type,
-                                   sample_regex, read_number_regex, lane_identifier, adapters, tc, force)
+@click.option(
+        "--validate",
+        help="see if fastq contain multipl runs/lanes by comparing first and last "
+             "read. Note will take time since whole file need to be parsed.",
+        is_flag=True)
+@click.option(
+        "--ask",
+        help="ask user input when inconsistent machine id or flow cell id are found, only asked when --validate is set.",
+        is_flag=True)
+@click.option(
+        "--th",
+        help="if occurences of a concesuns base in barcode is below this value a warning will be printed",
+        type=float,
+        default=0.9)
+@click.option(
+        "--nreads",
+        help="number of reads that will be used to generate consensus barcode.",
+        type=int,
+        default=200)
+@click.option(
+        "--every",
+        help="select every N reads for validation.",
+        type=int,
+        default=1000)
+def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
+                       sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every):
+    input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
+                                   sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every)
     input_files.init()
 
 

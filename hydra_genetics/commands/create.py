@@ -221,7 +221,7 @@ class CreateInputFiles(object):
                  post_file_modifier=None,
                  platform="Illumina",
                  sample_type="T",
-                 sample_regex="^([A-Za-z0-9-]+)_.*\.fastq.gz",
+                 sample_regex=r"^([A-Za-z0-9-]+)_.*\.fastq.gz",
                  read_number_regex="_(R[12]{1})_",
                  adapters="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
                  tc=1.0,
@@ -249,7 +249,6 @@ class CreateInputFiles(object):
 
         if not self.outdir:
             self.outdir = os.getcwd()
-
 
     def init(self):
         """Creates the hydra_genetics rule."""
@@ -283,7 +282,8 @@ class CreateInputFiles(object):
                     log.debug("Couldn't extract sample name from: %s" % temp_filename)
             if dir_files_found == 0:
                 log.warning("No fastq files found in '{}', "
-                            "please make sure regex '{}' matches your file names!, and '{}' matches read number".format(d, self.sample_regex, self.read_number_regex))
+                            "please make sure regex '{}' matches your file names!, and '{}' matches read number".
+                            format(d, self.sample_regex, self.read_number_regex))
             else:
                 log.info("{} fastq files found".format(dir_files_found))
         result_dict = {}
@@ -296,7 +296,12 @@ class CreateInputFiles(object):
                     raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
                 for read_number, f in file_dict[sample][files].items():
                     log.info("\t - {} for run information".format(str(f)))
-                    machine_id, flowcell, lane_id, barcode = extract_run_information(f, self.number_of_reads, self.every_n_reads, self.occurrences_warning_th, self.validate_run_information, self.ask_for_input)
+                    machine_id, flowcell, lane_id, barcode = extract_run_information(f,
+                                                                                     self.number_of_reads,
+                                                                                     self.every_n_reads,
+                                                                                     self.occurrences_warning_th,
+                                                                                     self.validate_run_information,
+                                                                                     self.ask_for_input)
                     file_dict = dict()
                     no_index_counter = 0
                     if sample in result_dict:
@@ -304,14 +309,14 @@ class CreateInputFiles(object):
                             if lane_id in result_dict[sample][flowcell]:
                                 if 'reads' in result_dict[sample][flowcell][lane_id]:
                                     if read_number in result_dict[sample][flowcell][lane_id]['reads']:
-                                        raise ValueError(
-                                            "s index and read number combination found multiple times: sample {} flowcell {} lane {} read {}:\n - {}".format(
-                                            sample,
-                                            flowcell,
-                                            lane_id,
-                                            read_number,
-                                            "\n - ".join(
-                                             [f, lane_dict[lane_id]['reads'][read_number]])))
+                                        raise ValueError("s index and read number combination "
+                                                         "found multiple times: sample {}"
+                                                         " flowcell {} lane {} read {}:\n - {}".
+                                                         format(sample,
+                                                                flowcell,
+                                                                lane_id,
+                                                                read_number,
+                                                                "\n - ".join([f, lane_dict[lane_id]['reads'][read_number]])))
                                     else:
                                         result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
                                 else:
@@ -354,7 +359,8 @@ class CreateInputFiles(object):
             else:
                 log.warn("File exists {} overwriting!!!".format(units_file_name))
         with open(units_file_name, "w") as output:
-            output.write("\t".join(["sample", "type", "platform", "barcode", "machine", "run", "lane", "fastq1", "fastq2", "adapter"]))
+            output.write("\t".join(["sample", "type", "platform", "barcode", "machine",
+                                    "run", "lane", "fastq1", "fastq2", "adapter"]))
             for sample in sorted(result_dict):
                 for flowcell in sorted(result_dict[sample]):
                     for lane, data in sorted(result_dict[sample][flowcell].items()):
@@ -369,12 +375,14 @@ class CreateInputFiles(object):
                                                      data['barcode'],
                                                      data['machine'],
                                                      flowcell,
-                                                     "L" + lane.rjust(3,'0'),
+                                                     "L" + lane.rjust(3, '0'),
                                                      str(data['reads']["1"]),
                                                      str(data['reads']["2"]),
                                                      self.adapters]))
 
-def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 1000, warning_threshold = 0.9, compare_first_and_last_read = False, ask_for_input = False):
+
+def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,
+                            compare_first_and_last_read=False, ask_for_input=False):
     """
     extract information from provided fastq.gz file and creates a consensus create_barcode
 
@@ -406,7 +414,8 @@ def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 10
         """
         iterate over barcode and increate data counter
 
-        :param data: data structure representing each position in the barcode, ex [[{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} ...]
+        :param data: data structure representing each position in the barcode,
+                     ex [[{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} ...]
         :typa data: list of dicts
         :param barcode: barcode added to data structure, ex ACGT+GTCA
         :type barcode: string
@@ -446,7 +455,8 @@ def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 10
         from data a barcode will be generate. Warnings will be raised for consensus chars that have a lower occurences then
         the provided threshold.
 
-        :param data: data structure representing each position in the barcode, ex [[{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} ...]
+        :param data: data structure representing each position in the barcode,
+                     ex [[{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} ...]
         :typa data: list of dicts
         :param length: length of barcode
         :type length: integer
@@ -465,7 +475,8 @@ def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 10
                 raise Exception("Multiple base with same occurences: {}. UNABLE to handle exiting!".format(data[i]))
             max_base_n = data[i][max_base]
             if max_base_n / number_of_reads < warning_threshold:
-                logging.warning('Consesuns base {} occurences {:.1%} at position {} in barcode, file {}'.format(max_base, max_base_n / number_of_reads, i, file_path))
+                logging.warning('Consesuns base {} occurences {:.1%} at position {} in barcode, file {}'.
+                                format(max_base, max_base_n / number_of_reads, i, file_path))
             barcode += max_base
         return barcode
 
@@ -483,9 +494,8 @@ def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 10
             raise Exception("No input entered!!!")
         if '_' in user_input:
             logging.warning("Replacing all occurences of '_' with '-' in {}".format(user_input))
-            user_input = user_input.replace("_","-")
+            user_input = user_input.replace("_", "-")
         return user_input
-
 
     def skip_read_information(reader_it):
         """
@@ -497,7 +507,7 @@ def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 10
 
     with gzip.open(file_path, "rb") as reader:
         counter = number_of_reads
-        every = every_n_reads # only look at every 1000 read
+        every = every_n_reads  # only look at every n read
         reader_it = iter(reader)
         # Parse first read
         line = next(reader_it).rstrip()
@@ -528,7 +538,8 @@ def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 10
                 skip_read_information(reader_it)
                 every -= 1
         if counter > 0:
-            logging.warning("Couldn't only select {} reads of {} from fastq file {} for evaluation!".format(number_of_reads - counter, number_of_reads, file_path))
+            logging.warning("Couldn't only select {} reads of {} from fastq file {} for evaluation!".
+                            format(number_of_reads - counter, number_of_reads, file_path))
         if compare_first_and_last_read:
             if counter == 0:
                 for last_read in reader_it:
@@ -539,18 +550,21 @@ def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 10
                 print("ID")
                 if ask_for_input:
                     print(input)
-                    last_machine_id = ask_user_for_input("Multiple machines found in fastq file, {} and {}\n".format(last_machine_id, machine_id),
+                    last_machine_id = ask_user_for_input("Multiple machines found in fastq file, {} and {}\n".
+                                                         format(last_machine_id, machine_id),
                                                          "Enter machine id that should be used:")
                 else:
                     raise Exception("Multiple machines found in fastq file, {} and {}".format(last_machine_id, machine_id))
             if last_flowcell_id != flowcell_id:
                 if ask_for_input:
-                    last_flowcell_id = ask_user_for_input("Multiple flowcells found in fastq file, {} and {}".format(last_flowcell_id, flowcell_id),
-                                                         "Enter flowcell id that should be used:")
+                    last_flowcell_id = ask_user_for_input("Multiple flowcells found in fastq file, {} and {}".
+                                                          format(last_flowcell_id, flowcell_id),
+                                                          "Enter flowcell id that should be used:")
                 else:
                     raise Exception("Multiple flowcells found in fastq file, {} and {}".format(last_flowcell_id, flowcell_id))
             if last_lane != lane:
-                logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".format(last_lane, lane))
+                logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".
+                                format(last_lane, lane))
             return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads, warning_threshold))
 
         return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads, warning_threshold))

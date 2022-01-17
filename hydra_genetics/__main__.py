@@ -183,7 +183,7 @@ def create_rule(name, module, author, email, outdir):
         "--sample-regex",
         type=str,
         help="Regex used find fastq files and to extract samplefrom filename, default '([A-Za-z0-9-]+)_.+.gz$'",
-        default="([A-Za-z0-9-]+)_.+\.fastq.gz")
+        default=r"([A-Za-z0-9-]+)_.+\.fastq.gz")
 @click.option(
         "-n",
         "--read-number-regex",
@@ -213,7 +213,8 @@ def create_rule(name, module, author, email, outdir):
         default=1.0)
 @click.option(
         "--validate",
-        help="see if fastq contain multipl runs/lanes by comparing first and last read. Note will take time since whole file need to be parsed.",
+        help="see if fastq contain multipl runs/lanes by comparing first and last "
+             "read. Note will take time since whole file need to be parsed.",
         is_flag=True)
 @click.option(
         "--ask",

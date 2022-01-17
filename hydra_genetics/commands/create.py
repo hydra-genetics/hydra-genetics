@@ -227,8 +227,10 @@ class CreateInputFiles(object):
                  tc=1.0,
                  force=False,
                  validate_run_information=False,
+                 ask_for_input=False,
                  occurrences_warning_th=0.9,
-                 number_of_reads=200):
+                 number_of_reads=200,
+                 every_n_reads=1000):
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier
@@ -240,8 +242,10 @@ class CreateInputFiles(object):
         self.tc = tc
         self.force = force
         self.validate_run_information = validate_run_information
+        self.ask_for_input = ask_for_input
         self.occurrences_warning_th = occurrences_warning_th
         self.number_of_reads = number_of_reads
+        self.every_n_reads = every_n_reads
 
         if not self.outdir:
             self.outdir = os.getcwd()
@@ -279,7 +283,7 @@ class CreateInputFiles(object):
                     log.debug("Couldn't extract sample name from: %s" % temp_filename)
             if dir_files_found == 0:
                 log.warning("No fastq files found in '{}', "
-                            "please make sure regex '{}' matches your file names!".format(d, self.sample_regex))
+                            "please make sure regex '{}' matches your file names!, and '{}' matches read number".format(d, self.sample_regex, self.read_number_regex))
             else:
                 log.info("{} fastq files found".format(dir_files_found))
         result_dict = {}
@@ -292,7 +296,7 @@ class CreateInputFiles(object):
                     raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
                 for read_number, f in file_dict[sample][files].items():
                     log.info("\t - {} for run information".format(str(f)))
-                    machine_id, flowcell, lane_id, barcode = extract_run_information(f, self.number_of_reads, self.occurrences_warning_th, self.validate_run_information)
+                    machine_id, flowcell, lane_id, barcode = extract_run_information(f, self.number_of_reads, self.every_n_reads, self.occurrences_warning_th, self.validate_run_information, self.ask_for_input)
                     file_dict = dict()
                     no_index_counter = 0
                     if sample in result_dict:
@@ -370,7 +374,7 @@ class CreateInputFiles(object):
                                                      str(data['reads']["2"]),
                                                      self.adapters]))
 
-def extract_run_information(file_path, number_of_reads = 200, warning_threshold = 0.9, compare_first_and_last_read = False):
+def extract_run_information(file_path, number_of_reads = 200, every_n_reads = 1000, warning_threshold = 0.9, compare_first_and_last_read = False, ask_for_input = False):
     """
     extract information from provided fastq.gz file and creates a consensus create_barcode
 
@@ -457,11 +461,31 @@ def extract_run_information(file_path, number_of_reads = 200, warning_threshold 
         barcode = ""
         for i in range(length):
             max_base = max(data[i], key=data[i].get)
+            if list(data[i].values()).count(data[i][max_base]) > 1:
+                raise Exception("Multiple base with same occurences: {}. UNABLE to handle exiting!".format(data[i]))
             max_base_n = data[i][max_base]
             if max_base_n / number_of_reads < warning_threshold:
                 logging.warning('Consesuns base {} occurences {:.1%} at position {} in barcode, file {}'.format(max_base, max_base_n / number_of_reads, i, file_path))
             barcode += max_base
         return barcode
+
+    def ask_user_for_input(message, question):
+        """
+        Function used to ask user for input, retries once if no input is given.
+        """
+        counter = 2
+        user_input = ''
+        print(message)
+        while counter > 0 and len(user_input) == 0:
+            user_input = input(question).rstrip()
+            counter -= 1
+        if len(user_input) == 0:
+            raise Exception("No input entered!!!")
+        if '_' in user_input:
+            logging.warning("Replacing all occurences of '_' with '-' in {}".format(user_input))
+            user_input = user_input.replace("_","-")
+        return user_input
+
 
     def skip_read_information(reader_it):
         """
@@ -473,38 +497,60 @@ def extract_run_information(file_path, number_of_reads = 200, warning_threshold 
 
     with gzip.open(file_path, "rb") as reader:
         counter = number_of_reads
-        every = 1000 # only look at every 1000 read
+        every = every_n_reads # only look at every 1000 read
         reader_it = iter(reader)
         # Parse first read
         line = next(reader_it).rstrip()
         # Extract machine id, flowcell and lane
-        run_information = extract_run_informatio(line)
+        machine_id, flowcell_id, lane = extract_run_informatio(line)
         barcode = extract_barcode(line)
         skip_read_information(reader_it)
+        counter -= 1
         length = len(barcode)
         # data structure used to store counts for each barcode
         data = [{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} for i in range(length)]
         data = count_bases(data, barcode, length)
+        last_read = line
         for line in reader_it:
             if every == 0:
-                every = 1000
+                every = every_n_reads
                 line = line.rstrip()
+                last_read = line
                 data = count_bases(data, extract_barcode(line), length)
                 skip_read_information(reader_it)
                 counter -= 1
                 if counter == 0:
                     break
                 continue
-            every -= 1
-        if compare_first_and_last_read:
-            for last_read in reader_it:
+            else:
+                line = line.rstrip()
+                last_read = line
                 skip_read_information(reader_it)
-            run_information_last_read = extract_run_informatio(last_read)
-            if run_information_last_read[0] != run_information[0]:
-                raise Exception("Multiple machines found in fastq file, {} and {}".format(run_information_last_read[0], run_information[0]))
-            if run_information_last_read[1] != run_information[1]:
-                raise Exception("Multiple flowcells found in fastq file, {} and {}".format(run_information_last_read[1], run_information[1]))
-            if run_information_last_read[2] != run_information[2]:
-                logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".format(run_information[2], run_information_last_read[2]))
-            return (run_information[0], run_information[1], "0", create_barcode(data, length, number_of_reads, warning_threshold))
-        return run_information + (create_barcode(data, length, number_of_reads, warning_threshold),)
+                every -= 1
+        if counter > 0:
+            logging.warning("Couldn't only select {} reads of {} from fastq file {} for evaluation!".format(number_of_reads - counter, number_of_reads, file_path))
+        if compare_first_and_last_read:
+            if counter == 0:
+                for last_read in reader_it:
+                    skip_read_information(reader_it)
+            data = count_bases(data, extract_barcode(last_read), length)
+            last_machine_id, last_flowcell_id, last_lane = extract_run_informatio(last_read)
+            if last_machine_id != machine_id:
+                print("ID")
+                if ask_for_input:
+                    print(input)
+                    last_machine_id = ask_user_for_input("Multiple machines found in fastq file, {} and {}\n".format(last_machine_id, machine_id),
+                                                         "Enter machine id that should be used:")
+                else:
+                    raise Exception("Multiple machines found in fastq file, {} and {}".format(last_machine_id, machine_id))
+            if last_flowcell_id != flowcell_id:
+                if ask_for_input:
+                    last_flowcell_id = ask_user_for_input("Multiple flowcells found in fastq file, {} and {}".format(last_flowcell_id, flowcell_id),
+                                                         "Enter flowcell id that should be used:")
+                else:
+                    raise Exception("Multiple flowcells found in fastq file, {} and {}".format(last_flowcell_id, flowcell_id))
+            if last_lane != lane:
+                logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".format(last_lane, lane))
+            return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads, warning_threshold))
+
+        return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads, warning_threshold))

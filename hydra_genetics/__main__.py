@@ -183,7 +183,7 @@ def create_rule(name, module, author, email, outdir):
         "--sample-regex",
         type=str,
         help="Regex used find fastq files and to extract samplefrom filename, default '([A-Za-z0-9-]+)_.+.gz$'",
-        default="^([A-Za-z0-9-]+)_.+\.fastq.gz")
+        default="([A-Za-z0-9-]+)_.+\.fastq.gz")
 @click.option(
         "-n",
         "--read-number-regex",
@@ -202,6 +202,7 @@ def create_rule(name, module, author, email, outdir):
         help="add string to output files",
         default=None)
 @click.option(
+        "-f",
         "--force",
         help="overwrite existing files",
         is_flag=True)
@@ -215,6 +216,10 @@ def create_rule(name, module, author, email, outdir):
         help="see if fastq contain multipl runs/lanes by comparing first and last read. Note will take time since whole file need to be parsed.",
         is_flag=True)
 @click.option(
+        "--ask",
+        help="ask user input when inconsistent machine id or flow cell id are found, only asked when --validate is set.",
+        is_flag=True)
+@click.option(
         "--th",
         help="if occurences of a concesuns base in barcode is below this value a warning will be printed",
         type=float,
@@ -224,10 +229,15 @@ def create_rule(name, module, author, email, outdir):
         help="number of reads that will be used to generate consensus barcode.",
         type=int,
         default=200)
+@click.option(
+        "--every",
+        help="select every N reads for validation.",
+        type=int,
+        default=1000)
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
-                       sample_regex, read_number_regex, adapters, tc, force, validate, th, nreads):
+                       sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every):
     input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
-                                   sample_regex, read_number_regex, adapters, tc, force, validate, th, nreads)
+                                   sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every)
     input_files.init()
 
 

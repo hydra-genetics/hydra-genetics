@@ -58,6 +58,7 @@ def get_fastq_adapter(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     unit = get_unit(units, wildcards)
     return unit["adapter"]
 
+
 def get_unit_barcode(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
     """
     function used to extract barcode for one unit(row) from units.tsv

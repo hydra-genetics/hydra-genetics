@@ -14,7 +14,7 @@ class TestUnitUtils(unittest.TestCase):
             "tests/utils/files/units.tsv",
             dtype=str
         ).set_index(["sample", "type", "run", "lane"], drop=False).sort_index()
-                                                                                                                                                                                                                                                                                                            ).set_index(["sample", "type", "run", "lane"], drop=False).sort_index()
+
         self.units_2 = pandas.read_table(
             "tests/utils/files/units_2.tsv",
             dtype=str
@@ -160,7 +160,10 @@ class TestUnitUtils(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             self.assertTrue(
-                get_fastq_file(self.units, Wildcards(fromdict={'sample': 'BE12878', "run": "HLCF3DRXY", "type": "N", "lane": "L005"}))
+                get_fastq_file(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                               "run": "HLCF3DRXY",
+                                                               "type": "N",
+                                                               "lane": "L005"}))
             )
 
     def test_get_fastq_adapter(self):
@@ -204,7 +207,10 @@ class TestUnitUtils(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             self.assertTrue(
-                get_fastq_adapter(self.units, Wildcards(fromdict={'sample': 'BE12878', "run": "HLCF3DRXY", "type": "N", "lane": "L005"}))
+                get_fastq_adapter(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                                  "run": "HLCF3DRXY",
+                                                                  "type": "N",
+                                                                  "lane": "L005"}))
             )
 
     def test_get_units(self):
@@ -241,39 +247,66 @@ class TestUnitUtils(unittest.TestCase):
     def test_get_unit_barcode(self):
         from hydra_genetics.utils.units import get_unit_barcode
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L001"})),
             'ACGGAACA+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L002"})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L002"})),
             'CCGGAACA+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA13878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA13878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L001"})),
             'GCGGAACA+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA22878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA22878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L001"})),
             'TGGGGGGG+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12978', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L001'})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12978',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "N",
+                                                             'lane': 'L001'})),
             'AAGGAACA+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L001'})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "N",
+                                                             'lane': 'L001'})),
             'ACGGAACA+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L002'})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "N",
+                                                             'lane': 'L002'})),
             'AGGGAACA+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "T", 'lane': 'L003'})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "T",
+                                                             'lane': 'L003'})),
             'ATGGAACA+ACGAGAAC'
         )
         self.assertEqual(
-            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "R", 'lane': 'L004'})),
+            get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "R",
+                                                             'lane': 'L004'})),
             'ACAGAACA+ACGAGAAC'
         )
 
@@ -343,78 +376,132 @@ class TestUnitUtils(unittest.TestCase):
     def test_get_unit_machine(self):
         from hydra_genetics.utils.units import get_unit_machine
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L001"})),
             'NDX550220'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L002"})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L002"})),
             'NDX550220'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA13878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA13878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L001"})),
             'NDX550220'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA22878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA22878',
+                                                             'run': 'HKTG2BGXG',
+                                                             'type': "N",
+                                                             'lane': "L001"})),
             'NDX550220'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12978', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L001'})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12978',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "N",
+                                                             'lane': 'L001'})),
             'M03273'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L001'})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "N",
+                                                             'lane': 'L001'})),
             'A00687'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L002'})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "N",
+                                                             'lane': 'L002'})),
             'A00687'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "T", 'lane': 'L003'})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "T",
+                                                             'lane': 'L003'})),
             'A00687'
         )
         self.assertEqual(
-            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "R", 'lane': 'L004'})),
+            get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                             'run': 'HLCF3DRXY',
+                                                             'type': "R",
+                                                             'lane': 'L004'})),
             'A00687'
         )
 
     def test_get_unit_platform(self):
         from hydra_genetics.utils.units import get_unit_platform
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12878',
+                                                              'run': 'HKTG2BGXG',
+                                                              'type': "N",
+                                                              'lane': "L001"})),
             'nextseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L002"})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12878',
+                                                              'run': 'HKTG2BGXG',
+                                                              'type': "N",
+                                                              'lane': "L002"})),
             'nextseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA13878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA13878',
+                                                              'run': 'HKTG2BGXG',
+                                                              'type': "N",
+                                                              'lane': "L001"})),
             'nextseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA22878', 'run': 'HKTG2BGXG', 'type': "N", 'lane': "L001"})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA22878',
+                                                              'run': 'HKTG2BGXG',
+                                                              'type': "N",
+                                                              'lane': "L001"})),
             'nextseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12978', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L001'})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12978',
+                                                              'run': 'HLCF3DRXY',
+                                                              'type': "N",
+                                                              'lane': 'L001'})),
             'miniseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L001'})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                              'run': 'HLCF3DRXY',
+                                                              'type': "N",
+                                                              'lane': 'L001'})),
             'novaseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "N", 'lane': 'L002'})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                              'run': 'HLCF3DRXY',
+                                                              'type': "N",
+                                                              'lane': 'L002'})),
             'novaseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "T", 'lane': 'L003'})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                              'run': 'HLCF3DRXY',
+                                                              'type': "T",
+                                                              'lane': 'L003'})),
             'novaseq'
         )
         self.assertEqual(
-            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878', 'run': 'HLCF3DRXY', 'type': "R", 'lane': 'L004'})),
+            get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
+                                                              'run': 'HLCF3DRXY',
+                                                              'type': "R",
+                                                              'lane': 'L004'})),
             'novaseq'
         )
 

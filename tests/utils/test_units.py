@@ -13,6 +13,7 @@ class TestUnitUtils(unittest.TestCase):
         self.units = pandas.read_table(
             "tests/utils/files/units.tsv",
             dtype=str
+        ).set_index(["sample", "type", "run", "lane"], drop=False).sort_index()
                                                                                                                                                                                                                                                                                                             ).set_index(["sample", "type", "run", "lane"], drop=False).sort_index()
         self.units_2 = pandas.read_table(
             "tests/utils/files/units_2.tsv",

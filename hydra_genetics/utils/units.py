@@ -59,6 +59,74 @@ def get_fastq_adapter(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     return unit["adapter"]
 
 
+def get_unit_barcode(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+    """
+    function used to extract barcode for one unit(row) from units.tsv
+    Args:
+        units: DataFrame generate by importing a file following schema defintion
+               found in pre-alignment/workflow/schemas/units.schema.tsv
+        wildcards: wildcards object with at least the following wildcard names
+               sample, type, run, and lane
+    Returns:
+        return barcode
+    Raises:
+        raises an exception (KeyError) if no unit can be extracted from the Dataframe
+    """
+    unit = get_unit(units, wildcards)
+    return unit["barcode"]
+
+
+def get_unit_machine(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+    """
+    function used to extract machine for one unit(row) from units.tsv
+    Args:
+        units: DataFrame generate by importing a file following schema defintion
+               found in pre-alignment/workflow/schemas/units.schema.tsv
+        wildcards: wildcards object with at least the following wildcard names
+               sample, type, run, and lane
+    Returns:
+        return machine id
+    Raises:
+        raises an exception (KeyError) if no unit can be extracted from the Dataframe
+    """
+    unit = get_unit(units, wildcards)
+    return unit["machine"]
+
+
+def get_unit_platform(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+    """
+    function used to extract platform for one unit(row) from units.tsv
+    Args:
+        units: DataFrame generate by importing a file following schema defintion
+               found in pre-alignment/workflow/schemas/units.schema.tsv
+        wildcards: wildcards object with at least the following wildcard names
+               sample, type, run, and lane
+    Returns:
+        return platform
+    Raises:
+        raises an exception (KeyError) if no unit can be extracted from the Dataframe
+    """
+    unit = get_unit(units, wildcards)
+    return unit["platform"]
+
+
+def get_unit_run(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+    """
+    function used to extract run for one unit(row) from units.tsv
+    Args:
+        units: DataFrame generate by importing a file following schema defintion
+               found in pre-alignment/workflow/schemas/units.schema.tsv
+        wildcards: wildcards object with at least the following wildcard names
+               sample, type, run, and lane
+    Returns:
+        return run (flowcell id)
+    Raises:
+        raises an exception (KeyError) if no unit can be extracted from the Dataframe
+    """
+    unit = get_unit(units, wildcards)
+    return unit["run"]
+
+
 def get_units(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: str = None) -> pandas.DataFrame:
     """
     function used to extract one or more units from units.tsv
@@ -103,7 +171,7 @@ def get_fastq_files(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, 
     return [getattr(file, wildcards.read) for file in get_units(units, wildcards, type)]
 
 
-def get_unit_platforms(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> set:
+def get_platforms(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> set:
     """
     function used to extract all uniq platform values for a sample and type combination found in units.tsv
     Args:

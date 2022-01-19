@@ -1,10 +1,10 @@
-sample	type	platform	run	lane	fastq1	fastq2	adapter
-NA12878	N	nextseq	1	1	input/1_R1_L1.fq.gz	input/1_R2_L1.fq.gz	ACGT,TGCA1
-NA12878	N	nextseq	1	2	input/2_R1_L2.fq.gz	input/2_R2_L2.fq.gz	ACGT,TGCA2
-NA13878	N	nextseq	1	1	input/3_R1_L1.fq.gz	input/3_R2_L1.fq.gz	ACGT,TGCA3
-NA22878	N	nextseq	1	1	input/4_R1_L1.fq.gz	input/4_R2_L1.fq.gz	ACGT,TGCA4
-NA12978	N	miniseq	1	1	input/5_R1_L1.fq.gz	input/5_R2_L1.fq.gz	ACGT,TGCA5
-BE12878	N	miniseq	2	1	input/6_R1_L1.fq.gz	input/6_R2_L1.fq.gz	ACGT,TGCA6
-BE12878	N	novaseq	2	2	input/7_R1_L2.fq.gz	input/7_R2_L2.fq.gz	ACGT,TGCA7
-BE12878	T	miniseq	2	3	input/8_R1_L3.fq.gz	input/8_R2_L3.fq.gz	ACGT,TGCA8
-BE12878	R	novaseq	2	4	input/9_R1_L4.fq.gz	input/9_R2_L4.fq.gz	ACGT,TGCA9
+sample	type	platform	machine	barcode	run	lane	fastq1	fastq2	adapter
+NA12878	N	nextseq	NDX550220	ACGGAACA+ACGAGAAC	HKTG2BGXG	L001	input/1_R1_L1.fq.gz	input/1_R2_L1.fq.gz	ACGT,TGCA1
+NA12878	N	nextseq	NDX550220	CCGGAACA+ACGAGAAC	HKTG2BGXG	L002	input/2_R1_L2.fq.gz	input/2_R2_L2.fq.gz	ACGT,TGCA2
+NA13878	N	nextseq	NDX550220	GCGGAACA+ACGAGAAC	HKTG2BGXG	L001	input/3_R1_L1.fq.gz	input/3_R2_L1.fq.gz	ACGT,TGCA3
+NA22878	N	nextseq	NDX550220	TGGGGGGG+ACGAGAAC	HKTG2BGXG	L001	input/4_R1_L1.fq.gz	input/4_R2_L1.fq.gz	ACGT,TGCA4
+NA12978	N	miniseq	M03273	AAGGAACA+ACGAGAAC	HLCF3DRXY	L001	input/5_R1_L1.fq.gz	input/5_R2_L1.fq.gz	ACGT,TGCA5
+BE12878	N	novaseq	A00687	ACGGAACA+ACGAGAAC	HLCF3DRXY	L001	input/6_R1_L1.fq.gz	input/6_R2_L1.fq.gz	ACGT,TGCA6
+BE12878	N	novaseq	A00687	AGGGAACA+ACGAGAAC	HLCF3DRXY	L002	input/7_R1_L2.fq.gz	input/7_R2_L2.fq.gz	ACGT,TGCA7
+BE12878	T	novaseq	A00687	ATGGAACA+ACGAGAAC	HLCF3DRXY	L003	input/8_R1_L3.fq.gz	input/8_R2_L3.fq.gz	ACGT,TGCA8
+BE12878	R	novaseq	A00687	ACAGAACA+ACGAGAAC	HLCF3DRXY	L004	input/9_R1_L4.fq.gz	input/9_R2_L4.fq.gz	ACGT,TGCA9

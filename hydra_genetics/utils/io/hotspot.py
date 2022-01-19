@@ -51,9 +51,6 @@ class Reader(object):
     def __iter__(self):
         return self
 
-    def __iter__(self):
-        return self
-
     def next(self):
         return self.__next__()
 

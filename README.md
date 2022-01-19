@@ -20,4 +20,8 @@ Example of how to generate a new project
  pip install hydra-genetics
  hydra-genetics create-module -n snv -d "Collection of callers" -a "Patrik S" -e "p.s@mail.se" -g patrik -o snv
  hydra-genetics create-rule -n rule2 -m snv -a test2 -e "test@test"
+ 
+ # Create input files
+ hydra-genetics create-input-files -d path/dir1 -d path/dir2
+
 ```

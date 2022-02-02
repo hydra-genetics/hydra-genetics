@@ -136,7 +136,7 @@ def generate_hotspot_report(sample,
                                     'stop': hotspot.EXTENDED_START + index,
                                     'ref': '-',
                                     'alt': '-',
-                                    'report':  hotspot.REPORT,
+                                    'report':  "1-hotspot",
                                     'gvcf_depth': depth,
                                     'ref_depth': '-',
                                     'alt_depth': '-'}

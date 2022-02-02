@@ -102,19 +102,19 @@ class Hotspot(object):
 
         if self.START > self.END:
             logging.error("Start cordinte cannot be larget then stop coordinate! start:%s > stop:%s" %
-                             (self.START, self.END))
+                          (self.START, self.END))
             raise ValueError("Start cordinte cannot be larget then stop coordinate! start:%s > stop:%s" %
                              (self.START, self.END))
 
         if not _cds_pattern.match(self.CDS_MUTATION_SYNTAX):
             logging.error("Incorrect cds syntax %s! Should start with \"c.\" or set to \"-\" if empty." %
-                             self.CDS_MUTATION_SYNTAX)
+                           self.CDS_MUTATION_SYNTAX)
             raise ValueError("Incorrect cds syntax %s! Should start with \"c.\" or set to \"-\" if empty." %
                              self.CDS_MUTATION_SYNTAX)
 
         if not _aa_pattern.match(self.AA_MUTATION_SYNTAX):
             logging.error("Incorrect aa syntax: %s! Should start with \"p.\" or set to \"-\" if empty." %
-                             self.AA_MUTATION_SYNTAX)
+                          self.AA_MUTATION_SYNTAX)
             raise ValueError("Incorrect aa syntax: %s! Should start with \"p.\" or set to \"-\" if empty." %
                              self.AA_MUTATION_SYNTAX)
 

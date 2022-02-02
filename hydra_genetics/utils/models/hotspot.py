@@ -3,13 +3,14 @@
 
 from enum import Enum, auto, unique
 import enum
+import logging
 import re
 
 import pysam
 
 _cds_pattern = re.compile(r'^c\..+|^-$')
 _aa_pattern = re.compile(r'^p\..+|^-$')
-_exon_intron_pattern = re.compile(r'^exon\d+$|^intronic$')
+_exon_intron_pattern = re.compile(r'^exon\d+$|^intronic$|^promotor$')
 _chr_pattern = re.compile(r'^chr[XYM0-9]+$|^[XYM0-9]+$')
 _nc_pattern = re.compile(r'^NC_0+\d+\.\d+$')
 
@@ -92,27 +93,37 @@ class Hotspot(object):
         self.ALWAYS_PRINT = ALWAYS_PRINT
 
         if not isinstance(self.START, int):
+            logging.error("Start position should be an integer: %s!" % self.START)
             raise ValueError("Start position should be an integer: %s!" % self.START)
 
         if not isinstance(self.END, int):
+            logging.error("End position should be an integer: %s!" % self.END)
             raise ValueError("End position should be an integer: %s!" % self.END)
 
         if self.START > self.END:
+            logging.error("Start cordinte cannot be larget then stop coordinate! start:%s > stop:%s" %
+                             (self.START, self.END))
             raise ValueError("Start cordinte cannot be larget then stop coordinate! start:%s > stop:%s" %
                              (self.START, self.END))
 
         if not _cds_pattern.match(self.CDS_MUTATION_SYNTAX):
+            logging.error("Incorrect cds syntax %s! Should start with \"c.\" or set to \"-\" if empty." %
+                             self.CDS_MUTATION_SYNTAX)
             raise ValueError("Incorrect cds syntax %s! Should start with \"c.\" or set to \"-\" if empty." %
                              self.CDS_MUTATION_SYNTAX)
 
         if not _aa_pattern.match(self.AA_MUTATION_SYNTAX):
+            logging.error("Incorrect aa syntax: %s! Should start with \"p.\" or set to \"-\" if empty." %
+                             self.AA_MUTATION_SYNTAX)
             raise ValueError("Incorrect aa syntax: %s! Should start with \"p.\" or set to \"-\" if empty." %
                              self.AA_MUTATION_SYNTAX)
 
         if self.REPORT in ReportClass.__members__:
+            logging.error("report value (%s) not found in  Enum class %s!" % (self.REPORT, list(ReportClass)))
             raise ValueError("report value (%s) not found in  Enum class %s!" % (self.REPORT, list(ReportClass)))
 
         if not _exon_intron_pattern.match(self.EXON):
+            logging.error("Exon value should have the following format: exon or intronic. not %" % self.EXON)
             raise ValueError("Exon value should have the following format: exon or intronic. not %" % self.EXON)
 
         self.VARIANTS = [{'extended': False, 'variants': []} for i in range((self.END - self.START + 1))]

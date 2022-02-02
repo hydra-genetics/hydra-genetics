@@ -27,9 +27,13 @@ def generate_hotspot_report(sample,
                           (ReportClass.region, []),
                           (ReportClass.indel, [])))
     if not hotspot_file == "-":
-        hotspot_reader = HotspotReader(hotspot_file)
-        for hotspot in iter(hotspot_reader):
-            reports[hotspot.REPORT].append(hotspot)
+        try:
+            hotspot_reader = HotspotReader(hotspot_file)
+            for hotspot in iter(hotspot_reader):
+                reports[hotspot.REPORT].append(hotspot)
+        except ValueError as e:
+            logging.error(e)
+            raise e
     chr_translater = ChrTranslater(chr_mapping)
     variants = VariantFile(vcf_file)
     other = []
@@ -132,7 +136,7 @@ def generate_hotspot_report(sample,
                                     'stop': hotspot.EXTENDED_START + index,
                                     'ref': '-',
                                     'alt': '-',
-                                    'report':  hotspot.REPORT,
+                                    'report':  "1-hotspot",
                                     'gvcf_depth': depth,
                                     'ref_depth': '-',
                                     'alt_depth': '-'}

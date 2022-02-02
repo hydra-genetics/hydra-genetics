@@ -9,7 +9,7 @@ import pysam
 
 _cds_pattern = re.compile(r'^c\..+|^-$')
 _aa_pattern = re.compile(r'^p\..+|^-$')
-_exon_intron_pattern = re.compile(r'^exon\d+$|^intronic$')
+_exon_intron_pattern = re.compile(r'^exon\d+$|^intronic$|^promotor$')
 _chr_pattern = re.compile(r'^chr[XYM0-9]+$|^[XYM0-9]+$')
 _nc_pattern = re.compile(r'^NC_0+\d+\.\d+$')
 

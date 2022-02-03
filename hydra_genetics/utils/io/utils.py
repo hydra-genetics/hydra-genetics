@@ -1,7 +1,9 @@
 import pysam
 from pysam import VariantFile
+import re
 import statistics
 import warnings
+import logging
 
 from hydra_genetics.utils.models.hotspot import ReportClass
 
@@ -54,6 +56,14 @@ def get_depth(gvcf_file, sample, chr, start, stop):
         return depth[0]
     else:
         return 0
+
+
+def regex_extract(value, regex):
+    search_result = re.search(regex, value)
+    if search_result is None:
+        return "-"
+    else:
+        return search_result[0]
 
 
 def get_info_field(variant, info_name):

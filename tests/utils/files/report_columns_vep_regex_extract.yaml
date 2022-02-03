@@ -1,0 +1,5 @@
+columns:
+    rs:
+        from: 'vep'
+        field: 'Existing_variation'
+        extract_regex: '(rs[0-9]+)'

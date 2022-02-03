@@ -113,7 +113,7 @@ class Hotspot(object):
             raise ValueError("report value (%s) not found in  Enum class %s!" % (self.REPORT, list(ReportClass)))
 
         if not _exon_intron_pattern.match(self.EXON):
-            raise ValueError("Exon value should have the following format: exon or intronic. not %" % self.EXON)
+            raise ValueError("Exon value should have the following format: exon or intronic. not %s" % self.EXON)
 
         self.VARIANTS = [{'extended': False, 'variants': []} for i in range((self.END - self.START + 1))]
 

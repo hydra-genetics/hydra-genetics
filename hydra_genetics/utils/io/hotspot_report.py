@@ -33,7 +33,7 @@ def generate_hotspot_report(sample,
                 reports[hotspot.REPORT].append(hotspot)
         except ValueError as e:
             logging.error(e)
-            raise e
+            exit(1)
     chr_translater = ChrTranslater(chr_mapping)
     variants = VariantFile(vcf_file)
     other = []
@@ -136,7 +136,7 @@ def generate_hotspot_report(sample,
                                     'stop': hotspot.EXTENDED_START + index,
                                     'ref': '-',
                                     'alt': '-',
-                                    'report':  "1-hotspot",
+                                    'report':  utils.format_report_type(hotspot),
                                     'gvcf_depth': depth,
                                     'ref_depth': '-',
                                     'alt_depth': '-'}

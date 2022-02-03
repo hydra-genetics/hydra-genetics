@@ -17,6 +17,15 @@ def add_contigs_to_header(input_name, output_name, contig_file, assembly):
         output_vcf.write(record)
 
 
+def format_report_type(hotspot):
+    if hotspot.REPORT == ReportClass.region or hotspot.REPORT == ReportClass.region_all:
+        return "3-check"
+    elif hotspot.REPORT == ReportClass.hotspot:
+        return "1-hotspot"
+    else:
+        raise Exception("Unhandled case")
+
+
 def get_annotation_data(data_extracter, mapper):
     return lambda variant, field: data_extracter(variant, mapper[field])
 

@@ -21,19 +21,11 @@ def get_annotation_data(data_extracter, mapper):
     return lambda variant, field: data_extracter(variant, mapper[field])
 
 
-def get_annoation_data_vep(field_dict):
+def get_annotation_data_vep(field_dict):
     def extractor(variant, info_name):
         if isinstance(variant, pysam.VariantRecord):
-            try:
-                data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
-                if data is None:
-                    return "-"
-                if isinstance(data, tuple):
-                    return ",".join(data)
-                return data
-            except KeyError:
-                return "-"
-        return "-"
+            return variant.info['CSQ'][0].split("|").get(field_dict[info_name], None)
+        return None
     return extractor
 
 
@@ -46,19 +38,15 @@ def get_depth(gvcf_file, sample, chr, start, stop):
     else:
         return 0
 
+    
+def get_annotation_data_format(variant, field):
+    return variant.samples[0].get(field. None)
 
-def get_info_field(variant, info_name):
+    
+def get_annotation_data_info(variant, info_name):
     if isinstance(variant, pysam.VariantRecord):
-        try:
-            data = variant.info[info_name]
-            if data is None:
-                return "-"
-            if isinstance(data, tuple):
-                return ",".join(map(str, data))
-            return data
-        except KeyError:
-            return "-"
-    return '-'
+        return variant.info.get(info_name, None)
+    return None
 
 
 def get_report_type(variant, hotspot):

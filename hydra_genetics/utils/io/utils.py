@@ -40,7 +40,7 @@ def get_depth(gvcf_file, sample, chr, start, stop):
 
     
 def get_annotation_data_format(variant, field):
-    return variant.samples[0].get(field. None)
+    return variant.samples[0].get(field, None)
 
     
 def get_annotation_data_info(variant, info_name):

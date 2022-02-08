@@ -345,9 +345,8 @@ class CreateInputFiles(object):
                 log.warn("File exists {} overwriting!!!".format(samples_file_name))
         with open(samples_file_name, "w") as output:
             output.write("\t".join(["sample", "TC"]))
-            for run_key, data in sorted(file_dict.items()):
-                for sample, sample_info in sorted(data.items()):
-                    output.write("\n{}".format("\t".join([sample, str(self.tc)])))
+            for sample, data in sorted(file_dict.items()):
+                output.write("\n{}".format("\t".join([sample, str(self.tc)])))
         units_file_name = "units.tsv"
         if self.post_file_modifier is not None:
             units_file_name = "units_{}.tsv".format(self.post_file_modifier)

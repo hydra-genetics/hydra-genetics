@@ -302,7 +302,6 @@ class CreateInputFiles(object):
                                                                                      self.occurrences_warning_th,
                                                                                      self.validate_run_information,
                                                                                      self.ask_for_input)
-                    file_dict = dict()
                     no_index_counter = 0
                     if sample in result_dict:
                         if flowcell in result_dict[sample]:
@@ -320,9 +319,9 @@ class CreateInputFiles(object):
                                     else:
                                         result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
                                 else:
-                                    file_dict[sample][flowcell][lane_id]['reads'] = {read_number: f}
-                                    file_dict[sample][flowcell][lane_id]['machine'] = machine_id
-                                    file_dict[sample][flowcell][lane_id]['barcode'] = barcode
+                                    result_dict[sample][flowcell][lane_id]['reads'] = {read_number: f}
+                                    result_dict[sample][flowcell][lane_id]['machine'] = machine_id
+                                    result_dict[sample][flowcell][lane_id]['barcode'] = barcode
                             else:
                                 result_dict[sample][flowcell][lane_id] = {'reads': {read_number: f},
                                                                           'machine': machine_id,

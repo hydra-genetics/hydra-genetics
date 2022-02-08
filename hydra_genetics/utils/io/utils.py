@@ -23,9 +23,7 @@ def get_annotation_data(data_extracter, mapper):
 
 def get_annotation_data_vep(field_dict):
     def extractor(variant, info_name):
-        if isinstance(variant, pysam.VariantRecord):
-            return variant.info['CSQ'][0].split("|").get(field_dict[info_name], None)
-        return None
+        return variant.info['CSQ'][0].split("|")[field_dict[info_name]]
     return extractor
 
 
@@ -44,9 +42,7 @@ def get_annotation_data_format(variant, field):
 
     
 def get_annotation_data_info(variant, info_name):
-    if isinstance(variant, pysam.VariantRecord):
-        return variant.info.get(info_name, None)
-    return None
+    return variant.info.get(info_name, None)
 
 
 def get_report_type(variant, hotspot):

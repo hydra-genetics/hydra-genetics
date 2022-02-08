@@ -64,10 +64,10 @@ def get_read_level(read_levels, rd):
         for (level, depth_status, analyzable) in read_levels:
             rd = int(rd)
             if rd >= int(level):
-                return depth_status, analyzable
+                return (depth_status, analyzable)
     except ValueError:
         pass
-    return "-", "zero"
+    return ("-", "zero")
 
 
 def is_indel(variant):
@@ -85,8 +85,8 @@ def is_multibp_sub(variant):
 
 def clinical_flagged(variant):
     if isinstance(variant, pysam.VariantRecord):
-        rs = get_info_field(variant, 'snp138').startswith("rs")
-        nonflagged = get_info_field(variant, 'snp138NonFlagged')
+        rs = get_annotation_data_info(variant, 'snp138').startswith("rs")
+        nonflagged = get_annotation_data_info(variant, 'snp138NonFlagged')
         if rs and ("-" == nonflagged or nonflagged == "."):
             return "Yes"
         else:

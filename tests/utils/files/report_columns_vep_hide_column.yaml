@@ -31,7 +31,7 @@ columns:
         field: 'Consequence'
     Callers:
         from: 'function'
-        name: 'get_info_field'
+        name: 'get_annotation_data_info'
         variables:
          - var
          - 'CALLERS'

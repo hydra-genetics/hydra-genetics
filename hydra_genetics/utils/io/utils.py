@@ -21,19 +21,9 @@ def get_annotation_data(data_extracter, mapper):
     return lambda variant, field: data_extracter(variant, mapper[field])
 
 
-def get_annoation_data_vep(field_dict):
+def get_annotation_data_vep(field_dict):
     def extractor(variant, info_name):
-        if isinstance(variant, pysam.VariantRecord):
-            try:
-                data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
-                if data is None:
-                    return "-"
-                if isinstance(data, tuple):
-                    return ",".join(data)
-                return data
-            except KeyError:
-                return "-"
-        return "-"
+        return variant.info['CSQ'][0].split("|")[field_dict[info_name]]
     return extractor
 
 
@@ -47,18 +37,12 @@ def get_depth(gvcf_file, sample, chr, start, stop):
         return 0
 
 
-def get_info_field(variant, info_name):
-    if isinstance(variant, pysam.VariantRecord):
-        try:
-            data = variant.info[info_name]
-            if data is None:
-                return "-"
-            if isinstance(data, tuple):
-                return ",".join(map(str, data))
-            return data
-        except KeyError:
-            return "-"
-    return '-'
+def get_annotation_data_format(variant, field):
+    return variant.samples[0].get(field, None)
+
+
+def get_annotation_data_info(variant, info_name):
+    return variant.info.get(info_name, None)
 
 
 def get_report_type(variant, hotspot):
@@ -80,10 +64,10 @@ def get_read_level(read_levels, rd):
         for (level, depth_status, analyzable) in read_levels:
             rd = int(rd)
             if rd >= int(level):
-                return depth_status, analyzable
+                return (depth_status, analyzable)
     except ValueError:
         pass
-    return "-", "zero"
+    return ("-", "zero")
 
 
 def is_indel(variant):
@@ -101,8 +85,8 @@ def is_multibp_sub(variant):
 
 def clinical_flagged(variant):
     if isinstance(variant, pysam.VariantRecord):
-        rs = get_info_field(variant, 'snp138').startswith("rs")
-        nonflagged = get_info_field(variant, 'snp138NonFlagged')
+        rs = get_annotation_data_info(variant, 'snp138').startswith("rs")
+        nonflagged = get_annotation_data_info(variant, 'snp138NonFlagged')
         if rs and ("-" == nonflagged or nonflagged == "."):
             return "Yes"
         else:

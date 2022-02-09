@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://www.github.com/hydra-genetics/tools/compare/v0.3.0...v0.4.0) (2022-02-09)
+
+
+### Features
+
+* add workflow for semantic check to template ([58dfec1](https://www.github.com/hydra-genetics/tools/commit/58dfec1651b37ed81753703990692ee5eddef4c3))
+* update hydra-genetics requirements in template to 0.3.0 ([ca5f0a6](https://www.github.com/hydra-genetics/tools/commit/ca5f0a6ed0c37fc58fdc6f99cdc147ee504f9618))
+
 ## [0.3.0](https://www.github.com/hydra-genetics/tools/compare/v0.2.9...v0.3.0) (2022-02-09)
 
 

@@ -5,13 +5,10 @@ on:
 
 name: release-please
 
-workflow_dispatch:
-
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-
       - uses: GoogleCloudPlatform/release-please-action@v2
         id: release
         with:

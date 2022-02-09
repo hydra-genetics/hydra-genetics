@@ -4,6 +4,5 @@
 
 """
 
-import pkg_resources
-
-__version__ = pkg_resources.get_distribution("hydra_genetics").version
+from . import _version
+__version__ = _version.get_versions()['version']

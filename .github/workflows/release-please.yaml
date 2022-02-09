@@ -13,7 +13,8 @@ jobs:
         id: release
         with:
           release-type: python
-          package-name: snakemake
+          package-name: hydra-genetics
+          default-branch: master
 
       - uses: actions/checkout@v2
         if: ${{ steps.release.outputs.release_created }}

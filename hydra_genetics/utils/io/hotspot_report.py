@@ -27,9 +27,13 @@ def generate_hotspot_report(sample,
                           (ReportClass.region, []),
                           (ReportClass.indel, [])))
     if not hotspot_file == "-":
-        hotspot_reader = HotspotReader(hotspot_file)
-        for hotspot in iter(hotspot_reader):
-            reports[hotspot.REPORT].append(hotspot)
+        try:
+            hotspot_reader = HotspotReader(hotspot_file)
+            for hotspot in iter(hotspot_reader):
+                reports[hotspot.REPORT].append(hotspot)
+        except ValueError as e:
+            logging.error(e)
+            exit(1)
     chr_translater = ChrTranslater(chr_mapping)
     variants = VariantFile(vcf_file)
     other = []
@@ -132,7 +136,7 @@ def generate_hotspot_report(sample,
                                     'stop': hotspot.EXTENDED_START + index,
                                     'ref': '-',
                                     'alt': '-',
-                                    'report':  hotspot.REPORT,
+                                    'report':  utils.format_report_type(hotspot),
                                     'gvcf_depth': depth,
                                     'ref_depth': '-',
                                     'alt_depth': '-'}
@@ -189,6 +193,8 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
                     data[c] = annotation_extractor(var,  columns["columns"][c]['field'])
                 except AttributeError:
                     data[c] = "-"
+                if "extract_regex" in columns["columns"][c]:
+                    data[c] = utils.regex_extract(data[c], columns["columns"][c]['extract_regex'])
             elif columns["columns"][c]['from'] == "hotspot":
                 if hotspot is None:
                     data[c] = "-"

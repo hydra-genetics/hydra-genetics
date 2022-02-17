@@ -1,7 +1,9 @@
 import pysam
 from pysam import VariantFile
+import re
 import statistics
 import warnings
+import logging
 
 from hydra_genetics.utils.models.hotspot import ReportClass
 
@@ -15,6 +17,15 @@ def add_contigs_to_header(input_name, output_name, contig_file, assembly):
     output_vcf = VariantFile(output_name, 'w', header=input_vcf.header)
     for record in input_vcf:
         output_vcf.write(record)
+
+
+def format_report_type(hotspot):
+    if hotspot.REPORT == ReportClass.region or hotspot.REPORT == ReportClass.region_all:
+        return "3-check"
+    elif hotspot.REPORT == ReportClass.hotspot:
+        return "1-hotspot"
+    else:
+        raise Exception("Unhandled case")
 
 
 def get_annotation_data(data_extracter, mapper):
@@ -35,6 +46,28 @@ def get_depth(gvcf_file, sample, chr, start, stop):
         return depth[0]
     else:
         return 0
+
+
+def regex_extract(value, regex):
+    search_result = re.search(regex, value)
+    if search_result is None:
+        return "-"
+    else:
+        return search_result[0]
+
+
+def get_info_field(variant, info_name):
+    if isinstance(variant, pysam.VariantRecord):
+        try:
+            data = variant.info[info_name]
+            if data is None:
+                return "-"
+            if isinstance(data, tuple):
+                return ",".join(map(str, data))
+            return data
+        except KeyError:
+            return "-"
+    return '-'
 
 
 def get_annotation_data_format(variant, field):

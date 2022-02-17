@@ -373,9 +373,9 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(len(result), 13)
             self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359	4")
             self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27	4")
-            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	hotspot	89	-	-")
-            self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	hotspot	0	-	-")
-            self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	hotspot	0	-	-")
+            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	1-hotspot	89	-	-")
+            self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	1-hotspot	0	-	-")
+            self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	1-hotspot	0	-	-")
             self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	region_all	221	-	-")
             self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	region_all	182	-	-")
             self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5	27")
@@ -401,11 +401,11 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(len(result), 13)
             self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359	4	yes	ok	ALK	protein_coding	synonymous_variant	vardict	resistance_mutation")  # noqa
             self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27	4	yes	low	BRAF	protein_coding	intron_variant	mutect2	-")  # noqa
-            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	hotspot	89	-	-	yes	low	-	-	-	-	-")   # noqa
-            self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	hotspot	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
-            self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	hotspot	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
-            self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	region_all	221	-	-	yes	low	-	-	-	-	-")  # noqa
-            self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	region_all	182	-	-	yes	low	-	-	-	-	-")  # noqa
+            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	1-hotspot	89	-	-	yes	low	-	-	-	-	-")   # noqa
+            self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	1-hotspot	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
+            self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	1-hotspot	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
+            self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	1-region_all	221	-	-	yes	low	-	-	-	-	-")  # noqa
+            self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	1-region_all	182	-	-	yes	low	-	-	-	-	-")  # noqa
             self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5	27	yes	ok	LRRC14	protein_coding	upstream_gene_variant	vardict	-")  # noqa
             self.assertEqual(result[8].rstrip(), "sample1	NC_000008.11	145738776	145738776	-	-	region_all	0	-	-	not analyzable	low	-	-	-	-	-")  # noqa
             self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
@@ -434,9 +434,9 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(len(result), 13)
             self.assertEqual(result[0].rstrip(), "29445271	29445271	NC_000002.11	ALK	sample1	G	A	1-hotspot	620	359	4	yes	ok	protein_coding	synonymous_variant	vardict	resistance_mutation")  # noqa
             self.assertEqual(result[1].rstrip(), "140498362	140498359	NC_000007.13	BRAF	sample1	CTTT	C	2-indel	100.5	27	4	yes	low	protein_coding	intron_variant	mutect2	-")  # noqa
-            self.assertEqual(result[2].rstrip(), "140498361	140498361	NC_000007.13	-	sample1	-	-	hotspot	89	-	-	yes	low	-	-	-	-")   # noqa
-            self.assertEqual(result[3].rstrip(), "140453136	140453136	NC_000007.13	-	sample1	-	-	hotspot	0	-	-	not analyzable	low	-	-	-	-")  # noqa
-            self.assertEqual(result[4].rstrip(), "116412043	116412043	NC_000007.13	-	sample1	-	-	hotspot	0	-	-	not analyzable	low	-	-	-	-")  # noqa
+            self.assertEqual(result[2].rstrip(), "140498361	140498361	NC_000007.13	-	sample1	-	-	1-hotspot	89	-	-	yes	low	-	-	-	-")   # noqa
+            self.assertEqual(result[3].rstrip(), "140453136	140453136	NC_000007.13	-	sample1	-	-	1-hotspot	0	-	-	not analyzable	low	-	-	-	-")  # noqa
+            self.assertEqual(result[4].rstrip(), "116412043	116412043	NC_000007.13	-	sample1	-	-	1-hotspot	0	-	-	not analyzable	low	-	-	-	-")  # noqa
             self.assertEqual(result[5].rstrip(), "29445272	29445272	NC_000002.11	-	sample1	-	-	region_all	221	-	-	yes	low	-	-	-	-")  # noqa
             self.assertEqual(result[6].rstrip(), "29445277	29445277	NC_000002.11	-	sample1	-	-	region_all	182	-	-	yes	low	-	-	-	-")  # noqa
             self.assertEqual(result[7].rstrip(), "145738768	145738768	NC_000008.11	LRRC14	sample1	G	C	3-check	1571	5	27	yes	ok	protein_coding	upstream_gene_variant	vardict	-")  # noqa
@@ -467,9 +467,9 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(len(result), 13)
             self.assertEqual(result[0].rstrip(), "ALK	sample1	29445271	G	A	1-hotspot	620	359	4	yes	protein_coding	synonymous_variant	vardict	resistance_mutation")  # noqa
             self.assertEqual(result[1].rstrip(), "BRAF	sample1	140498359	CTTT	C	2-indel	100.5	27	4	yes	protein_coding	intron_variant	mutect2	-")  # noqa
-            self.assertEqual(result[2].rstrip(), "-	sample1	140498361	-	-	hotspot	89	-	-	yes	-	-	-	-")   # noqa
-            self.assertEqual(result[3].rstrip(), "-	sample1	140453136	-	-	hotspot	0	-	-	not analyzable	-	-	-	-")  # noqa
-            self.assertEqual(result[4].rstrip(), "-	sample1	116412043	-	-	hotspot	0	-	-	not analyzable	-	-	-	-")  # noqa
+            self.assertEqual(result[2].rstrip(), "-	sample1	140498361	-	-	1-hotspot	89	-	-	yes	-	-	-	-")   # noqa
+            self.assertEqual(result[3].rstrip(), "-	sample1	140453136	-	-	1-hotspot	0	-	-	not analyzable	-	-	-	-")  # noqa
+            self.assertEqual(result[4].rstrip(), "-	sample1	116412043	-	-	1-hotspot	0	-	-	not analyzable	-	-	-	-")  # noqa
             self.assertEqual(result[5].rstrip(), "-	sample1	29445272	-	-	region_all	221	-	-	yes	-	-	-	-")  # noqa
             self.assertEqual(result[6].rstrip(), "-	sample1	29445277	-	-	region_all	182	-	-	yes	-	-	-	-")  # noqa
             self.assertEqual(result[7].rstrip(), "LRRC14	sample1	145738768	G	C	3-check	1571	5	27	yes	protein_coding	upstream_gene_variant	vardict	-")  # noqa

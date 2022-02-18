@@ -3,7 +3,7 @@
 from __future__ import print_function
 
 __author__ = "Patrik Smeds"
-__copyright__ = "Copyright 2022, Johannes Köster"
+__copyright__ = "Copyright 2022, Patrik Smeds"
 __email__ = "patrik.smeds@scilifelab.uu.se"
 __license__ = "GPL-3"
 

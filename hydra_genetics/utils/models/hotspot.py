@@ -9,7 +9,7 @@ import pysam
 
 _cds_pattern = re.compile(r'^c\..+|^-$')
 _aa_pattern = re.compile(r'^p\..+|^-$')
-_exon_intron_pattern = re.compile(r'^exon\d+$|^intronic$')
+_exon_intron_pattern = re.compile(r'^exon\d+$|^intronic$|^promotor$')
 _chr_pattern = re.compile(r'^chr[XYM0-9]+$|^[XYM0-9]+$')
 _nc_pattern = re.compile(r'^NC_0+\d+\.\d+$')
 
@@ -113,7 +113,7 @@ class Hotspot(object):
             raise ValueError("report value (%s) not found in  Enum class %s!" % (self.REPORT, list(ReportClass)))
 
         if not _exon_intron_pattern.match(self.EXON):
-            raise ValueError("Exon value should have the following format: exon or intronic. not %" % self.EXON)
+            raise ValueError("Exon value should have the following format: exon or intronic. not %s" % self.EXON)
 
         self.VARIANTS = [{'extended': False, 'variants': []} for i in range((self.END - self.START + 1))]
 

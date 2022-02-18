@@ -109,7 +109,7 @@ def generate_hotspot_report(sample,
                 log.info(" -- found vep information: {}".format(vcf_file))
                 log.debug(" -- -- {}".format(record['Description'].split("Format: ")[1].split("|")))
                 vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
-                annotation_extractor = utils.get_annoation_data_vep(vep_fields)
+                annotation_extractor = utils.get_annotation_data_vep(vep_fields)
 
     log.info("open output file: {}".format(output))
     with open(output, "w") as writer:
@@ -136,7 +136,7 @@ def generate_hotspot_report(sample,
                                     'stop': hotspot.EXTENDED_START + index,
                                     'ref': '-',
                                     'alt': '-',
-                                    'report':  "1-hotspot",
+                                    'report':  utils.format_report_type(hotspot),
                                     'gvcf_depth': depth,
                                     'ref_depth': '-',
                                     'alt_depth': '-'}
@@ -189,7 +189,12 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
     for c in columns["columns"]:
         if 'from' in columns["columns"][c]:
             if columns["columns"][c]['from'] == "vep":
-                data[c] = annotation_extractor(var,  columns["columns"][c]['field'])
+                try:
+                    data[c] = annotation_extractor(var,  columns["columns"][c]['field'])
+                except AttributeError:
+                    data[c] = "-"
+                if "extract_regex" in columns["columns"][c]:
+                    data[c] = utils.regex_extract(data[c], columns["columns"][c]['extract_regex'])
             elif columns["columns"][c]['from'] == "hotspot":
                 if hotspot is None:
                     data[c] = "-"
@@ -202,12 +207,18 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
                     variables = []
                     for v in columns["columns"][c]['variables']:
                         variables.append(locals().get(v, v))
-                    value = function(*variables)
+                    value = "-"
+                    try:
+                        value = function(*variables)
+                    except AttributeError:
+                        data[c] = "-"
                 else:
                     function()
                 if 'column' in columns["columns"][c]:
                     data[c] = value[columns["columns"][c]['column']]
                 else:
+                    if isinstance(value, tuple):
+                        value = ",".join(value)
                     data[c] = value
             elif columns["columns"][c]['from'] == 'variable':
                 data[c] = locals()[columns["columns"][c]['field']]

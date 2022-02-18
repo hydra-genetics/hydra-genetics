@@ -315,7 +315,7 @@ class CreateInputFiles(object):
                                                                 flowcell,
                                                                 lane_id,
                                                                 read_number,
-                                                                "\n - ".join([f, lane_dict[lane_id]['reads'][read_number]])))
+                                                                "\n - ".join([f, result_dict[sample][flowcell][lane_id]['reads'][read_number]])))
                                     else:
                                         result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
                                 else:

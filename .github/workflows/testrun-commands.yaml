@@ -1,0 +1,39 @@
+name: Lint and Test
+
+# Controls when the action will run.
+on:
+   # Triggers the workflow on push or pull request events but only for the master and develop branch
+  push:
+    branches:
+     - develop
+     - master
+  pull_request:
+    branches:
+     - develop
+     - master
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  python_code:
+    name: check pycodestyle and unittest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Add conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install hydra genetics
+        run: |
+          pip install -e .
+      - name: Create module
+        run: hydra-genetics create-module -n testar -d "test description" -a testare -e testar@mail.com -g testare
+      - name: Create rule
+        run: hydra-genetics create-rule -n test2 -m testar -a testare2 -e testare2@mail.com
+      - name: Create input files
+        run: hydra-genetics create-input-files  -d .tests/ -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1

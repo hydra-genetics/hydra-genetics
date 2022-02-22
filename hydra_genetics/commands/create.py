@@ -267,6 +267,7 @@ class CreateInputFiles(object):
                     samplename = re.search(self.sample_regex, temp_filename).group(1)
                     read = re.search(self.read_number_regex, temp_filename).group(1)
                     first_part = re.split(self.read_number_regex, temp_filename)[0]
+                    log.debug("sample name: {}, read part: {}".format(samplename, read))
                     if samplename not in file_dict:
                         file_dict[samplename] = {}
                     if first_part not in file_dict[samplename]:
@@ -308,14 +309,15 @@ class CreateInputFiles(object):
                             if lane_id in result_dict[sample][flowcell]:
                                 if 'reads' in result_dict[sample][flowcell][lane_id]:
                                     if read_number in result_dict[sample][flowcell][lane_id]['reads']:
-                                        raise ValueError("s index and read number combination "
+                                        dup_file = result_dict[sample][flowcell][lane_id]['reads'][read_number]
+                                        raise ValueError("sample, flowcell, lane and read number combination "
                                                          "found multiple times: sample {}"
                                                          " flowcell {} lane {} read {}:\n - {}".
                                                          format(sample,
                                                                 flowcell,
                                                                 lane_id,
                                                                 read_number,
-                                                                "\n - ".join([f, lane_dict[lane_id]['reads'][read_number]])))
+                                                                "\n - ".join([f, dup_file])))
                                     else:
                                         result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
                                 else:
@@ -406,7 +408,7 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
         :return: barcode from read name
         :rtype: string
         """
-        return line.decode("utf-8").split(":")[-1]
+        return re.sub('[12/]+$', '', line.decode("utf-8").split(":")[-1])
 
     def count_bases(data, barcode, length):
         """
@@ -545,9 +547,7 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
             data = count_bases(data, extract_barcode(last_read), length)
             last_machine_id, last_flowcell_id, last_lane = extract_run_informatio(last_read)
             if last_machine_id != machine_id:
-                print("ID")
                 if ask_for_input:
-                    print(input)
                     last_machine_id = ask_user_for_input("Multiple machines found in fastq file, {} and {}\n".
                                                          format(last_machine_id, machine_id),
                                                          "Enter machine id that should be used:")
@@ -564,5 +564,4 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
                 logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".
                                 format(last_lane, lane))
             return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads, warning_threshold))
-
         return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads, warning_threshold))

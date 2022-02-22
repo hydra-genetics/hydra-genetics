@@ -408,7 +408,7 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
         :return: barcode from read name
         :rtype: string
         """
-        return line.decode("utf-8").split(":")[-1]
+        return re.sub('[12/]+$', '', line.decode("utf-8").split(":")[-1])
 
     def count_bases(data, barcode, length):
         """

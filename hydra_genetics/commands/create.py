@@ -267,6 +267,7 @@ class CreateInputFiles(object):
                     samplename = re.search(self.sample_regex, temp_filename).group(1)
                     read = re.search(self.read_number_regex, temp_filename).group(1)
                     first_part = re.split(self.read_number_regex, temp_filename)[0]
+                    log.debug("sample name: {}, read part: {}".format(samplename, read))
                     if samplename not in file_dict:
                         file_dict[samplename] = {}
                     if first_part not in file_dict[samplename]:
@@ -308,14 +309,15 @@ class CreateInputFiles(object):
                             if lane_id in result_dict[sample][flowcell]:
                                 if 'reads' in result_dict[sample][flowcell][lane_id]:
                                     if read_number in result_dict[sample][flowcell][lane_id]['reads']:
-                                        raise ValueError("s index and read number combination "
+                                        dup_file = result_dict[sample][flowcell][lane_id]['reads'][read_number]
+                                        raise ValueError("sample, flowcell, lane and read number combination "
                                                          "found multiple times: sample {}"
                                                          " flowcell {} lane {} read {}:\n - {}".
                                                          format(sample,
                                                                 flowcell,
                                                                 lane_id,
                                                                 read_number,
-                                                                "\n - ".join([f, lane_dict[lane_id]['reads'][read_number]])))
+                                                                "\n - ".join([f, dup_file])))
                                     else:
                                         result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
                                 else:

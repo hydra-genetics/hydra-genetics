@@ -146,7 +146,7 @@ def create_module(name, description, author, email, version, min_snakemake_versi
         "-o",
         "--outdir",
         type=str,
-        help="Output directory for where rule will be added (default: current dir)")
+        help="Output directory for where module is located (default: current dir)")
 def create_rule(name, module, author, email, outdir):
     rule = RuleCreate(name, module, author, email, outdir)
     rule.init_rule()

@@ -1,4 +1,4 @@
-name: Lint and Test
+name: test run hydra-genetics commands
 
 # Controls when the action will run.
 on:

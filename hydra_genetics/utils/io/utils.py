@@ -34,12 +34,15 @@ def get_annotation_data(data_extracter, mapper):
 
 def get_annotation_data_vep(field_dict):
     def extractor(variant, info_name):
-        return variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+        data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+        if len(data) == 0
+            return None
+        return data
     return extractor
 
 
-def get_depth(gvcf_file, sample, chr, start, stop):
-    depth = [r.samples[sample]['DP'] for r in gvcf_file.fetch(chr, start, stop)]
+def get_depth(gvcf_file, sample, chr, start, stop, depth_flag='DP'):
+    depth = [r.samples[sample][depth_flag] for r in gvcf_file.fetch(chr, start, stop)]
     if len(depth) > 1:
         return statistics.mean(depth)
     elif len(depth) == 1:
@@ -60,14 +63,12 @@ def get_info_field(variant, info_name):
     if isinstance(variant, pysam.VariantRecord):
         try:
             data = variant.info[info_name]
-            if data is None:
-                return "-"
             if isinstance(data, tuple):
                 return ",".join(map(str, data))
             return data
         except KeyError:
-            return "-"
-    return '-'
+            return None
+    return None
 
 
 def get_annotation_data_format(variant, field):

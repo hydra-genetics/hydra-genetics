@@ -191,8 +191,10 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
             if columns["columns"][c]['from'] == "vep":
                 try:
                     data[c] = annotation_extractor(var,  columns["columns"][c]['field'])
+                    if data[c] is None:
+                        data[c] = '-'
                 except AttributeError:
-                    data[c] = "-"
+                    data[c] = '-'
                 if "extract_regex" in columns["columns"][c]:
                     data[c] = utils.regex_extract(data[c], columns["columns"][c]['extract_regex'])
             elif columns["columns"][c]['from'] == "hotspot":

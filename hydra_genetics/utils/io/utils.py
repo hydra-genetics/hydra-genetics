@@ -35,7 +35,7 @@ def get_annotation_data(data_extracter, mapper):
 def get_annotation_data_vep(field_dict):
     def extractor(variant, info_name):
         data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
-        if len(data) == 0
+        if len(data) == 0:
             return None
         return data
     return extractor

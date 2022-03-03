@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.0](https://www.github.com/hydra-genetics/tools/compare/v0.5.0...v0.6.0) (2022-03-03)
+
+
+### Features
+
+* return None with missing/empty annotation data ([aa19bc8](https://www.github.com/hydra-genetics/tools/commit/aa19bc8537612731b9aadabe2358f1c7497635de))
+
+
+### Bug Fixes
+
+* change name of testrun-commands workflow ([86f49d7](https://www.github.com/hydra-genetics/tools/commit/86f49d7519ac9c6c61705b441b2b2f5170ba123b))
+* correct syntax error and handle return None value ([3d93271](https://www.github.com/hydra-genetics/tools/commit/3d9327144672a705664b0918503c30a7987f31ed))
+* set correct indentation for config.schema.yaml ([5f43478](https://www.github.com/hydra-genetics/tools/commit/5f4347875f6cc4cedbf2e923797ac6df94911c62))
+* set correct indentation for resources.schema.yaml ([048dcad](https://www.github.com/hydra-genetics/tools/commit/048dcadd82bb390ad36e6ee2cb3e8bae5c541bb8))
+
 ## [0.5.0](https://www.github.com/hydra-genetics/tools/compare/v0.4.0...v0.5.0) (2022-02-22)
 
 

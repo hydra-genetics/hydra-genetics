@@ -1,4 +1,4 @@
-sample	type	platform	machine	barcode	run	lane	fastq1	fastq2	adapter
+sample	type	platform	machine	barcode	flowcell	lane	fastq1	fastq2	adapter
 NA12878	N	nextseq	NDX550220	ACGGAACA+ACGAGAAC	HKTG2BGXG	L001	input/1_R1_L1.fq.gz	input/1_R2_L1.fq.gz	ACGT,TGCA1
 NA12878	N	nextseq	NDX550220	CCGGAACA+ACGAGAAC	HKTG2BGXG	L002	input/2_R1_L2.fq.gz	input/2_R2_L2.fq.gz	ACGT,TGCA2
 NA13878	N	nextseq	NDX550220	GCGGAACA+ACGAGAAC	HKTG2BGXG	L001	input/3_R1_L1.fq.gz	input/3_R2_L1.fq.gz	ACGT,TGCA3

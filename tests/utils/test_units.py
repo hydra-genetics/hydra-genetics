@@ -13,24 +13,24 @@ class TestUnitUtils(unittest.TestCase):
         self.units = pandas.read_table(
             "tests/utils/files/units.tsv",
             dtype=str
-        ).set_index(["sample", "type", "run", "lane"], drop=False).sort_index()
+        ).set_index(["sample", "type", "flowcell", "lane"], drop=False).sort_index()
 
         self.units_2 = pandas.read_table(
             "tests/utils/files/units_2.tsv",
             dtype=str
         ).set_index(["sample", "type"], drop=False).sort_index()
         self.sample_NA12878 = {
-            "L1": Wildcards(fromdict={'sample': 'NA12878', "run": "HKTG2BGXG", "type": "N", "lane": "L001"}),
-            "L2": Wildcards(fromdict={'sample': 'NA12878', "run": "HKTG2BGXG", "type": "N", "lane": "L002"})
+            "L1": Wildcards(fromdict={'sample': 'NA12878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001"}),
+            "L2": Wildcards(fromdict={'sample': 'NA12878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L002"})
             }
-        self.sample_NA13878 = Wildcards(fromdict={'sample': 'NA13878', "run": "HKTG2BGXG", "type": "N", "lane": "L001"})
-        self.sample_NA22878 = Wildcards(fromdict={'sample': 'NA22878', "run": "HKTG2BGXG", "type": "N", "lane": "L001"})
-        self.sample_NA12978 = Wildcards(fromdict={'sample': 'NA12978', "run": "HLCF3DRXY", "type": "N", "lane": "L001"})
+        self.sample_NA13878 = Wildcards(fromdict={'sample': 'NA13878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001"})
+        self.sample_NA22878 = Wildcards(fromdict={'sample': 'NA22878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001"})
+        self.sample_NA12978 = Wildcards(fromdict={'sample': 'NA12978', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L001"})
         self.sample_BE12878 = {
-            "N_L1": Wildcards(fromdict={'sample': 'BE12878', "run": "HLCF3DRXY", "type": "N", "lane": "L001"}),
-            "N_L2": Wildcards(fromdict={'sample': 'BE12878', "run": "HLCF3DRXY", "type": "N", "lane": "L002"}),
-            "T_L3": Wildcards(fromdict={'sample': 'BE12878', "run": "HLCF3DRXY", "type": "T", "lane": "L003"}),
-            "R_L4": Wildcards(fromdict={'sample': 'BE12878', "run": "HLCF3DRXY", "type": "R", "lane": "L004"})
+            "N_L1": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L001"}),
+            "N_L2": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L002"}),
+            "T_L3": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "T", "lane": "L003"}),
+            "R_L4": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "R", "lane": "L004"})
         }
 
     def tearDown(self):
@@ -161,7 +161,7 @@ class TestUnitUtils(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.assertTrue(
                 get_fastq_file(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                               "run": "HLCF3DRXY",
+                                                               "flowcell": "HLCF3DRXY",
                                                                "type": "N",
                                                                "lane": "L005"}))
             )
@@ -208,7 +208,7 @@ class TestUnitUtils(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.assertTrue(
                 get_fastq_adapter(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                                  "run": "HLCF3DRXY",
+                                                                  "flowcell": "HLCF3DRXY",
                                                                   "type": "N",
                                                                   "lane": "L005"}))
             )
@@ -248,63 +248,63 @@ class TestUnitUtils(unittest.TestCase):
         from hydra_genetics.utils.units import get_unit_barcode
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L001"})),
             'ACGGAACA+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L002"})),
             'CCGGAACA+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA13878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L001"})),
             'GCGGAACA+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA22878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L001"})),
             'TGGGGGGG+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'NA12978',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "N",
                                                              'lane': 'L001'})),
             'AAGGAACA+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "N",
                                                              'lane': 'L001'})),
             'ACGGAACA+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "N",
                                                              'lane': 'L002'})),
             'AGGGAACA+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "T",
                                                              'lane': 'L003'})),
             'ATGGAACA+ACGAGAAC'
         )
         self.assertEqual(
             get_unit_barcode(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "R",
                                                              'lane': 'L004'})),
             'ACAGAACA+ACGAGAAC'
@@ -377,63 +377,63 @@ class TestUnitUtils(unittest.TestCase):
         from hydra_genetics.utils.units import get_unit_machine
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L001"})),
             'NDX550220'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L002"})),
             'NDX550220'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA13878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L001"})),
             'NDX550220'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA22878',
-                                                             'run': 'HKTG2BGXG',
+                                                             'flowcell': 'HKTG2BGXG',
                                                              'type': "N",
                                                              'lane': "L001"})),
             'NDX550220'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'NA12978',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "N",
                                                              'lane': 'L001'})),
             'M03273'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "N",
                                                              'lane': 'L001'})),
             'A00687'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "N",
                                                              'lane': 'L002'})),
             'A00687'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "T",
                                                              'lane': 'L003'})),
             'A00687'
         )
         self.assertEqual(
             get_unit_machine(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'run': 'HLCF3DRXY',
+                                                             'flowcell': 'HLCF3DRXY',
                                                              'type': "R",
                                                              'lane': 'L004'})),
             'A00687'
@@ -443,63 +443,63 @@ class TestUnitUtils(unittest.TestCase):
         from hydra_genetics.utils.units import get_unit_platform
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                              'run': 'HKTG2BGXG',
+                                                              'flowcell': 'HKTG2BGXG',
                                                               'type': "N",
                                                               'lane': "L001"})),
             'nextseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                              'run': 'HKTG2BGXG',
+                                                              'flowcell': 'HKTG2BGXG',
                                                               'type': "N",
                                                               'lane': "L002"})),
             'nextseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA13878',
-                                                              'run': 'HKTG2BGXG',
+                                                              'flowcell': 'HKTG2BGXG',
                                                               'type': "N",
                                                               'lane': "L001"})),
             'nextseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA22878',
-                                                              'run': 'HKTG2BGXG',
+                                                              'flowcell': 'HKTG2BGXG',
                                                               'type': "N",
                                                               'lane': "L001"})),
             'nextseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'NA12978',
-                                                              'run': 'HLCF3DRXY',
+                                                              'flowcell': 'HLCF3DRXY',
                                                               'type': "N",
                                                               'lane': 'L001'})),
             'miniseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                              'run': 'HLCF3DRXY',
+                                                              'flowcell': 'HLCF3DRXY',
                                                               'type': "N",
                                                               'lane': 'L001'})),
             'novaseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                              'run': 'HLCF3DRXY',
+                                                              'flowcell': 'HLCF3DRXY',
                                                               'type': "N",
                                                               'lane': 'L002'})),
             'novaseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                              'run': 'HLCF3DRXY',
+                                                              'flowcell': 'HLCF3DRXY',
                                                               'type': "T",
                                                               'lane': 'L003'})),
             'novaseq'
         )
         self.assertEqual(
             get_unit_platform(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                              'run': 'HLCF3DRXY',
+                                                              'flowcell': 'HLCF3DRXY',
                                                               'type': "R",
                                                               'lane': 'L004'})),
             'novaseq'
@@ -535,13 +535,13 @@ class TestUnitUtils(unittest.TestCase):
             {'N', 'T', 'R'}
         )
 
-    def test_get_units_per_run(self):
-        from hydra_genetics.utils.units import get_units_per_run
+    def test_get_units_per_flowcell(self):
+        from hydra_genetics.utils.units import get_units_per_flowcell
         self.assertEqual(
-            len(get_units_per_run(self.units, Wildcards(fromdict={"run": "HKTG2BGXG"}))),
+            len(get_units_per_flowcell(self.units, Wildcards(fromdict={"flowcell": "HKTG2BGXG"}))),
             3
         )
         self.assertEqual(
-            len(get_units_per_run(self.units, Wildcards(fromdict={"run": "HLCF3DRXY"}))),
+            len(get_units_per_flowcell(self.units, Wildcards(fromdict={"flowcell": "HLCF3DRXY"}))),
             4
         )

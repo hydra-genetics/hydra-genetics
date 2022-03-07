@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://www.github.com/hydra-genetics/tools/compare/v0.6.0...v0.7.0) (2022-03-07)
+
+
+### Features
+
+* clean test requirements ([10f3f67](https://www.github.com/hydra-genetics/tools/commit/10f3f67fed81693ad39f8e10ddd36b26cf62f9ae))
+
 ## [0.6.0](https://www.github.com/hydra-genetics/tools/compare/v0.5.0...v0.6.0) (2022-03-03)
 
 

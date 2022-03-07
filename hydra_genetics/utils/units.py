@@ -12,13 +12,13 @@ def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pand
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, run, and lane
+               sample, type, flowcell, and lane
     Returns:
         Series containing data of the selected row
     Raises:
         raises an exception (KeyError) if no unit can be extracted from the Dataframe
     """
-    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.run, wildcards.lane)].dropna()
+    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.flowcell, wildcards.lane)].dropna()
     return unit
 
 
@@ -29,7 +29,7 @@ def get_fastq_file(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, r
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, run, and lane
+               sample, type, flowcell, and lane
         read_pair: fast1 or fastq2
     Returns:
         path for fastq file as a str
@@ -49,7 +49,7 @@ def get_fastq_adapter(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, run, and lane
+               sample, type, flowcell, and lane
     Returns:
         return adapter with format seq1,seq2
     Raises:
@@ -66,7 +66,7 @@ def get_unit_barcode(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards)
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, run, and lane
+               sample, type, flowcell, and lane
     Returns:
         return barcode
     Raises:
@@ -83,7 +83,7 @@ def get_unit_machine(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards)
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, run, and lane
+               sample, type, flowcell, and lane
     Returns:
         return machine id
     Raises:
@@ -100,7 +100,7 @@ def get_unit_platform(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, run, and lane
+               sample, type, flowcell, and lane
     Returns:
         return platform
     Raises:
@@ -110,21 +110,21 @@ def get_unit_platform(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     return unit["platform"]
 
 
-def get_unit_run(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+def get_unit_flowcell(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
     """
-    function used to extract run for one unit(row) from units.tsv
+    function used to extract flowcell for one unit(row) from units.tsv
     Args:
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, run, and lane
+               sample, type, flowcell, and lane
     Returns:
-        return run (flowcell id)
+        return flowcell
     Raises:
         raises an exception (KeyError) if no unit can be extracted from the Dataframe
     """
     unit = get_unit(units, wildcards)
-    return unit["run"]
+    return unit["flowcell"]
 
 
 def get_units(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: str = None) -> pandas.DataFrame:
@@ -203,17 +203,17 @@ def get_unit_types(units: pandas.DataFrame, sample: str) -> set:
     return set([u.type for u in units.loc[(sample,)].dropna().itertuples()])
 
 
-def get_units_per_run(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards):
+def get_units_per_flowcell(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards):
     """
-    function used to extract all sample and type combinations for one sequencing run
+    function used to extract all sample and type combinations for one sequencing flowcell
     Args:
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, run.
+               sample, flowcell.
     Returns:
         tuple with sample and type
     Raises:
         raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
     """
-    return set([(u.sample, u.type) for u in units[units.run == wildcards.run].itertuples()])
+    return set([(u.sample, u.type) for u in units[units.flowcell == wildcards.flowcell].itertuples()])

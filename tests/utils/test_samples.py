@@ -15,11 +15,11 @@ class TestSampleUtils(unittest.TestCase):
     def test_get_sample(self):
         from hydra_genetics.utils.samples import get_sample
         sample = get_sample(self.samples, Wildcards(fromdict={'sample': 'NA12878'}))
-        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA12878'}))['TC'], '0.1')
-        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA13878'}))['TC'], '0.2')
-        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA22878'}))['TC'], '0.3')
-        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA12978'}))['TC'], '0.4')
-        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'BE12878'}))['TC'], '0.5')
+        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA12878'}))['tumor_content'], '0.1')
+        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA13878'}))['tumor_content'], '0.2')
+        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA22878'}))['tumor_content'], '0.3')
+        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'NA12978'}))['tumor_content'], '0.4')
+        self.assertEqual(get_sample(self.samples, Wildcards(fromdict={'sample': 'BE12878'}))['tumor_content'], '0.5')
 
     def test_get_samples(self):
         from hydra_genetics.utils.samples import get_samples

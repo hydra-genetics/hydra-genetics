@@ -346,7 +346,7 @@ class CreateInputFiles(object):
             else:
                 log.warn("File exists {} overwriting!!!".format(samples_file_name))
         with open(samples_file_name, "w") as output:
-            output.write("\t".join(["sample", "TC"]))
+            output.write("\t".join(["sample", 'TC']))
             for sample, data in sorted(file_dict.items()):
                 output.write("\n{}".format("\t".join([sample, str(self.tc)])))
         units_file_name = "units.tsv"
@@ -360,7 +360,7 @@ class CreateInputFiles(object):
                 log.warn("File exists {} overwriting!!!".format(units_file_name))
         with open(units_file_name, "w") as output:
             output.write("\t".join(["sample", "type", "platform", "barcode", "machine",
-                                    "run", "lane", "fastq1", "fastq2", "adapter"]))
+                                    "flowcell", "lane", "fastq1", "fastq2", "adapter"]))
             for sample in sorted(result_dict):
                 for flowcell in sorted(result_dict[sample]):
                     for lane, data in sorted(result_dict[sample][flowcell].items()):
@@ -392,7 +392,7 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
     :type number_of_reads: integer
     :param: warning_threshold: raise a warning for char with lower occurences this value
     :type warning_threshold: float
-    :param compare_first_and_last_read: compare first read with last read to detect merged lanes or runs
+    :param compare_first_and_last_read: compare first read with last read to detect merged lanes or flowcells
 
     :return: (machine_id, flowcell_id, lane, consensus_barcode)
     :rtype: tuple

@@ -82,13 +82,19 @@ def generate_hotspot_report(sample,
             if entry in hotspot_columns:
                 hotspot_columns.remove(entry)
             output_order.append((columns['columns'][entry]['order'], entry))
-            report_header.append((columns['columns'][entry]['order'], entry))
+            if 'from' in columns['columns'][entry] and 'merge' == columns['columns'][entry]['from']:
+                report_header.append((columns['columns'][entry]['order'],
+                                      entry + "_" +
+                                      columns['columns'][entry]['divider'].join(
+                                        extract_item_merge_header(columns['columns'][entry]['elements']))))
+            else:
+                report_header.append((columns['columns'][entry]['order'], entry))
             biggest_order = max(biggest_order, columns['columns'][entry]['order'])
         elif columns['columns'][entry].get('visible', 1) == 0:
             if entry in hotspot_columns:
                 hotspot_columns.remove(entry)
-    for entry in hotspot_columns:
 
+    for entry in hotspot_columns:
         biggest_order += 1
         output_order.append((biggest_order, entry))
         report_header.append((biggest_order, entry))
@@ -98,7 +104,13 @@ def generate_hotspot_report(sample,
                 continue
             biggest_order += 1
             output_order.append((biggest_order, entry))
-            report_header.append((biggest_order, entry))
+            if 'from' in columns['columns'][entry] and 'merge' == columns['columns'][entry]['from']:
+                report_header.append((biggest_order,
+                                      entry + "_" +
+                                      columns['columns'][entry]['divider'].join(
+                                        extract_item_merge_header(columns['columns'][entry]['elements']))))
+            else:
+                report_header.append((biggest_order, entry))
     output_order = sorted(output_order, key=lambda tup: tup[0])
     report_header = sorted(report_header, key=lambda tup: tup[0])
 
@@ -127,7 +139,7 @@ def generate_hotspot_report(sample,
                                                 chr_translater.get_chr_value(hotspot.CHROMOSOME),
                                                 hotspot.EXTENDED_START + index - 1,
                                                 hotspot.EXTENDED_START + index)
-                        if hotspot.REPORT == ReportClass.region_all and depth > 299:
+                        if hotspot.REPORT == ReportClass.region_all and depth > 299:  # ToDo remove harcoded value
                             continue
                         elif hotspot.ALWAYS_PRINT:
                             data = {'sample': sample,
@@ -182,47 +194,67 @@ def generate_hotspot_report(sample,
             log.info("-- non-hotspot entries: {}".format(counter))
 
 
+def extract_item_merge_header(columns):
+    header_list = []
+    for value in columns:
+        if 'from' in columns[value] and columns[value]['from'] == 'merge':
+            header_list.append(value + "_" +
+                               columns[value]['divider'].join(extract_item_merge_header(columns[value]['elements'])))
+        else:
+            header_list.append(value)
+    return header_list
+
+
 def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels):
     """
         print extra columns defined by a yaml file. Data from variant, hotspot or annotations
     """
+    def add_data(data, column, c, depth, levels):
+        if column[c]['from'] == "merge":
+            divider = column[c]['divider']
+            temp_data = {}
+            for key in column[c]['elements']:
+                add_data(temp_data, column[c]['elements'], key, depth, levels)
+            data[c] = divider.join([v for k, v in temp_data.items()])
+        elif column[c]['from'] == "vep":
+            try:
+                data[c] = annotation_extractor(var,  column[c]['field'])
+                if data[c] is None:
+                    data[c] = '-'
+            except AttributeError:
+                data[c] = '-'
+            if "extract_regex" in column[c]:
+                data[c] = utils.regex_extract(data[c], column[c]['extract_regex'])
+        elif column[c]['from'] == "hotspot":
+            if hotspot is None:
+                data[c] = "-"
+            else:
+                data[c] = getattr(hotspot, column[c]['field'])
+        elif column[c]['from'] == "function":
+            function = getattr(utils, column[c]['name'])
+            variables = ()
+            if 'variables' in column[c]:
+                variables = []
+                for v in column[c]['variables']:
+                    variables.append(locals().get(v, v))
+                value = "-"
+                try:
+                    value = function(*variables)
+                except AttributeError:
+                    data[c] = "-"
+            else:
+                function()
+            if 'column' in column[c]:
+                data[c] = value[column[c]['column']]
+            else:
+                if isinstance(value, tuple):
+                    value = ",".join(value)
+                data[c] = value
+        elif column[c]['from'] == 'variable':
+            data[c] = locals()[column[c]['field']]
+        else:
+            raise Exception("Undhandledd cased: " + column[c]['field'])
+
     for c in columns["columns"]:
         if 'from' in columns["columns"][c]:
-            if columns["columns"][c]['from'] == "vep":
-                try:
-                    data[c] = annotation_extractor(var,  columns["columns"][c]['field'])
-                    if data[c] is None:
-                        data[c] = '-'
-                except AttributeError:
-                    data[c] = '-'
-                if "extract_regex" in columns["columns"][c]:
-                    data[c] = utils.regex_extract(data[c], columns["columns"][c]['extract_regex'])
-            elif columns["columns"][c]['from'] == "hotspot":
-                if hotspot is None:
-                    data[c] = "-"
-                else:
-                    data[c] = getattr(hotspot, columns["columns"][c]['field'])
-            elif columns["columns"][c]['from'] == "function":
-                function = getattr(utils, columns["columns"][c]['name'])
-                variables = ()
-                if 'variables' in columns["columns"][c]:
-                    variables = []
-                    for v in columns["columns"][c]['variables']:
-                        variables.append(locals().get(v, v))
-                    value = "-"
-                    try:
-                        value = function(*variables)
-                    except AttributeError:
-                        data[c] = "-"
-                else:
-                    function()
-                if 'column' in columns["columns"][c]:
-                    data[c] = value[columns["columns"][c]['column']]
-                else:
-                    if isinstance(value, tuple):
-                        value = ",".join(value)
-                    data[c] = value
-            elif columns["columns"][c]['from'] == 'variable':
-                data[c] = locals()[columns["columns"][c]['field']]
-            else:
-                raise Exception("Undhandledd cased: " + columns["columns"][c]['field'])
+            add_data(data, columns["columns"], c, depth, levels)

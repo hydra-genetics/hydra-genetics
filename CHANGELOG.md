@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://www.github.com/hydra-genetics/tools/compare/v0.7.0...v0.8.0) (2022-03-09)
+
+
+### Features
+
+* make it possible to combine columns in hotspot report. ([5d21af8](https://www.github.com/hydra-genetics/tools/commit/5d21af830f301f89f178660f9f1e1a0470e39d37))
+
+
+### Bug Fixes
+
+* change TC to tumor_content ([31d8d6b](https://www.github.com/hydra-genetics/tools/commit/31d8d6b1e2b8f2741e5212c9b5dc41db2df07073))
+
 ## [0.7.0](https://www.github.com/hydra-genetics/tools/compare/v0.6.0...v0.7.0) (2022-03-07)
 
 

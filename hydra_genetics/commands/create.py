@@ -346,7 +346,7 @@ class CreateInputFiles(object):
             else:
                 log.warn("File exists {} overwriting!!!".format(samples_file_name))
         with open(samples_file_name, "w") as output:
-            output.write("\t".join(["sample", 'TC']))
+            output.write("\t".join(["sample", 'tumor_content']))
             for sample, data in sorted(file_dict.items()):
                 output.write("\n{}".format("\t".join([sample, str(self.tc)])))
         units_file_name = "units.tsv"

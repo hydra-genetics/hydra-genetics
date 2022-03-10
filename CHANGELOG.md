@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://www.github.com/hydra-genetics/tools/compare/v0.8.0...v0.9.0) (2022-03-10)
+
+
+### Features
+
+* make it possible to change depth field ([32b385c](https://www.github.com/hydra-genetics/tools/commit/32b385c10b13aed1dda3f5d242014f42c1a3c903))
+
 ## [0.8.0](https://www.github.com/hydra-genetics/tools/compare/v0.7.0...v0.8.0) (2022-03-09)
 
 

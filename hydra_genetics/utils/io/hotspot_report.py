@@ -163,7 +163,7 @@ def generate_hotspot_report(sample,
                     else:
                         # print found variants that overlap with hotspot positions
                         for var in variant['variants']:
-                            depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop)
+                            depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop, gcvf_depth_field)
                             data = {'sample': sample,
                                     'chr': chr_translater.get_nc_value(var.chrom),
                                     'start': var.start + 1,
@@ -182,7 +182,7 @@ def generate_hotspot_report(sample,
         counter = 0
         for var in other:
             # print variants that doesn't overlap with a hotspot
-            depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop)
+            depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop, gcvf_depth_field)
             data = {'sample': sample,
                     'chr': chr_translater.get_nc_value(var.chrom),
                     'start': var.start + 1,

@@ -77,6 +77,10 @@ def generate_hotspot_report(sample,
     report_header = []
 
     biggest_order = -1
+
+    gcvf_depth_field = 'DP'
+    if isinstance(columns['columns'], dict):
+        gcvf_depth_field = columns['columns'].get('gvcf_depth', {}).get('field', 'DP')
     for entry in columns['columns']:
         if 'order' in columns['columns'][entry]:
             if entry in hotspot_columns:
@@ -138,7 +142,8 @@ def generate_hotspot_report(sample,
                                                 sample,
                                                 chr_translater.get_chr_value(hotspot.CHROMOSOME),
                                                 hotspot.EXTENDED_START + index - 1,
-                                                hotspot.EXTENDED_START + index)
+                                                hotspot.EXTENDED_START + index,
+                                                gcvf_depth_field)
                         if hotspot.REPORT == ReportClass.region_all and depth > 299:  # ToDo remove harcoded value
                             continue
                         elif hotspot.ALWAYS_PRINT:

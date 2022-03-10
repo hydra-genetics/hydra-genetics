@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.9.1](https://www.github.com/hydra-genetics/tools/compare/v0.9.0...v0.9.1) (2022-03-10)
+
+
+### Bug Fixes
+
+* add gcvf_depth_field to other variants and found hotspot variants ([ba2a39e](https://www.github.com/hydra-genetics/tools/commit/ba2a39e35ebfd07cde5f8a171d4a451eddb3e50c))
+
 ## [0.9.0](https://www.github.com/hydra-genetics/tools/compare/v0.8.0...v0.9.0) (2022-03-10)
 
 

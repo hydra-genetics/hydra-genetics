@@ -19,11 +19,11 @@ rule {{ name }}:
         )
     threads: config.get("{{ name }}", {}).get("threads", config["default_resources"]["threads"])
     resources:
-        threads=config.get("{{ name }}", {}).get("threads", config["default_resources"]["threads"]),
-        time=config.get("{{ name }}", {}).get("time", config["default_resources"]["time"]),
         mem_mb=config.get("{{ name }}", {}).get("mem_mb", config["default_resources"]["mem_mb"]),
         mem_per_cpu=config.get("{{ name }}", {}).get("mem_per_cpu", config["default_resources"]["mem_per_cpu"]),
         partition=config.get("{{ name }}", {}).get("partition", config["default_resources"]["partition"]),
+        threads=config.get("{{ name }}", {}).get("threads", config["default_resources"]["threads"]),
+        time=config.get("{{ name }}", {}).get("time", config["default_resources"]["time"]),
     container:
         config.get("{{ name }}", {}).get("container", config["default_container"])
     conda:

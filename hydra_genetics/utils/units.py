@@ -18,7 +18,7 @@ def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pand
     Raises:
         raises an exception (KeyError) if no unit can be extracted from the Dataframe
     """
-    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.flowcell, wildcards.lane)].dropna()
+    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.flowcell, wildcards.barcode, wildcards.lane)].dropna()
     return unit
 
 

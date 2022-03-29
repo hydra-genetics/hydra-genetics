@@ -18,7 +18,7 @@ def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pand
     Raises:
         raises an exception (KeyError) if no unit can be extracted from the Dataframe
     """
-    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.flowcell, wildcards.barcode, wildcards.lane)].dropna()
+    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.flowcell, wildcards.lane, wildcards.barcode)].dropna()
     return unit
 
 
@@ -59,21 +59,20 @@ def get_fastq_adapter(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     return unit["adapter"]
 
 
-def get_unit_barcode(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+def get_unit_barcodes(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
     """
     function used to extract barcode for one unit(row) from units.tsv
     Args:
         units: DataFrame generate by importing a file following schema defintion
                found in pre-alignment/workflow/schemas/units.schema.tsv
         wildcards: wildcards object with at least the following wildcard names
-               sample, type, flowcell, and lane
+               sample, type, and flowcell
     Returns:
-        return barcode
+        return barcodes
     Raises:
         raises an exception (KeyError) if no unit can be extracted from the Dataframe
     """
-    unit = get_unit(units, wildcards)
-    return unit["barcode"]
+    return set([u.barcode for u in units.loc[(wildcards.sample, wildcards.flowcell, wildcards.type)].dropna().itertuples()])
 
 
 def get_unit_machine(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:

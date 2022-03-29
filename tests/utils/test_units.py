@@ -20,17 +20,35 @@ class TestUnitUtils(unittest.TestCase):
             dtype=str
         ).set_index(["sample", "type"], drop=False).sort_index()
         self.sample_NA12878 = {
-            "L1": Wildcards(fromdict={'sample': 'NA12878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001", "barcode": "ACGGAACA+ACGAGAAC"}),
-            "L2": Wildcards(fromdict={'sample': 'NA12878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L002", "barcode": "CCGGAACA+ACGAGAAC"})
-            }
-        self.sample_NA13878 = Wildcards(fromdict={'sample': 'NA13878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001", "barcode": "GCGGAACA+ACGAGAAC"})
-        self.sample_NA22878 = Wildcards(fromdict={'sample': 'NA22878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001", "barcode": "TGGGGGGG+ACGAGAAC"})
-        self.sample_NA12978 = Wildcards(fromdict={'sample': 'NA12978', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L001", "barcode": "AAGGAACA+ACGAGAAC"})
+            "L1": Wildcards(fromdict={
+                'sample': 'NA12878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001", "barcode": "ACGGAACA+ACGAGAAC"
+            }),
+            "L2": Wildcards(fromdict={
+                'sample': 'NA12878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L002", "barcode": "CCGGAACA+ACGAGAAC"
+            })
+        }
+        self.sample_NA13878 = Wildcards(fromdict={
+            'sample': 'NA13878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001", "barcode": "GCGGAACA+ACGAGAAC"
+        })
+        self.sample_NA22878 = Wildcards(fromdict={
+            'sample': 'NA22878', "flowcell": "HKTG2BGXG", "type": "N", "lane": "L001", "barcode": "TGGGGGGG+ACGAGAAC"
+        })
+        self.sample_NA12978 = Wildcards(fromdict={
+            'sample': 'NA12978', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L001", "barcode": "AAGGAACA+ACGAGAAC"
+        })
         self.sample_BE12878 = {
-            "N_L1": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L001", "barcode": "ACGGAACA+ACGAGAAC"}),
-            "N_L2": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L002", "barcode": "AGGGAACA+ACGAGAAC"}),
-            "T_L3": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "T", "lane": "L003", "barcode": "ATGGAACA+ACGAGAAC"}),
-            "R_L4": Wildcards(fromdict={'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "R", "lane": "L004", "barcode": "ACAGAACA+ACGAGAAC"})
+            "N_L1": Wildcards(fromdict={
+                'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L001", "barcode": "ACGGAACA+ACGAGAAC"
+            }),
+            "N_L2": Wildcards(fromdict={
+                'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "N", "lane": "L002", "barcode": "AGGGAACA+ACGAGAAC"
+            }),
+            "T_L3": Wildcards(fromdict={
+                'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "T", "lane": "L003", "barcode": "ATGGAACA+ACGAGAAC"
+            }),
+            "R_L4": Wildcards(fromdict={
+                'sample': 'BE12878', "flowcell": "HLCF3DRXY", "type": "R", "lane": "L004", "barcode": "ACAGAACA+ACGAGAAC"
+            })
         }
 
     def tearDown(self):
@@ -250,66 +268,45 @@ class TestUnitUtils(unittest.TestCase):
         from hydra_genetics.utils.units import get_unit_barcodes
         self.assertEqual(
             get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                             'flowcell': 'HKTG2BGXG',
-                                                             'type': "N",
-                                                             'lane': "L001"})),
-            'ACGGAACA+ACGAGAAC'
-        )
-        self.assertEqual(
-            get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'NA12878',
-                                                             'flowcell': 'HKTG2BGXG',
-                                                             'type': "N",
-                                                             'lane': "L002"})),
-            'CCGGAACA+ACGAGAAC'
+                                                              'flowcell': 'HKTG2BGXG',
+                                                              'type': "N"})),
+            {'ACGGAACA+ACGAGAAC', 'CCGGAACA+ACGAGAAC'}
         )
         self.assertEqual(
             get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'NA13878',
-                                                             'flowcell': 'HKTG2BGXG',
-                                                             'type': "N",
-                                                             'lane': "L001"})),
-            'GCGGAACA+ACGAGAAC'
+                                                              'flowcell': 'HKTG2BGXG',
+                                                              'type': "N"})),
+            {'GCGGAACA+ACGAGAAC'}
         )
         self.assertEqual(
             get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'NA22878',
-                                                             'flowcell': 'HKTG2BGXG',
-                                                             'type': "N",
-                                                             'lane': "L001"})),
-            'TGGGGGGG+ACGAGAAC'
+                                                              'flowcell': 'HKTG2BGXG',
+                                                              'type': "N"})),
+            {'TGGGGGGG+ACGAGAAC'}
         )
         self.assertEqual(
             get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'NA12978',
-                                                             'flowcell': 'HLCF3DRXY',
-                                                             'type': "N",
-                                                             'lane': 'L001'})),
-            'AAGGAACA+ACGAGAAC'
+                                                              'flowcell': 'HLCF3DRXY',
+                                                              'type': "N"})),
+            {'AAGGAACA+ACGAGAAC'}
         )
         self.assertEqual(
             get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'flowcell': 'HLCF3DRXY',
-                                                             'type': "N",
-                                                             'lane': 'L001'})),
-            'ACGGAACA+ACGAGAAC'
+                                                              'flowcell': 'HLCF3DRXY',
+                                                              'type': "N"})),
+            {'ACGGAACA+ACGAGAAC', 'AGGGAACA+ACGAGAAC'}
         )
         self.assertEqual(
             get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'flowcell': 'HLCF3DRXY',
-                                                             'type': "N",
-                                                             'lane': 'L002'})),
-            'AGGGAACA+ACGAGAAC'
+                                                              'flowcell': 'HLCF3DRXY',
+                                                              'type': "T"})),
+            {'ATGGAACA+ACGAGAAC'}
         )
         self.assertEqual(
             get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'flowcell': 'HLCF3DRXY',
-                                                             'type': "T",
-                                                             'lane': 'L003'})),
-            'ATGGAACA+ACGAGAAC'
-        )
-        self.assertEqual(
-            get_unit_barcodes(self.units, Wildcards(fromdict={'sample': 'BE12878',
-                                                             'flowcell': 'HLCF3DRXY',
-                                                             'type': "R",
-                                                             'lane': 'L004'})),
-            'ACAGAACA+ACGAGAAC'
+                                                              'flowcell': 'HLCF3DRXY',
+                                                              'type': "R"})),
+            {'ACAGAACA+ACGAGAAC'}
         )
 
     def test_get_fastq_files(self):
@@ -524,7 +521,7 @@ class TestUnitUtils(unittest.TestCase):
                                                               'barcode': "ACAGAACA+ACGAGAAC"})),
             'novaseq'
         )
-    
+
     def test_get_platforms(self):
         from hydra_genetics.utils.units import get_platforms
         self.assertEqual(

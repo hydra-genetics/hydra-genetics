@@ -72,7 +72,7 @@ def get_unit_barcodes(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     Raises:
         raises an exception (KeyError) if no unit can be extracted from the Dataframe
     """
-    return set([u.barcode for u in units.loc[(wildcards.sample, wildcards.flowcell, wildcards.type)].dropna().itertuples()])
+    return set([u.barcode for u in units.loc[(units['sample'] == wildcards.sample) & (units['flowcell'] == wildcards.flowcell) & (units['type'] == wildcards.type),].dropna().itertuples()])
 
 
 def get_unit_machine(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:

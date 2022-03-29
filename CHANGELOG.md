@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.9.2](https://www.github.com/hydra-genetics/tools/compare/v0.9.1...v0.9.2) (2022-03-29)
+
+
+### Bug Fixes
+
+* added barcode to get_unit filter ([903cb8e](https://www.github.com/hydra-genetics/tools/commit/903cb8eacae5bda19853dcf305f851f21816e600))
+* update to comply with latest guidelines ([dc15b5b](https://www.github.com/hydra-genetics/tools/commit/dc15b5b8713af275995d24ef8f88f459087fb908))
+
 ### [0.9.1](https://www.github.com/hydra-genetics/tools/compare/v0.9.0...v0.9.1) (2022-03-10)
 
 

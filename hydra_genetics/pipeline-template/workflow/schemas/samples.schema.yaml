@@ -9,4 +9,3 @@ properties:
     description: tumor cell content in sample
 required:
   - sample
-  - tumor_content

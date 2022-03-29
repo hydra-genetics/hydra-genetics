@@ -1,6 +1,5 @@
-hydra-genetics
+drmaa==0.7.9
+hydra-genetics==v0.9.1
 pandas>=1.3.1
-snakemake==6.8.0
 singularity==3.0.0
-jinja2==3.0.1
-networkx
+snakemake==6.10.0

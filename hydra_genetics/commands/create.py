@@ -33,7 +33,7 @@ class PipelineCreate(object):
             May the force be with you.
         outdir (str): Path to the local output directory.
     """
-    def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version="6.8.0",
+    def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version="6.10.0",
                  git_user=None, no_git=False, force=False, outdir=None):
         self.short_name = name.lower().replace(r"/\s+/", "-").replace("hydra-genetics/", "").replace("/", "-")
         self.name = f"{self.short_name}"

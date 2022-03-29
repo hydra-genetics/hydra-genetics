@@ -122,7 +122,7 @@ class Hotspot(object):
         self.PRINT_ALL = PRINT_ALL
         self.VARIANT_ADDED = False
 
-    def check_overlapp(self, chrom, region_start, region_stop, start, stop=None):
+    def check_overlap(self, chrom, region_start, region_stop, start, stop=None):
         return self.CHROMOSOME == chrom and \
                ((stop is not None and region_start <= stop and start <= region_stop) or (region_start <= start <= region_stop))
 
@@ -133,7 +133,7 @@ class Hotspot(object):
             v_start = variant.start + 1
             v_stop = variant.stop + 1
 
-            if self.check_overlapp(chr_translater.get_nc_value(variant.chrom), self.START, self.END, v_start, v_stop):
+            if self.check_overlap(chr_translater.get_nc_value(variant.chrom), self.START, self.END, v_start, v_stop):
                 if self.REPORT == ReportClass.indel and not is_indel(variant):
                     return False
                 if self.EXTENDED_END < v_stop or v_start < self.EXTENDED_START:

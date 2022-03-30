@@ -285,6 +285,7 @@ class CreateInputFiles(object):
                 log.warning("No fastq files found in '{}', "
                             "please make sure regex '{}' matches your file names!, and '{}' matches read number".
                             format(d, self.sample_regex, self.read_number_regex))
+                exit(1)
             else:
                 log.info("{} fastq files found".format(dir_files_found))
         result_dict = {}

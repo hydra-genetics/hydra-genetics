@@ -43,7 +43,6 @@ def generate_hotspot_report(sample,
         # ToDo make sure that empty variants are handled better!!!
         if variant is None:
             raise Exception("Empty allele found: " + str(variant))
-            continue
         if not len(variant.alts) == 1:
             raise Exception("Multiple allele found: " + str(variant.alts))
         added = False

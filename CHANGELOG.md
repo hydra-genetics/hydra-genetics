@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://www.github.com/hydra-genetics/tools/compare/v0.9.2...v0.10.0) (2022-04-22)
+
+
+### Features
+
+* add function used to set min version for hydra-genetics ([a45b8a0](https://www.github.com/hydra-genetics/tools/commit/a45b8a0c57cda85a9fd63059907ac518a710daa8))
+
+
+### Bug Fixes
+
+* add barcode as index ([970c6a8](https://www.github.com/hydra-genetics/tools/commit/970c6a83bc3bf4ffe3b7a74d8e7a52920f357834))
+* exit of no files are found ([83ee81d](https://www.github.com/hydra-genetics/tools/commit/83ee81d5bf0b314e667d1d09559779cd4830d6a8))
+
 ### [0.9.2](https://www.github.com/hydra-genetics/tools/compare/v0.9.1...v0.9.2) (2022-03-29)
 
 

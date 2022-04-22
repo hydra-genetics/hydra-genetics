@@ -1,0 +1,2 @@
+class HydraGeneticsVersionError(Exception):
+    pass

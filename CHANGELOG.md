@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.10.1](https://www.github.com/hydra-genetics/tools/compare/v0.10.0...v0.10.1) (2022-05-16)
+
+
+### Bug Fixes
+
+* make it possible to add more rules(commands) to a existing smk file. ([d8aec9a](https://www.github.com/hydra-genetics/tools/commit/d8aec9a41ed77badbfefc5f1f989a856ab9f54ba))
+* update hydra-genetics version in template ([5f1b6cb](https://www.github.com/hydra-genetics/tools/commit/5f1b6cb5b1a1e961a00d39b5c7d71a6e4a6398a3))
+
+
+### Documentation
+
+* update readme with more examples ([fb6d2ee](https://www.github.com/hydra-genetics/tools/commit/fb6d2eebe0067740299b1155416047ad86c1a103))
+
 ## [0.10.0](https://www.github.com/hydra-genetics/tools/compare/v0.9.2...v0.10.0) (2022-04-22)
 
 

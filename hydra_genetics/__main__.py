@@ -79,7 +79,7 @@ def validate_wf_name_prompt(ctx, opts, value):
 def validate_rule_name_prompt(ctx, opts, value):
     """Force the rule name to meet the hydra-core requirements"""
     if not re.match(r"^[a-z0-9_]+$", value):
-        click.echo("Invalid workflow name: must be lowercase ('_' is allowed) without punctuation.")
+        click.echo("Invalid command/tool formatting: only lowercase and '_' is allowed.")
         value = click.prompt(opts.prompt)
         return validate_rule_name_prompt(ctx, opts, value)
     return value
@@ -111,13 +111,23 @@ def create_module(name, description, author, email, version, min_snakemake_versi
 
 @cli.command(short_help="add rule to project")
 @click.option(
-    "-n",
-    "--name",
-    prompt="rule name",
+    "-c",
+    "--command",
+    prompt="command name/rule name",
     required=True,
     callback=validate_rule_name_prompt,
     type=str,
-    help="name of rule that will be added",
+    help="command that will be run, will be used to name the rule",
+)
+@click.option(
+    "-t",
+    "--tool",
+    prompt="tool used run command (optional)",
+    required=False,
+    callback=validate_rule_name_prompt,
+    type=str,
+    default=None,
+    help="tool that will be used to run the command, if provided it will be used during the naming of the rule, ex samtools",
 )
 @click.option(
     "-m",
@@ -147,8 +157,9 @@ def create_module(name, description, author, email, version, min_snakemake_versi
         "--outdir",
         type=str,
         help="Output directory for where module is located (default: current dir)")
-def create_rule(name, module, author, email, outdir):
-    rule = RuleCreate(name, module, author, email, outdir)
+def create_rule(command, tool, module, author, email, outdir):
+    print(": ".join([command, tool, module, author, email, str(outdir)]))
+    rule = RuleCreate(command, module, author, email, tool, outdir)
     rule.init_rule()
 
 

@@ -34,6 +34,8 @@ jobs:
       - name: Create module
         run: hydra-genetics create-module -n testar -d "test description" -a testare -e testar@mail.com -g testare
       - name: Create rule
-        run: hydra-genetics create-rule -n test2 -m testar -a testare2 -e testare2@mail.com
+        run: hydra-genetics create-rule -c test2 -t samtools -m testar -a testare2 -e testare2@mail.com
+      - name: Add rule to existing smk file
+        run: hydra-genetics create-rule -c test3 -t samtools -m testar -a testare2 -e testare2@mail.com
       - name: Create input files
         run: hydra-genetics create-input-files  -d .tests/ -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1

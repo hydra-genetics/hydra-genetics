@@ -125,14 +125,18 @@ class PipelineCreate(object):
 class RuleCreate(object):
     """Creates a hydra-genetics rule.
     Args:
-        name (str): Name for the pipeline.
+        command (str): Name of the rule, command that will be run.
+        tool (str): tool that will be used to run the command, ex samtools (optional)
         module (str): Name of module where rule will be added.
         author (str): Authors name
         email (str): Authors email
         outdir (str): Path to the local output directory.
+
+        if a tool and command are both provided the rule will be named tool_command
     """
-    def __init__(self, name, module, author, email, outdir=None):
-        self.name = name
+    def __init__(self, command, module, author, email, tool=None, outdir=None):
+        self.command = command
+        self.tool = tool
         self.module_name = module
         self.author = author
         self.email = email
@@ -144,35 +148,61 @@ class RuleCreate(object):
 
     def init_rule(self):
         """Creates the hydra_genetics rule."""
-        log.info(f"Creating rule: {self.outdir}/{self.module_name}/workflow/rules/{self.name}.smk")
-        outdir = os.path.join(self.outdir, self.module_name, "workflow")
-        output_rules = os.path.join(self.outdir, self.module_name, "workflow", "rules")
-        output_envs = os.path.join(self.outdir, self.module_name, "workflow", "envs")
+        outdir = os.path.join(self.outdir, self.module_name)
+        if not os.path.exists(outdir):
+            outdir_temp = outdir
+            outdir = os.path.join(os.path.dirname(self.outdir), self.module_name)
+            if not os.path.exists(outdir):
+                log.error(f"Can not find module directory, tried with:\n'{outdir_temp}'\n'{outdir}'")
+                exit(1)
+        outdir = os.path.join(outdir, "workflow")
+        output_rules = os.path.join(outdir, "rules")
+        output_envs = os.path.join(outdir, "envs")
         if not os.path.exists(output_rules):
             log.error(f"Can not find output directory '{output_rules}'")
-            sys.exit(1)
+            sys.exit(2)
         if not os.path.exists(output_envs):
             log.error(f"Can not find output directory '{output_envs}' exists!")
-            sys.exit(1)
-        output_rule = os.path.join(output_rules, f"{self.name}.smk")
-        output_env = os.path.join(output_envs, f"{self.name}.yaml")
-        if os.path.exists(output_rule):
+            sys.exit(3)
+        self.append_rule = False
+        self.name = self.command
+        if self.tool is None:
+            log.info(f"Creating rule: '{output_rules}/{self.command}.smk'")
+        else:
+            self.name = f"{self.tool}_{self.name}"
+            if os.path.exists(os.path.join(output_rules, f"{self.tool}.smk")):
+                log.info(f"Adding entry {self.name} to smk '{outdir}/{self.tool}.smk'")
+                output_rule = os.path.join(output_rules, f"{self.tool}.smk")
+                output_env = os.path.join(output_envs, f"{self.tool}.yaml")
+                self.append_rule = True
+            else:
+                log.info(f"Creating smk file: '{output_rules}/{self.tool}.smk' with rule {self.name}")
+                output_rule = os.path.join(output_rules, f"{self.tool}.smk")
+                output_env = os.path.join(output_envs, f"{self.tool}.yaml")
+        if os.path.exists(output_rule) and self.tool is None:
             log.error(f"Rule already exists '{output_rule}'")
-            sys.exit(1)
-        if os.path.exists(output_env):
+            sys.exit(4)
+        if os.path.exists(output_env) and self.tool is None:
             log.error(f"env file already exists '{output_env}'")
-            sys.exit(1)
+            sys.exit(5)
         env = jinja2.Environment(
             loader=jinja2.PackageLoader("hydra_genetics", "rule-template"), keep_trailing_newline=True
         )
         template_dir = os.path.join(os.path.dirname(__file__), "../rule-template")
         rename_files = {
-           "skeleton_env.yaml": os.path.join("envs", f"{self.name}.yaml"),
-           "skeleton_rule.smk": os.path.join("rules", f"{self.name}.smk"),
+            "skeleton_rule.smk": output_rule,
         }
+        if self.tool is None or not self.append_rule:
+            rename_files["skeleton_env.yaml"] = os.path.join("envs", f"{self.tool}.yaml")
         object_attrs = vars(self)
         template_files = list(pathlib.Path(template_dir).glob("**/*"))
         ignore_strs = [".pyc", "__pycache__", ".pyo", ".pyd", ".DS_Store", ".egg", ".snakemake"]
+        if self.append_rule:
+            with open(output_rule, 'r') as lines:
+                for line in lines:
+                    if self.name in line:
+                        log.error(f"rule {self.name} already found in file {output_rule}")
+                        exit(6)
         log.info("Adding folder and files")
         for template_fn_path_obj in template_files:
             template_fn_path = str(template_fn_path_obj)
@@ -190,9 +220,10 @@ class RuleCreate(object):
             rendered_output = j_template.render(object_attrs)
 
             # Write to the pipeline output file
-            with open(output_path, "w") as fh:
+            with open(output_path, "w" if not self.append_rule else "a") as fh:
                 log.debug(f"Writing to output file: '{output_path}'")
                 fh.write(rendered_output)
+
         snakefile = os.path.join(outdir, "Snakefile")
         with open(snakefile, 'r+') as fh:
             lines = fh.readlines()
@@ -205,7 +236,11 @@ class RuleCreate(object):
                 log.error(f"Could not find 'include: ../rules/common.smk' entry in Snakefile '{snakefile}'")
                 sys.exit(1)
             fh.seek(0)
-            lines.insert(line_number, str(f"include: \"rules/{self.name}.smk\"\n"))
+            if self.tool is not None and not self.append_rule:
+                lines.insert(line_number, str(f"include: \"rules/{self.tool}.smk\"\n"))
+            elif self.tool is None:
+                lines.insert(line_number, str(f"include: \"rules/{self.command}.smk\"\n"))
+
             fh.writelines(lines)
 
 

@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 from copy import deepcopy
+from os.path import exists
 
 
 def merge(dict1, dict2):
@@ -18,6 +19,8 @@ def merge(dict1, dict2):
 
 def extract_chr(file, filter_out=["chrM"]):
     chr = None
-    with open(file) as lines:
-        chr = [line.split("\t")[0] for line in lines]
-    return [c for c in chr if c not in filter_out]
+    if exists(file):
+        with open(file) as lines:
+            chr = [line.split("\t")[0] for line in lines]
+        return [c for c in chr if c not in filter_out]
+    return [""]

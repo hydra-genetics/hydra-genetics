@@ -555,7 +555,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         # Extract machine id, flowcell and lane
         machine_id, flowcell_id, lane = extract_run_informatio(line)
         barcode = extract_barcode(line)
-        if not re.match('^[A-Z-]$', barcode):
+        if not re.match('^[A-Z-+]$', barcode):
             if default_barcode is not None:
                 return (machine_id, flowcell_id, lane, default_barcode)
             else:

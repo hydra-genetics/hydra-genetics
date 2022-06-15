@@ -141,14 +141,15 @@ class RuleCreate(object):
         self.author = author
         self.email = email
         self.year = date.today().year
-        self.outdir = outdir
 
-        if not self.outdir:
+        if not outdir:
             self.outdir = os.getcwd()
+        else:
+            self.outdir = os.path.abspath(outdir)
 
     def init_rule(self):
         """Creates the hydra_genetics rule."""
-        outdir = os.path.join(self.outdir, self.module_name)
+        outdir = os.path.normpath(os.path.join(self.outdir, self.module_name))
         if not os.path.exists(outdir):
             outdir_temp = outdir
             outdir = os.path.join(os.path.dirname(self.outdir), self.module_name)

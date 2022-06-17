@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://www.github.com/hydra-genetics/tools/compare/v0.10.1...v0.11.0) (2022-05-17)
+
+
+### Features
+
+* extrac_chr return list with empty string if file not exist ([dcf1afb](https://www.github.com/hydra-genetics/tools/commit/dcf1afb2f7602c35a5c66359fcf7250e341d85b0))
+
 ### [0.10.1](https://www.github.com/hydra-genetics/tools/compare/v0.10.0...v0.10.1) (2022-05-16)
 
 

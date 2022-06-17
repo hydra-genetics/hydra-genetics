@@ -220,7 +220,7 @@ def create_rule(command, tool, module, author, email, outdir):
 @click.option(
         "-b",
         "--default-barcode",
-        help="default barcode value that should be used when the fastq files are missing barcode information in there header, "
+        help="default barcode value that should be used when the fastq files are missing barcode information in their header, "
              "if not set the tool will fail if barcode can not be extracted",
         type=str,
         default=None)

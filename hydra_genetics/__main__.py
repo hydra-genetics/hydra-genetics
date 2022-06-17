@@ -218,6 +218,13 @@ def create_rule(command, tool, module, author, email, outdir):
         help="overwrite existing files",
         is_flag=True)
 @click.option(
+        "-b",
+        "--default-barcode",
+        help="default barcode value that should be used when the fastq files are missing barcode information in their header, "
+             "if not set the tool will fail if barcode can not be extracted",
+        type=str,
+        default=None)
+@click.option(
         "--tc",
         help="tumor contet",
         type=float,
@@ -247,9 +254,10 @@ def create_rule(command, tool, module, author, email, outdir):
         type=int,
         default=1000)
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
-                       sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every):
+                       sample_regex, read_number_regex, adapters, tc, force, default_barcode, validate, ask, th, nreads, every):
     input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
-                                   sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every)
+                                   sample_regex, read_number_regex, adapters, tc, force, default_barcode, validate, ask, th,
+                                   nreads, every)
     input_files.init()
 
 

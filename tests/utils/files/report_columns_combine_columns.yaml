@@ -1,4 +1,6 @@
 columns:
+    ref_depth:
+      format: ['string', "{:.2f}", "float"]
     Analyzable:
         from: 'function'
         name: "get_read_level"
@@ -20,10 +22,10 @@ columns:
             vep:
                 from: 'vep'
                 field: 'SYMBOL'
+                format: ['replace', 'SEPT', '´SEPT']
             hotspot:
                 from: 'hotspot'
                 field: 'GENE'
-                format: ['replace', 'SEPT', '´SEPT']
     Variant_type:
         from: 'vep'
         field: 'BIOTYPE'

@@ -15,8 +15,8 @@ min_version("{{ min_snakemake_version }}")
 
 ### Set and validate config file
 
-
-configfile: "config.yaml"
+if not workflow.overwrite_configfiles:
+    sys.exit("At least one config file must be passed using --configfile/--configfiles, by command line or a profile!")
 
 
 validate(config, schema="../schemas/config.schema.yaml")

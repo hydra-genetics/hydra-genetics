@@ -141,14 +141,15 @@ class RuleCreate(object):
         self.author = author
         self.email = email
         self.year = date.today().year
-        self.outdir = outdir
 
-        if not self.outdir:
+        if not outdir:
             self.outdir = os.getcwd()
+        else:
+            self.outdir = os.path.abspath(outdir)
 
     def init_rule(self):
         """Creates the hydra_genetics rule."""
-        outdir = os.path.join(self.outdir, self.module_name)
+        outdir = os.path.normpath(os.path.join(self.outdir, self.module_name))
         if not os.path.exists(outdir):
             outdir_temp = outdir
             outdir = os.path.join(os.path.dirname(self.outdir), self.module_name)
@@ -261,6 +262,7 @@ class CreateInputFiles(object):
                  adapters="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
                  tc=1.0,
                  force=False,
+                 default_barcode=None,
                  validate_run_information=False,
                  ask_for_input=False,
                  occurrences_warning_th=0.9,
@@ -276,6 +278,7 @@ class CreateInputFiles(object):
         self.adapters = adapters
         self.tc = tc
         self.force = force
+        self.default_barcode = default_barcode
         self.validate_run_information = validate_run_information
         self.ask_for_input = ask_for_input
         self.occurrences_warning_th = occurrences_warning_th
@@ -334,6 +337,7 @@ class CreateInputFiles(object):
                 for read_number, f in file_dict[sample][files].items():
                     log.info("\t - {} for run information".format(str(f)))
                     machine_id, flowcell, lane_id, barcode = extract_run_information(f,
+                                                                                     self.default_barcode,
                                                                                      self.number_of_reads,
                                                                                      self.every_n_reads,
                                                                                      self.occurrences_warning_th,
@@ -417,13 +421,15 @@ class CreateInputFiles(object):
                                                      self.adapters]))
 
 
-def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,
+def extract_run_information(file_path, default_barcode=None, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,
                             compare_first_and_last_read=False, ask_for_input=False):
     """
     extract information from provided fastq.gz file and creates a consensus create_barcode
 
     :param file_path: path to fastq.gz file
     :type file_path: string
+    :param default_barcode: barcode string used when a barcode can not be extracted
+    :type default_barcode: string
     :param number_of_reads: number of reads that will be used to create consensus barcode
     :type number_of_reads: integer
     :param: warning_threshold: raise a warning for char with lower occurences this value
@@ -550,6 +556,11 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
         # Extract machine id, flowcell and lane
         machine_id, flowcell_id, lane = extract_run_informatio(line)
         barcode = extract_barcode(line)
+        if not re.match('^[A-Z-+]+$', barcode):
+            if default_barcode is not None:
+                return (machine_id, flowcell_id, lane, default_barcode)
+            else:
+                raise Exception("Undable to extract barcode from read name and no default barcode specified")
         skip_read_information(reader_it)
         counter -= 1
         length = len(barcode)

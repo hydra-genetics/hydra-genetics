@@ -220,7 +220,7 @@ def format_value(value, format):
     elif format[0] == "string":
         if len(format) == 3:
             value = getattr(builtins, format[2])(value)
-         else:
+        else:
             value = float(value)
         return format[1].format(value)
     else:

@@ -219,10 +219,9 @@ def format_value(value, format):
         return value.replace(format[1], format[2])
     elif format[0] == "string":
         if len(format) == 3:
-            try:
-                value = getattr(builtins, "float")(value)
-            except ValueError:
-                return value
+            value = getattr(builtins, format[2])(value)
+        else:
+            value = float(value)
         return format[1].format(value)
     else:
         raise Exception("Unknown format value: " + format)
@@ -233,7 +232,12 @@ def format_hotspot(data, columns, hotspot):
         format = columns.get(key, {}).get("format", None)
         format = hotspot.get(key, {}).get("format", format)
         if format:
-            data[key] = format_value(data[key], format)
+            try:
+                data[key] = format_value(data[key], format)
+            except ValueError:
+                log.warning("Unable to convert and format value {data[{value}]}, field {key}")
+            except TypeError:
+                log.warning("Unable to convert and format value {data[{value}]}, field {key}")
 
 
 def extract_item_merge_header(columns):

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0](https://www.github.com/hydra-genetics/tools/compare/v0.12.0...v0.13.0) (2022-07-03)
+
+
+### Features
+
+* update module/pipeline template ([26537c4](https://www.github.com/hydra-genetics/tools/commit/26537c4858523a6e7555c3c98138736c78a2297d))
+
+
+### Bug Fixes
+
+* handle hotspot formatting errors better ([8c712b0](https://www.github.com/hydra-genetics/tools/commit/8c712b0ca6cbeb6827ad9906d62546e0d47ae88d))
+
 ## [0.12.0](https://www.github.com/hydra-genetics/tools/compare/v0.11.0...v0.12.0) (2022-06-17)
 
 

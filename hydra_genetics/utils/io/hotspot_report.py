@@ -304,9 +304,9 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
             try:
                 data[c] = format_value(data[c], column[c]["format"])
             except ValueError:
-                log.warning("Unable to format value {data[{c}]}, field {c}, format {column[{c}]["format"]}")
+                log.warning("Unable to format value {data[{c}]}, field {c}, format {column[{c}]['format']}")
             except TypeError:
-                log.warning("Unable to format value {data[{c}]}, field {c}, format {column[{c}]["format"]}")
+                log.warning("Unable to format value {data[{c}]}, field {c}, format {column[{c}]['format']}")
 
     for c in columns["columns"]:
         if 'from' in columns["columns"][c]:

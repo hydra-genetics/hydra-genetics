@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.13.1](https://www.github.com/hydra-genetics/tools/compare/v0.13.0...v0.13.1) (2022-07-05)
+
+
+### Bug Fixes
+
+* update handling of formatting of report values ([23c9b37](https://www.github.com/hydra-genetics/tools/commit/23c9b375106cbb930239d86894c497df91659efc))
+
 ## [0.13.0](https://www.github.com/hydra-genetics/tools/compare/v0.12.0...v0.13.0) (2022-07-03)
 
 

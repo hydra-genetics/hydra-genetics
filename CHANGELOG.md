@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.13.2](https://www.github.com/hydra-genetics/tools/compare/v0.13.1...v0.13.2) (2022-07-06)
+
+
+### Bug Fixes
+
+* format log messages ([26bfb4a](https://www.github.com/hydra-genetics/tools/commit/26bfb4a4eb8bdc33760f9acee7ec36201b79c722))
+
 ### [0.13.1](https://www.github.com/hydra-genetics/tools/compare/v0.13.0...v0.13.1) (2022-07-05)
 
 

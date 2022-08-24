@@ -159,4 +159,4 @@ class Hotspot(object):
         return False
 
     def __str__(self):
-        return self.CHROMOSOME + ":" + str(self.START) + "-" + str(self.END) + " " + str(self.REPORT)
+        return self.CHROMOSOME + ":" + str(self.START) + "-" + str(self.END) + " " + str(self.REPORT) + " " + self.GENE

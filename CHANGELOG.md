@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.0](https://www.github.com/hydra-genetics/tools/compare/v0.13.2...v0.14.0) (2022-08-25)
+
+
+### Features
+
+* make it possible to select one ore more of specified data sources ([577764a](https://www.github.com/hydra-genetics/tools/commit/577764a50a6c53f65ce330526563fc7c584c2a2d))
+
+
+### Bug Fixes
+
+* skeleton rule to pass snakefmt ([380233f](https://www.github.com/hydra-genetics/tools/commit/380233f44f524bbe32e7827061bae8823c70ce66))
+
 ### [0.13.2](https://www.github.com/hydra-genetics/tools/compare/v0.13.1...v0.13.2) (2022-07-06)
 
 

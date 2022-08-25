@@ -134,12 +134,13 @@ def generate_hotspot_report(sample,
 
         def condition(items, empty):
             items = convert_list_slice(items)
+
             def func(data):
                 values = items(data)
                 if isinstance(values, str):
-                    return (values == "-" ) == empty
+                    return (values == "-") == empty
                 else:
-                    return (len([v for _,v in values.items() if v != "-"]) == 0) == empty
+                    return (len([v for _, v in values.items() if v != "-"]) == 0) == empty
             return func
 
         data['items'] = convert_list_slice(data['items'])
@@ -148,7 +149,6 @@ def generate_hotspot_report(sample,
         if "condition" in data:
             data['condition'] = condition(data['condition']['items'], data['condition'].get("empty", True))
         return data
-
 
     for entry in columns['columns']:
         if "from" in columns['columns'][entry] and "select" in columns['columns'][entry]["from"]:
@@ -319,7 +319,7 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
             data[c] = "-"
             condition = True
             if 'condition' in column[c]:
-                condition =  column[c]['condition'](temp_data)
+                condition = column[c]['condition'](temp_data)
             if select is not None and select != '-' and condition:
                 data[c] = select
             elif 'else' in column[c]:
@@ -377,6 +377,6 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
             except TypeError:
                 log.warning("Unable to format value {}, field {}, format {}".format(data[c], c, column[c]["format"]))
 
-    for c in columns["columns"]:
-        if 'from' in columns["columns"][c]:
-            add_data(data, columns["columns"], c, depth, levels)
+    for c in columns['columns']:
+        if 'from' in columns['columns'][c]:
+            add_data(data, columns['columns'], c, depth, levels)

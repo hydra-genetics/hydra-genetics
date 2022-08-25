@@ -635,7 +635,7 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4	protein_coding	synonymous_variant	vardict,mutect2	-	-	-")  # noqa
             self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	protein_coding	intron_variant	vardict	-	-	-")  # noqa
             self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	protein_coding	splice_region_variant&intron_variant	vardict	-	-	-")  # noqa
-            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	PLCG2	protein_coding	intron_variant	vardict,mutect2	-	-	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT	protein_coding	intron_variant	vardict,mutect2	-	-	-")  # noqa
 
 
 if __name__ == '__main__':

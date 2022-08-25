@@ -110,6 +110,50 @@ def generate_hotspot_report(sample,
         if key in columns['columns']:
             del columns['columns'][key]
 
+    def handle_select(data):
+        def convert_list_slice(info):
+            if len(info) < 3:
+                raise SyntaxError(f"Invalid syntax: {info}")
+            if info.startswith("[") and info.endswith("]"):
+                info = info[1:-1].split(":")
+                if len(info) == 1:
+                    return lambda data: data[int(info[0])]
+                elif len(info) == 2:
+                    value0 = int(info[0]) if len(info[0]) > 0 else None
+                    value1 = int(info[1]) if len(info[1]) > 0 else None
+                    return lambda data: data[value0:value1]
+                elif len(info) == 3:
+                    value0 = int(info[0]) if len(info[0]) > 0 else None
+                    value1 = int(info[1]) if len(info[1]) > 0 else None
+                    value2 = int(info[2]) if len(info[2]) > 0 else None
+                    return lambda data: data[value0:value1:value2]
+                else:
+                    raise SyntaxError(f"Invalid syntax: {info}, invalid number of elemens inside '[]'")
+            else:
+                raise SyntaxError(f"Invalid syntax: {info}, missing brackat '[]'")
+
+        def condition(items, empty):
+            items = convert_list_slice(items)
+
+            def func(data):
+                values = items(data)
+                if isinstance(values, str):
+                    return (values == "-") == empty
+                else:
+                    return (len([v for _, v in values.items() if v != "-"]) == 0) == empty
+            return func
+
+        data['items'] = convert_list_slice(data['items'])
+        if "else" in data:
+            data['else'] = convert_list_slice(data['else'])
+        if "condition" in data:
+            data['condition'] = condition(data['condition']['items'], data['condition'].get("empty", True))
+        return data
+
+    for entry in columns['columns']:
+        if "from" in columns['columns'][entry] and "select" in columns['columns'][entry]["from"]:
+            columns['columns'][entry] = handle_select(columns['columns'][entry])
+
     for entry in hotspot_columns:
         biggest_order += 1
         output_order.append((biggest_order, entry))
@@ -257,11 +301,36 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
     """
     def add_data(data, column, c, depth, levels):
         if column[c]['from'] == "merge":
+            # Used to merge two columns and combine using divider
             divider = column[c]['divider']
-            temp_data = {}
+            temp_data = OrderedDict()
             for key in column[c]['elements']:
                 add_data(temp_data, column[c]['elements'], key, depth, levels)
             data[c] = divider.join([v for k, v in temp_data.items()])
+        elif column[c]['from'] == "select":
+            # From multiple column select the first one with data
+            temp_data = OrderedDict()
+            for key in column[c]['elements']:
+                add_data(temp_data, column[c]['elements'], key, depth, levels)
+            temp_data = [v for _, v in temp_data.items()]
+            select = column[c]['items'](temp_data)
+            if not isinstance(select, str):
+                select = column[c].get("divider", ":").join(select)
+            data[c] = "-"
+            condition = True
+            if 'condition' in column[c]:
+                condition = column[c]['condition'](temp_data)
+            if select is not None and select != '-' and condition:
+                data[c] = select
+            elif 'else' in column[c]:
+                select = column[c]['else'](temp_data)
+                if not isinstance(select, str):
+                    select = [v for v in select if v != "-"]
+                    if len(select) == 0:
+                        select = "-"
+                    else:
+                        select = column[c].get("divider", ":").join(select)
+                data[c] = select
         elif column[c]['from'] == "vep":
             try:
                 data[c] = annotation_extractor(var,  column[c]['field'])
@@ -308,6 +377,6 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
             except TypeError:
                 log.warning("Unable to format value {}, field {}, format {}".format(data[c], c, column[c]["format"]))
 
-    for c in columns["columns"]:
-        if 'from' in columns["columns"][c]:
-            add_data(data, columns["columns"], c, depth, levels)
+    for c in columns['columns']:
+        if 'from' in columns['columns'][c]:
+            add_data(data, columns['columns'], c, depth, levels)

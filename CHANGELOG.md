@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.14.1](https://www.github.com/hydra-genetics/tools/compare/v0.14.0...v0.14.1) (2022-08-26)
+
+
+### Bug Fixes
+
+* **utils:** update handling for retrieval of data using function ([ab4ca3f](https://www.github.com/hydra-genetics/tools/commit/ab4ca3f53097489fcb24b1fdd93f92c81b7115eb))
+
 ## [0.14.0](https://www.github.com/hydra-genetics/tools/compare/v0.13.2...v0.14.0) (2022-08-25)
 
 

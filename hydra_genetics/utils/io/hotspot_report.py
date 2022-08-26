@@ -352,19 +352,20 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
                 variables = []
                 for v in column[c]['variables']:
                     variables.append(locals().get(v, v))
-                value = "-"
                 try:
                     value = function(*variables)
                 except AttributeError:
-                    data[c] = "-"
+                    value = "-"
             else:
-                function()
+                value = function()
             if 'column' in column[c]:
                 data[c] = value[column[c]['column']]
             else:
                 if isinstance(value, tuple):
                     value = ",".join(value)
                 data[c] = value
+            if data[c] is None:
+                data[c] = "-"
         elif column[c]['from'] == 'variable':
             data[c] = locals()[column[c]['field']]
         else:
@@ -373,9 +374,9 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
             try:
                 data[c] = format_value(data[c], column[c]["format"])
             except ValueError:
-                log.warning("Unable to format value {}, field {}, format {}".format(data[c], c, column[c]["format"]))
+                log.debug("Unable to format value {}, field {}, format {}".format(data[c], c, column[c]["format"]))
             except TypeError:
-                log.warning("Unable to format value {}, field {}, format {}".format(data[c], c, column[c]["format"]))
+                log.debug("Unable to format value {}, field {}, format {}".format(data[c], c, column[c]["format"]))
 
     for c in columns['columns']:
         if 'from' in columns['columns'][c]:

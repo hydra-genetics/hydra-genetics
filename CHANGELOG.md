@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.0](https://www.github.com/hydra-genetics/tools/compare/v0.14.1...v0.15.0) (2022-09-06)
+
+
+### Features
+
+* **comman:** update workflow name regex ([3261aaf](https://www.github.com/hydra-genetics/tools/commit/3261aafff9b4710c8d692e00ec62051e940cd114))
+* function used to switch between github and local repos ([520bbf3](https://www.github.com/hydra-genetics/tools/commit/520bbf380e3ef9133900aad41448ce08d6e5f704))
+
+
+### Bug Fixes
+
+* update warning raised when tools tries to calculate barcode sequence  and fails to select preferred number of reads ([6423239](https://www.github.com/hydra-genetics/tools/commit/642323943f42096e7a36a09eb9dcd75b5e12f9ef))
+
 ### [0.14.1](https://www.github.com/hydra-genetics/tools/compare/v0.14.0...v0.14.1) (2022-08-26)
 
 

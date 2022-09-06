@@ -69,7 +69,7 @@ def cli(verbose, log_file):
 
 def validate_wf_name_prompt(ctx, opts, value):
     """Force the workflow name to meet the hydra-core requirements"""
-    if not re.match(r"^[a-z_]+$", value):
+    if not re.match(r"^[a-z][a-z0-9_]+$", value):
         click.echo("Invalid workflow name: must be lowercase without punctuation.")
         value = click.prompt(opts.prompt)
         return validate_wf_name_prompt(ctx, opts, value)

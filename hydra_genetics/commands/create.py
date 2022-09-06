@@ -585,7 +585,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
                 skip_read_information(reader_it)
                 every -= 1
         if counter > 0:
-            logging.warning("Couldn't only select {} reads of {} from fastq file {} for evaluation!".
+            logging.warning("Could only select {} reads of {} from fastq file {} for evaluation!".
                             format(number_of_reads - counter, number_of_reads, file_path))
         if compare_first_and_last_read:
             if counter == 0:

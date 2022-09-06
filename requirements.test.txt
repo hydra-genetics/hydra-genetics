@@ -7,4 +7,4 @@ pycodestyle
 pysam
 pytest
 rich==10.9.0
-snakemake==6.8.0
+snakemake==7.13.0

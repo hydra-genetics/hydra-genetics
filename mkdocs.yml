@@ -1,0 +1,20 @@
+site_name: Hydra-genetics
+nav:
+  - Introduction: index.md
+  - Modules: modules.md
+  - Snakemake rules: rules.md
+  - Code standards: standards.md
+  - Code testing: testing.md
+  - How-to make a pipeline:
+    - Create a pipeline skeleton: create.md
+    - Import modules and rules: import.md
+    - Pipeline configuration: config.md
+    - Result files: results.md
+  - How-to run a pipeline:
+    - Cluster profile: profile.md
+    - Create sample files: create_sample_files.md
+    - Make a python environment: environment.md
+
+
+theme: readthedocs
+extra_css: [extra.css]

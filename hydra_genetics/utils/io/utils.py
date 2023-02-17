@@ -32,17 +32,17 @@ def get_annotation_data(data_extracter, mapper):
     return lambda variant, field: data_extracter(variant, mapper[field])
 
 
-def get_annotation_data_vep(field_dict):
+def get_annotation_data_vep(field_dict, sample_index):
     def extractor(variant, info_name):
-        data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+        data = variant.info['CSQ'][sample_index].split("|")[field_dict[info_name]]
         if len(data) == 0:
             return None
         return data
     return extractor
 
 
-def get_depth(gvcf_file, sample, chr, start, stop, depth_flag='DP'):
-    depth = [r.samples[sample][depth_flag] for r in gvcf_file.fetch(chr, start, stop)]
+def get_depth(gvcf_file, sample_index, chr, start, stop, depth_flag='DP'):
+    depth = [r.samples[sample_index][depth_flag] for r in gvcf_file.fetch(chr, start, stop)]
     if len(depth) > 1:
         return statistics.mean(depth)
     elif len(depth) == 1:
@@ -71,8 +71,8 @@ def get_info_field(variant, info_name):
     return None
 
 
-def get_annotation_data_format(variant, field):
-    return variant.samples[0].get(field, None)
+def get_annotation_data_format(variant, field, sample_index):
+    return variant.samples[sample_index].get(field, None)
 
 
 def get_annotation_data_info(variant, info_name):
@@ -88,9 +88,9 @@ def get_report_type(variant, hotspot):
     return "1-hotspot"
 
 
-def get_sample_value(variant, sample):
+def get_sample_value(variant, sample_index):
     if isinstance(variant, pysam.VariantRecord):
-        return variant.samples[sample]
+        return variant.samples[sample_index]
 
 
 def get_read_level(read_levels, rd):
@@ -127,7 +127,7 @@ def clinical_flagged(variant):
             return "No"
 
 
-def get_vaf(variant, sample):
+def get_vaf(variant, sample_index):
     if isinstance(variant, pysam.VariantRecord):
-        depth, ref, var = get_depth(variant, sample)
+        depth, ref, var = get_depth(variant, sample_index)
         return int(var)/(int(depth))

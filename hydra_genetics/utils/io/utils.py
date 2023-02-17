@@ -71,8 +71,8 @@ def get_info_field(variant, info_name):
     return None
 
 
-def get_annotation_data_format(variant, field):
-    return variant.samples[0].get(field, None)
+def get_annotation_data_format(sample_index):
+    return lambda variant, field: variant.samples[sample_index].get(field, None)
 
 
 def get_annotation_data_info(variant, info_name):

@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v0.15.0...v1.0.0) (2023-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* force user to set index from which format field data will be extracted
+
+### Features
+
+* force user to set index from which format field data will be extracted ([dc9bafd](https://www.github.com/hydra-genetics/hydra-genetics/commit/dc9bafd236abd5c67e6eeb934b5547d500a9adf3))
+* rename pycodestyle template gitaction file ([105c6bc](https://www.github.com/hydra-genetics/hydra-genetics/commit/105c6bc93c4e39168a5b1177544cf05018f98abf))
+* rename template integration file ([064e8b6](https://www.github.com/hydra-genetics/hydra-genetics/commit/064e8b61eea704349963874437371595d55896bc))
+* update project template ([0988d0e](https://www.github.com/hydra-genetics/hydra-genetics/commit/0988d0ee28a42afbed6b8adf8539b221d0ab4513))
+
+
+### Documentation
+
+* updated name to correspond to the module name change ([18791fe](https://www.github.com/hydra-genetics/hydra-genetics/commit/18791fea96ed3657416e3c01f7e408c7fc9579c2))
+
 ## [0.15.0](https://www.github.com/hydra-genetics/tools/compare/v0.14.1...v0.15.0) (2022-09-06)
 
 

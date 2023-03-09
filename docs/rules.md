@@ -13,7 +13,7 @@ The hydra-genetics tools will set up a rule skeleton and place the rule in modul
 ```bash
 hydra-genetics create-rule -c picard_mark_duplicates -t picard -m alignment -a my_name -e name@email.com [OPTIONS]
 ```
-| Option | Explanation |
+| **Option** | **Description** |
 |--------|-------------|
 | -c, --command TEXT | command that will be run, will be used to name the rule [required] |
 | -t, --tool TEXT | tool that will be used to run the command, if provided it will be used during the naming of the rule, ex samtools

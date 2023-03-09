@@ -15,11 +15,11 @@ reference:                                                  # list of general re
 Basic setup for the `resources.yaml` for default resource usage:
 ```
 default_resources:
-  threads: 1          # threads
-  time: "4:00:00"     # wall time
   mem_mb: 6144        # total max memory
   mem_per_cpu: 6144   # memory per thread
   partition: "core"   # partition to us on the cluster (optional)
+  threads: 1          # threads
+  time: "4:00:00"     # wall time
 ```
 ## Rule parameters
 Rules with configurable parameters can be set in `config.yaml` in the following way:
@@ -32,8 +32,8 @@ cnvkit_batch:
 Rules with extra resource demands can be set in `resources.yaml` in the following way:
 ```
 arriba:
-  threads: 5
-  time: "8:00:00"
   mem_mb: 30720
   mem_per_cpu: 6144
+  threads: 5
+  time: "8:00:00"
 ```

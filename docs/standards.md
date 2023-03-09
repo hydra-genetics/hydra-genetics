@@ -1,5 +1,5 @@
 # Code standards
-Here is defined standards and conventions on how to write rules, configs, and other code in the hydra-genetics framwork.
+Here the standards and conventions are defined on how to write rules, configs, and other code in the hydra-genetics framework.
 
 ## Documentation
 ### README
@@ -13,7 +13,7 @@ Each module and pipeline should include a README with the following parts:
 * Rule graph which is contained in images/rulegraph.svg.
 
 ### readthedocs
-Each module and pipeline a recommended to have a more in depth documentation using [readthedocs](https://readthedocs.org/).
+Each module and pipeline are recommended to have a more in depth documentation using [readthedocs](https://readthedocs.org/).
 
 ## Snakemake rules
 * Rules should be placed in the workflow/rules directory.

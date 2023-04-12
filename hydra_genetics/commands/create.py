@@ -158,13 +158,9 @@ class RuleCreate(object):
                 exit(1)
         outdir = os.path.join(outdir, "workflow")
         output_rules = os.path.join(outdir, "rules")
-        output_envs = os.path.join(outdir, "envs")
         if not os.path.exists(output_rules):
             log.error(f"Can not find output directory '{output_rules}'")
             sys.exit(2)
-        if not os.path.exists(output_envs):
-            log.error(f"Can not find output directory '{output_envs}' exists!")
-            sys.exit(3)
         self.append_rule = False
         self.name = self.command
         if self.tool is None:
@@ -174,18 +170,13 @@ class RuleCreate(object):
             if os.path.exists(os.path.join(output_rules, f"{self.tool}.smk")):
                 log.info(f"Adding entry {self.name} to smk '{outdir}/{self.tool}.smk'")
                 output_rule = os.path.join(output_rules, f"{self.tool}.smk")
-                output_env = os.path.join(output_envs, f"{self.tool}.yaml")
                 self.append_rule = True
             else:
                 log.info(f"Creating smk file: '{output_rules}/{self.tool}.smk' with rule {self.name}")
                 output_rule = os.path.join(output_rules, f"{self.tool}.smk")
-                output_env = os.path.join(output_envs, f"{self.tool}.yaml")
         if os.path.exists(output_rule) and self.tool is None:
             log.error(f"Rule already exists '{output_rule}'")
             sys.exit(4)
-        if os.path.exists(output_env) and self.tool is None:
-            log.error(f"env file already exists '{output_env}'")
-            sys.exit(5)
         env = jinja2.Environment(
             loader=jinja2.PackageLoader("hydra_genetics", "rule-template"), keep_trailing_newline=True
         )
@@ -193,8 +184,6 @@ class RuleCreate(object):
         rename_files = {
             "skeleton_rule.smk": output_rule,
         }
-        if self.tool is None or not self.append_rule:
-            rename_files["skeleton_env.yaml"] = os.path.join("envs", f"{self.tool}.yaml")
         object_attrs = vars(self)
         template_files = list(pathlib.Path(template_dir).glob("**/*"))
         ignore_strs = [".pyc", "__pycache__", ".pyo", ".pyd", ".DS_Store", ".egg", ".snakemake"]

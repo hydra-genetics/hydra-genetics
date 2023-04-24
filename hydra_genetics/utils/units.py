@@ -151,7 +151,7 @@ def get_units(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: 
         files = units.loc[(wildcards.sample, type)].dropna()
     if isinstance(files, pandas.Series):
         files = pandas.DataFrame(
-            [[f[1] for f in files.iteritems()], ], columns=[f[0] for f in files.iteritems()]
+            [[f[1] for f in files.items()], ], columns=[f[0] for f in files.items()]
         ).set_index(units.index.names)
     return [file for file in files.itertuples()]
 

@@ -264,6 +264,15 @@ class TestUnitUtils(unittest.TestCase):
             2
         )
 
+        # small dataframe that produces a pandas.Series in get_units
+        units3 = pandas.DataFrame(
+            dict(
+                sample=["NA12878", "NA12878", "NA13878"],
+                type=["N", "T", "N"],
+            )
+        ).set_index(["sample", "type"], drop=False)
+        self.assertEqual(len(get_units(units3, Wildcards(fromdict={"sample": "NA12878", "type": "N"}))), 1)
+
     def test_get_unit_barcodes(self):
         from hydra_genetics.utils.units import get_unit_barcodes
         self.assertEqual(

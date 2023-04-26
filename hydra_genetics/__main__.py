@@ -6,6 +6,7 @@ import re
 import sys
 
 import hydra_genetics.utils
+from hydra_genetics.commands.prep_pipeline_env import environment
 from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles
 import rich.console
 import rich.logging
@@ -265,6 +266,8 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
 def referece_data():
     pass
 
+
+cli.add_command(environment)
 
 if __name__ == "__main__":
     run()

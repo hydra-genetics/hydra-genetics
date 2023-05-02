@@ -4,6 +4,7 @@ Here the standards and conventions are defined on how to write rules, configs, a
 ## Documentation
 ### README
 Each module and pipeline should include a README with the following parts:
+
 * Short description
 * Github action badges
 * Introduction on what the module should be used for
@@ -16,6 +17,7 @@ Each module and pipeline should include a README with the following parts:
 Each module and pipeline are recommended to have a more in depth documentation using [readthedocs](https://readthedocs.org/).
 
 ## Snakemake rules
+
 * Rules should be placed in the workflow/rules directory.
 * Use only small letters and connect words with underscore (e.g. picard_mark_duplicates).
 * Use alphabetical order when applicable.
@@ -36,7 +38,7 @@ sorting=config.get("bwa_mem", {}).get("sort", "samtools"),
 ```
 threads=config.get("bwa_mem", {}).get("threads", config["default_resources"]["threads"]),
 ```
-* For execution, both a container image as well as an conda env file need to be defined. The env file should be named tool.yaml. For the container image, the [docker images](https://hub.docker.com/search?q=hydragenetics) provided by hydra-genetics should be used.
+* Container images are used for execution. Containers should be located at dockerHub and [docker images](https://hub.docker.com/search?q=hydragenetics) provided by hydra-genetics should be used. New containers are added and uploaded via the docker module.
 * All rules should contain a message for logging starting with the rule name followed by a colon and a brief description of what is done and on which file.
 ```
 message:
@@ -198,6 +200,7 @@ required:
 ## Github
 The following branches are used: main, develop (default), feature, bugfix and release branches. Branches are merged into main and then into main follwoing a new release. Read more about gitflow: https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
 https://lucamezzalira.com/2014/03/10/git-flow-vs-github-flow/  
+
 * Code contribution should be kept small, be done via pull-request.
 * Use commit tags and meaningful commit messages to make it easier for the reviewer to understand the purpose of your contribution. sgc is a nice CLI that will guide you when committing staged changes. You need to get npm or yarn though.
 * If possible try to squash commits before doing the first pull-request and reformat the commit messages

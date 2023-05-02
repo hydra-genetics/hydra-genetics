@@ -1,12 +1,12 @@
 # Testing
 
-## Current tests:
+## Current tests
 - [pycodestyle](https://pycodestyle.pycqa.org/en/latest/): (--max-line-length 130)
 - [snakefmt](https://github.com/snakemake/snakefmt): (line-length 130)
 - [snakemake](https://snakemake.readthedocs.io/en/stable/executing/cli.html?highlight=lint#UTILITIES) --lint: (line-length 130)
 - [snakemake dry-run](https://snakemake.readthedocs.io/en/stable/executing/cli.html#useful-command-line-arguments)
 - execution test with small dataset
-- execution: integration test with complete dataset after merging to develop or main on some modules which also tests compatibility between dependent modules.
+- integration test with complete dataset after merging to develop or main on some modules which also tests compatibility between dependent modules.
 
 The small execution tests will make sure that the pipeline actually can be executed, i.e run and generate data. The integration test with complete data set will also evaluate the generated result to make sure that results does not change, if it's not deliberately.
 
@@ -31,9 +31,9 @@ pip install -r requirements.test.txt
 pip install -r requirements.txt
 snakefmt --compact-diff
 pycodestyle --max-line-length=130 --statistics workflow/scripts
+python -m pytest workflow/scripts/python_script_test.py
 cd .tests/integration
 snakemake --lint -s ../../workflow/Snakefile
 snakemake -n -s ../../workflow/Snakefile
-snakemake -c 2 --use-conda -s ../../workflow/Snakefile
 snakemake -s ../../workflow/Snakefile -j 1 --use-singularity
 ```

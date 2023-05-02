@@ -16,7 +16,7 @@ covering all included softwares as well as links to respective github repositori
 | [mitochondrial]() | [https://github.com/hydra-genetics/mitochondrial](https://github.com/hydra-genetics/mitochondrial) |
 | [snv_indels]() | [https://github.com/hydra-genetics/snv_indels](https://github.com/hydra-genetics/snv_indels) |
 | [parabricks]() | [https://github.com/hydra-genetics/parabricks](https://github.com/hydra-genetics/parabricks) |
-| [prealignment]() | [https://github.com/hydra-genetics/prealignment](https://github.com/hydra-genetics/prealignment) |
+| [prealignment](https://twist-solid.readthedocs.io/en/stable/) | [https://github.com/hydra-genetics/prealignment](https://github.com/hydra-genetics/prealignment) |
 | [profiles]() | [https://github.com/hydra-genetics/profiles](https://github.com/hydra-genetics/profiles) |
 | [qc]() | [https://github.com/hydra-genetics/qc](https://github.com/hydra-genetics/qc) |
 

@@ -32,7 +32,7 @@ jobs:
         run: |
           pip install -e .
       - name: Create module
-        run: hydra-genetics create-module -n testar -d "test description" -a testare -e testar@mail.com -g testare
+        run: hydra-genetics create-pipeline -n testar -d "test description" -a testare -e testar@mail.com -g testare
       - name: Create rule
         run: hydra-genetics create-rule -c test2 -t samtools -m testar -a testare2 -e testare2@mail.com
       - name: Add rule to existing smk file

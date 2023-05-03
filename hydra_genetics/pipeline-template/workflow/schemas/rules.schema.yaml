@@ -1,0 +1,26 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+description: snakemake rule input and output files description file
+type: object
+properties:
+  RULE_NAME:
+    type: object
+    description: input and output parameters for RULE_NAME
+    properties:
+      input:
+        type: object
+        description: list of inputs
+        properties:
+          INPUT1:
+            type: string
+            #value: ...
+            description: ...
+      output:
+        type: object
+        description: ....
+        properties:
+          OUTPUT1:
+            type: string
+            description: ...
+          OUPUT2:
+            type: string
+            description: ...

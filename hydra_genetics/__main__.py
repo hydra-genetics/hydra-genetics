@@ -86,7 +86,7 @@ def validate_rule_name_prompt(ctx, opts, value):
     return value
 
 
-@cli.command(short_help="create bare bone project")
+@cli.command(short_help="create bare bone project, pipeline or module")
 @click.option(
     "-n",
     "--name",
@@ -105,7 +105,7 @@ def validate_rule_name_prompt(ctx, opts, value):
 @click.option("--no-git", is_flag=True, default=False, help="Do not create git repo")
 @click.option("-f", "--force", is_flag=True, default=False, help="Overwrite output directory if it already exists")
 @click.option("-o", "--outdir", type=str, help="Output directory for new pipeline (default: pipeline name)")
-def create_module(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
+def create_pipeline(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
     pipeline = PipelineCreate(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir)
     pipeline.init_pipeline()
 

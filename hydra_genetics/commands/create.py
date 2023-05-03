@@ -12,6 +12,7 @@ import jinja2
 import pathlib
 import os
 import re
+import shutil
 import sys
 import hydra_genetics
 
@@ -95,13 +96,18 @@ class PipelineCreate(object):
                 continue
 
             log.debug(f"Rendering template file: '{template_fn}'")
-            j_template = env.get_template(template_fn)
-            rendered_output = j_template.render(object_attrs)
 
-            # Write to the pipeline output file
-            with open(output_path, "w") as fh:
-                log.debug(f"Writing to output file: '{output_path}'")
-                fh.write(rendered_output)
+            if template_fn.endswith(".png"):
+                print(template_fn)
+                shutil.copy(template_fn, output_path)
+            else:
+                j_template = env.get_template(template_fn)
+                rendered_output = j_template.render(object_attrs)
+
+                # Write to the pipeline output file
+                with open(output_path, "w") as fh:
+                    log.debug(f"Writing to output file: '{output_path}'")
+                    fh.write(rendered_output)
 
         if not self.no_git:
             self.git_init_pipeline()

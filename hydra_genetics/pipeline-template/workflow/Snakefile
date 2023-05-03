@@ -23,8 +23,6 @@ rule dummy:
         time=config.get("dummy", {}).get("time", config["default_resources"]["time"]),
     container:
        config.get("dummy", {}).get("container", config["default_container"])
-    conda:
-       "../envs/dummy.yaml"
     message:
        "{rule}: Do stuff on module/{rule}/{wildcards.sample}_{wildcards.type}.input"
     shell:

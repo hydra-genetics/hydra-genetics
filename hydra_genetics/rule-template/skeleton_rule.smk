@@ -31,8 +31,6 @@ rule {{ name }}:
         time=config.get("{{ name }}", {}).get("time", config["default_resources"]["time"]),
     container:
         config.get("{{ name }}", {}).get("container", config["default_container"])
-    conda:
-        "../envs/{{ name }}.yaml"
     message:
         "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.type}.input"
     wrapper:

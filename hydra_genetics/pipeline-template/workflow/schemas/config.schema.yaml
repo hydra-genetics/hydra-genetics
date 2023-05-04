@@ -12,8 +12,31 @@ properties:
   default_container:
     type: string
     description: name or path to a default docker/singularity container
+
+  # Feel free to remove dummy, it's just an example
+  dummy:
+    type: object
+    description: resource definitions for {{ name }}
+    properties:
+      mem_mb:
+        type: integer
+        description: max memory in MB to be available
+      mem_per_cpu:
+        type: integer
+        description: memory in MB used per cpu
+      partition:
+        type: string
+        description: partition to use on cluster
+      threads:
+        type: integer
+        description: number of threads to be available
+      time:
+        type: string
+        description: max execution time
+
 required:
   - samples
   - units
   - resources
   - default_container
+

@@ -6,7 +6,7 @@ __license__ = "GPL-3"
 
 rule dummy:
     output:
-        "{{ short_name }}/dummy/{sample}_{type}.dummy.txt"
+        OUTPUT1="{{ short_name }}/dummy/{sample}_{type}.dummy.txt"
     params:
         extra=config.get("dummy", {}).get("extra", ""),
     log:

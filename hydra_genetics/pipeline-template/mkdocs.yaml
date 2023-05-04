@@ -1,6 +1,7 @@
 site_name: {{ short_name }}
 nav:
   - Introduction: intro.md
+  - Softwares: softwares.md
 
 theme: readthedocs
 extra_css: [extra.css]

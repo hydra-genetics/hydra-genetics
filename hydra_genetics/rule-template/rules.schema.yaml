@@ -16,13 +16,9 @@ properties:
         type: object
         description: list of inputs
         properties:
-          input_1:
+          input1:
             type: string
             description: description input1
-            #value: set to override value in table, else remove
-          input_2:
-            type: string
-            description: description input2
             #value: set to override value in table, else remove
 
       output:

@@ -13,11 +13,6 @@ properties:
   default_container:
     type: string
     description: name or path to a default docker/singularity container
-required:
-  - samples
-  - units
-  - resources
-  - default_container
 
 {% else %}
 
@@ -37,3 +32,11 @@ required:
       extra:
         type: string
         description: parameters that should be forwarded
+
+{% if append_schema_config == 0 -%}
+required:
+  - samples
+  - units
+  - resources
+  - default_container
+{% endif -%}

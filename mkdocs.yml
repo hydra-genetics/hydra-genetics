@@ -36,16 +36,3 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
-
-plugins:
-  - yaml-schema:
-      yaml_files:
-        - file: "workflow/schemas/config.schema.yaml"
-          tag: "CONFIGSCHEMA"
-        - file: "workflow/schemas/resources.schema.yaml"
-          tag: "RESOURCESSCHEMA"
-  - snakemake-rule:
-      rule_folders:
-        - 'workflow/rules'
-      schemas:
-        - 'workflow/schemas/rules.schema.yaml'

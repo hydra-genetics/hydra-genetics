@@ -10,9 +10,9 @@ __license__ = "GPL-3"
 {% endif -%}
 rule {{ name }}:
     input:
-        "...",
+        input1="...",
     output:
-        "{{ module_name }}/{{ name }}/{sample}_{type}.output.txt",
+        output1="{{ module_name }}/{{ name }}/{sample}_{type}.output.txt",
     params:
         extra=config.get("{{ name }}", {}).get("extra", ""),
     log:

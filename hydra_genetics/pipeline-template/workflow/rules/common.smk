@@ -16,7 +16,9 @@ min_version("{{ min_snakemake_version }}")
 ### Set and validate config file
 
 if not workflow.overwrite_configfiles:
-    sys.exit("At least one config file must be passed using --configfile/--configfiles, by command line or a profile!")
+    sys.exit(
+        "At least one config file must be passed using --configfile/--configfiles, by command line or a profile!"
+    )
 
 
 validate(config, schema="../schemas/config.schema.yaml")
@@ -31,7 +33,12 @@ validate(samples, schema="../schemas/samples.schema.yaml")
 
 ### Read and validate units file
 
-units = pandas.read_table(config["units"], dtype=str).set_index(["sample", "type", "flowcell", "lane", "barcode"], drop=False).sort_index()
+units = (
+    pandas.read_table(config["units"], dtype=str)
+    .set_index(["sample", "type", "flowcell", "lane", "barcode"], drop=False)
+    .sort_index()
+)
+
 validate(units, schema="../schemas/units.schema.yaml")
 
 ### Set wildcard constraints

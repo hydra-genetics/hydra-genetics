@@ -164,13 +164,20 @@ class RuleCreate(object):
                 exit(1)
         outdir = os.path.join(outdir, "workflow")
         output_rules = os.path.join(outdir, "rules")
+
+        output_schemas = os.path.join(outdir, "schemas")
+        output_schemas_config = os.path.join(output_schemas, "config.schema.yaml")
+        output_schemas_resources = os.path.join(output_schemas, "resources.schema.yaml")
+        output_schemas_rule = os.path.join(output_schemas, "rules.schema.yaml")
         if not os.path.exists(output_rules):
             log.error(f"Can not find output directory '{output_rules}'")
             sys.exit(2)
         self.append_rule = False
         self.name = self.command
         if self.tool is None:
-            log.info(f"Creating rule: '{output_rules}/{self.command}.smk'")
+            self.rule_name = self.name
+            log.info(f"Creating rule: '{output_rules}/{self.name}.smk'")
+            output_rule = os.path.join(output_rules, f"{self.name}.smk")
         else:
             self.name = f"{self.tool}_{self.name}"
             if os.path.exists(os.path.join(output_rules, f"{self.tool}.smk")):
@@ -183,6 +190,32 @@ class RuleCreate(object):
         if os.path.exists(output_rule) and self.tool is None:
             log.error(f"Rule already exists '{output_rule}'")
             sys.exit(4)
+
+        if not os.path.exists(output_schemas):
+            log.info(f"Creating schema folder {output_schemas}")
+            os.mkdir(output_schemas)
+
+        if not os.path.exists(output_schemas_config):
+            log.info(f"Creating config schema file {output_schemas_config}")
+            self.append_schema_config = False
+        else:
+            log.info(f"Appending to config schema file {output_schemas_config}")
+            self.append_schema_config = True
+
+        if not os.path.exists(output_schemas_resources):
+            log.info(f"Creating resources schema file {output_schemas_resources}")
+            self.append_schema_resources = False
+        else:
+            log.info(f"Appending to resources schema file {output_schemas_resources}")
+            self.append_schema_resources = True
+
+        if not os.path.exists(output_schemas_rule):
+            log.info(f"Creating rule schema file {output_schemas_rule}")
+            self.append_schema_rule = False
+        else:
+            log.info(f"Appending to rule schema file {output_schemas_rule}")
+            self.append_schema_rule = True
+
         env = jinja2.Environment(
             loader=jinja2.PackageLoader("hydra_genetics", "rule-template"), keep_trailing_newline=True
         )
@@ -207,16 +240,28 @@ class RuleCreate(object):
                 continue
 
             template_fn = os.path.relpath(template_fn_path, template_dir)
-            output_path = os.path.join(outdir, template_fn)
+            if template_fn.endswith(".smk"):
+                output_path = output_rules
+                self.append = self.append_rule
+            elif template_fn.endswith("config.schema.yaml"):
+                output_path = output_schemas_config
+                self.append = self.append_schema_config
+            elif template_fn.endswith("rules.schema.yaml"):
+                output_path = output_schemas_rule
+                self.append = self.append_schema_rule
+            elif template_fn.endswith("resources.schema.yaml"):
+                output_path = output_schemas_resources
+                self.append = self.append_schema_resources
+
             if template_fn in rename_files:
                 output_path = os.path.join(outdir, rename_files[template_fn])
 
-            log.debug(f"Rendering template file: '{template_fn}'")
+            log.info(f"Rendering template file: '{template_fn}' at {output_path}")
             j_template = env.get_template(template_fn)
-            rendered_output = j_template.render(object_attrs)
+            rendered_output = j_template.render(object_attrs, trim_blocks=False)
 
             # Write to the pipeline output file
-            with open(output_path, "w" if not self.append_rule else "a") as fh:
+            with open(output_path, "w" if not self.append else "a") as fh:
                 log.debug(f"Writing to output file: '{output_path}'")
                 fh.write(rendered_output)
 

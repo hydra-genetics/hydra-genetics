@@ -39,3 +39,11 @@ jobs:
         run: hydra-genetics create-rule -c test3 -t samtools -m testar -a testare2 -e testare2@mail.com
       - name: Create input files
         run: hydra-genetics create-input-files  -d .tests/ -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1
+      - name: Create pipeline
+        run: hydra-genetics create-pipeline -n test_pipeline -d test -a S -e p -g t
+      - name: Add rule
+        run: hydra-genetics create-rule -c rule1234 -m test_pipeline -a s -e g
+      - name: Add rule belonging to a tool
+        run: hydra-genetics create-rule -c rule1234 -t my_tool -m test_pipeline -a s -e g 
+      - name: Add additional rule to tool
+        run: hydra-genetics create-rule -c rule5231 -t my_tool -m test_pipeline -a s -e g 

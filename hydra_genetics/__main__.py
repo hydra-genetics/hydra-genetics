@@ -79,7 +79,7 @@ def validate_wf_name_prompt(ctx, opts, value):
 
 def validate_rule_name_prompt(ctx, opts, value):
     """Force the rule name to meet the hydra-core requirements"""
-    if not re.match(r"^[a-z0-9_]+$", value):
+    if value is not None and not re.match(r"^[a-z0-9_]+$", value):
         click.echo("Invalid command/tool formatting: only lowercase and '_' is allowed.")
         value = click.prompt(opts.prompt)
         return validate_rule_name_prompt(ctx, opts, value)
@@ -123,12 +123,12 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
 @click.option(
     "-t",
     "--tool",
-    prompt="tool used run command (optional)",
     required=False,
     callback=validate_rule_name_prompt,
     type=str,
     default=None,
-    help="tool that will be used to run the command, if provided it will be used during the naming of the rule, ex samtools",
+    help="tool that will be used to run the command, if provided it will be used during the naming of the "
+         "rule, ex samtools, optional",
 )
 @click.option(
     "-m",
@@ -137,7 +137,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     required=True,
     callback=validate_wf_name_prompt,
     type=str,
-    help="name module/workflow where rule will be added. Expected folder structure is module_name/workflow/, "
+    help="name module/pipeline where rule will be added. Expected folder structure is module_name_or_pipeline/workflow/, "
          " the rule will be added to a subfolder named rules, env.yaml to a subfolder named envs.")
 @click.option(
         "-a",
@@ -159,7 +159,6 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
         type=str,
         help="Output directory for where module is located (default: current dir)")
 def create_rule(command, tool, module, author, email, outdir):
-    print(": ".join([command, tool, module, author, email, str(outdir)]))
     rule = RuleCreate(command, module, author, email, tool, outdir)
     rule.init_rule()
 

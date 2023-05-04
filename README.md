@@ -31,4 +31,8 @@ Example of how to generate a new project
  # Create input files
  hydra-genetics create-input-files -d path/dir1 -d path/dir2
 
+ # Create singularity cache
+ # all container specified in config.yaml will be fetched
+ hydra-genetics singularity create-singularity-files  -o singularity_cache -c config.yaml
+
 ```

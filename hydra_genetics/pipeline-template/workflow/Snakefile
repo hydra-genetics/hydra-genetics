@@ -9,10 +9,11 @@ include: "rules/common.smk"
 include: "rules/dummy.smk"
 
 
-# Include modules
-
-
-# All rule
+# 'All' rule, must be specified before any other modules are
+# included, since they also contain 'All' rule
 rule all:
     input:
         unpack(compile_output_list),
+
+        
+# Include modules

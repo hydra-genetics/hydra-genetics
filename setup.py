@@ -51,7 +51,7 @@ setup(
     entry_points={"console_scripts": ["hydra-genetics=hydra_genetics.__main__:run"]},
     install_requires=[
         'pandas>=1.3.1',
-        'click==7.1.2',
+        'click>=8,<9',
         'jinja2==3.0.1',
         'rich==10.9.0',
         'snakemake',

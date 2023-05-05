@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.1.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.0.0...v1.1.0) (2023-05-05)
+
+
+### Features
+
+* update click dep to match snakefmt versions ([e272547](https://www.github.com/hydra-genetics/hydra-genetics/commit
+
+#### CLI
+* cli to fetch containers and update config ([a558a18](https://www.github.com/hydra-genetics/hydra-genetics/commit/a558a18fa0732506d103d7ba9e59903a6dfaa20a))
+* update cli function used to create new rules ([0be3a24](https://www.github.com/hydra-genetics/hydra-genetics/commit/0be3a2424d37c2a51a692ce5942d9ef13a5e1fb4))
+
+
+#### Templates
+* add mkdocs setup ([9b46bed](https://www.github.com/hydra-genetics/hydra-genetics/commit/9b46bed0c5cf1a1a259f45f0b4937367f5211e4b))
+* drop conda support and testing ([387b50d](https://www.github.com/hydra-genetics/hydra-genetics/commit/387b50d5aaf5f2a0d8d4b918053d64053dbed0bb))
+/e27254758210a13686d89f77ee71684a47f1b318))
+* update project/module template ([1a235ba](https://www.github.com/hydra-genetics/hydra-genetics/commit/1a235ba7889bba5312e8a1fbc3e7537324a3d133))
+
+
+### Bug Fixes
+
+* config template ([2a93542](https://www.github.com/hydra-genetics/hydra-genetics/commit/2a93542a82653c23ab953134d1b482e9df29ce16))
+* replace iteritems() with items() ([508db62](https://www.github.com/hydra-genetics/hydra-genetics/commit/508db621127c0c0195785868508228bf8be51ec8))
+* update requirements for pipeline template ([49a127b](https://www.github.com/hydra-genetics/hydra-genetics/commit/49a127bc9e5c941a42f5499b8beb86291c72fa0b))
+
+
+### Documentation
+
+* remove martin as code owner ([fd61559](https://www.github.com/hydra-genetics/hydra-genetics/commit/fd61559441776b237a40114f2b61b01277670f8f))
+
 ## [1.0.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v0.15.0...v1.0.0) (2023-02-20)
 
 

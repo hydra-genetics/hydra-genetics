@@ -77,7 +77,7 @@ def container_path_update(configfile, new_configfile, singularity_cache_path):
     help="path to update config file",
 )
 @click.option(
-    "--reference-path",
+    "--reference-paths",
     multiple=True,
     prompt="path",
     required=True,
@@ -87,7 +87,7 @@ def container_path_update(configfile, new_configfile, singularity_cache_path):
         " file and replace all occurrences of oldpath with new path"
     ),
 )
-def reference_path_update(configfile, new_configfile, reference_path):
+def reference_path_update(configfile, new_configfile, reference_paths):
     def process_yaml_data(yaml_data, reference_path):
         for key in yaml_data:
             if isinstance(yaml_data[key], dict):

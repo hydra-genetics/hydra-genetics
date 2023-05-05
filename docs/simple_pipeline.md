@@ -42,7 +42,6 @@ cd simple_pipeline
 Look through the generated files
 
 ### Add hydra-genetics modules
-Remove the dummy rule from `workflow/Snakefile`.  
 Add the [prealignment module](https://github.com/hydra-genetics/prealignment) to `workflow/Snakefile` (use tag=”v1.1.0”). See instructions in the module README.  
 Add the [alignment module](https://github.com/hydra-genetics/alignment) to `workflow/Snakefile` (use tag=”v0.4.0”). See instructions in the module README.  
 
@@ -153,9 +152,9 @@ Modify ´simple_pipeline/workflow/rules/picard.smk´ so that the rule does what 
 Update the pipeline to use the new rule.  
 The following files need to be modified:
 
-* `simple_pipeline/workflow/rules/common.smk` #new output
-* `simple_pipeline/workflow/Snakefile` #import the new rule file
-* `simple_pipeline/config/config.yaml` #Add new rule with container and other options needed
+* `simple_pipeline/workflow/rules/common.smk` #Add new output
+* `simple_pipeline/workflow/Snakefile` #Check that the new rule is imported
+* `simple_pipeline/config/config.yaml` #Check that the new rule with container and other options are added. Add more stuff if needed
 
 ### Run pipeline
 Run the pipeline to generate the new output files.

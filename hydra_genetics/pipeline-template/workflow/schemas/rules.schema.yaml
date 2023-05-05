@@ -2,16 +2,3 @@ $schema: "http://json-schema.org/draft-04/schema#"
 description: snakemake rule input and output files description file
 type: object
 properties:
-  # Feel free to remove dummy, it's just an example
-  dummy:
-    type: object
-    description: input and output parameters for dummy
-    properties:
-      output:
-        type: object
-        description: ....
-        properties:
-          OUTPUT1:
-            type: string
-            #value: set to override value in table, else remove
-            description: description of OUTPU1

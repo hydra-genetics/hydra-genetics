@@ -5,12 +5,18 @@
 
 ### Features
 
-* add information to mkdocs ([9b46bed](https://www.github.com/hydra-genetics/hydra-genetics/commit/9b46bed0c5cf1a1a259f45f0b4937367f5211e4b))
+* update click dep to match snakefmt versions ([e272547](https://www.github.com/hydra-genetics/hydra-genetics/commit
+
+#### CLI
 * cli to fetch containers and update config ([a558a18](https://www.github.com/hydra-genetics/hydra-genetics/commit/a558a18fa0732506d103d7ba9e59903a6dfaa20a))
+* update cli function used to create new rules ([0be3a24](https://www.github.com/hydra-genetics/hydra-genetics/commit/0be3a2424d37c2a51a692ce5942d9ef13a5e1fb4))
+
+
+#### Templates
+* add mkdocs setup ([9b46bed](https://www.github.com/hydra-genetics/hydra-genetics/commit/9b46bed0c5cf1a1a259f45f0b4937367f5211e4b))
 * drop conda support and testing ([387b50d](https://www.github.com/hydra-genetics/hydra-genetics/commit/387b50d5aaf5f2a0d8d4b918053d64053dbed0bb))
-* update click dep to match snakefmt versions ([e272547](https://www.github.com/hydra-genetics/hydra-genetics/commit/e27254758210a13686d89f77ee71684a47f1b318))
+/e27254758210a13686d89f77ee71684a47f1b318))
 * update project/module template ([1a235ba](https://www.github.com/hydra-genetics/hydra-genetics/commit/1a235ba7889bba5312e8a1fbc3e7537324a3d133))
-* update rule adding cli ([0be3a24](https://www.github.com/hydra-genetics/hydra-genetics/commit/0be3a2424d37c2a51a692ce5942d9ef13a5e1fb4))
 
 
 ### Bug Fixes

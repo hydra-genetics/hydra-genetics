@@ -10,9 +10,9 @@ __license__ = "GPL-3"
 {% endif -%}
 rule {{ name }}:
     input:
-        "...",
+        input1="...",
     output:
-        "{{ module_name }}/{{ name }}/{sample}_{type}.output.txt",
+        output1="{{ module_name }}/{{ name }}/{sample}_{type}.output.txt",
     params:
         extra=config.get("{{ name }}", {}).get("extra", ""),
     log:
@@ -31,8 +31,6 @@ rule {{ name }}:
         time=config.get("{{ name }}", {}).get("time", config["default_resources"]["time"]),
     container:
         config.get("{{ name }}", {}).get("container", config["default_container"])
-    conda:
-        "../envs/{{ name }}.yaml"
     message:
         "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.type}.input"
     wrapper:

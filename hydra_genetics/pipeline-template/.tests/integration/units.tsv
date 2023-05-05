@@ -1,2 +1,2 @@
-sample	type	run	lane	fastq1	fastq2	adapter
-NA12878	N	1	1	input/R1.fq.gz	input/R2.fq.gz	ACGT
+sample	type	platform	machine	flowcell	lane	barcode	fastq1	fastq2	adapter
+NA12878	N	NextSeq	NDX555	HFXAT1	L001	ACGT-CGTA	input/R1.fq.gz	input/R2.fq.gz	ACGT

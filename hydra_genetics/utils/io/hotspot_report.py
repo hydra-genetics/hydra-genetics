@@ -64,7 +64,6 @@ def generate_hotspot_report(sample,
             other.append(variant)
     log.info("Open genomic vcf")
     g_variants = VariantFile(gvcf_file)
-    sample_format_index_mapper = {sample: index + 1 for index, sample in enumerate(g_variants.header.samples)}
 
     columns = {'columns': []}
     if column_yaml_file is not None:

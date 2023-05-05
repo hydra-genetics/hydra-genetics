@@ -1,4 +1,4 @@
-# :snake: hydra-genetics/{{ short_name }}
+# <img src="images/hydragenetics.png" width=40 /> hydra-genetics/{{ short_name }}
 
 #### {{ description }}
 

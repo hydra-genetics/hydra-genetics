@@ -6,6 +6,9 @@ properties:
     type: string
   units:
     type: string
+  output:
+    type: string
+    description: output yaml/json file defining expected output from pipeline
   resources:
     type: string
     description: Path to resources.yaml file
@@ -16,6 +19,7 @@ properties:
 required:
   - samples
   - units
+  - output
   - resources
   - default_container
 

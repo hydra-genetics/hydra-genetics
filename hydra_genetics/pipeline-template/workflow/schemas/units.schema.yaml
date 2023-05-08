@@ -7,6 +7,7 @@ properties:
   type:
     type: string
     description: type of sample (N|T|R)
+    pattern: ^(N|T|R)$
   platform:
     type: string
     description: sequence platform that have been used to generate data, ex NextSeq

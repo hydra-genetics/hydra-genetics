@@ -1,5 +1,5 @@
 
-# Tools
+# <img src="images/hydragenetics.png" width=40 /> Hydra-genetics
 
 Command line interface to create new modules/pipelines or adding a new rule to an existing project. Provides libraries used to make it easier for people not used to pandas to extract information from samples and units dataframes. These dataframes are generated from [units.tsv](https://github.com/hydra-genetics/tools/blob/develop/hydra_genetics/pipeline-template/workflow/schemas/units.schema.yaml) and [samples.tsv](https://github.com/hydra-genetics/prealignment/blob/develop/workflow/schemas/samples.schema.yaml) files which are used as input.
 
@@ -30,5 +30,9 @@ Example of how to generate a new project
 
  # Create input files
  hydra-genetics create-input-files -d path/dir1 -d path/dir2
+
+ # Create singularity cache
+ # all container specified in config.yaml will be fetched
+ hydra-genetics singularity create-singularity-files  -o singularity_cache -c config.yaml
 
 ```

@@ -1,6 +1,4 @@
 columns:
-    ref_depth:
-      format: ['string', "{:.2f}", "float"]
     Analyzable:
         from: 'function'
         name: "get_read_level"
@@ -16,13 +14,13 @@ columns:
          - depth
         column: 0
     Gene:
-        from: 'merge'
-        divider: ';'
+        from: 'select'
+        items: '[0]'
+        else: '[1:]'
         elements:
             vep:
                 from: 'vep'
                 field: 'SYMBOL'
-                format: ['replace', 'SEPT', '´SEPT']
             hotspot:
                 from: 'hotspot'
                 field: 'GENE'
@@ -41,3 +39,29 @@ columns:
     Comment:
         from: 'hotspot'
         field: "COMMENT"
+    Not_Empty:
+        from: 'select'
+        items: '[1:]'
+        condition:
+          items: '[0]'
+          empty: False
+        elements:
+            vep:
+                from: 'vep'
+                field: 'SYMBOL'
+            hotspot:
+                from: 'hotspot'
+                field: 'GENE'
+    Empty:
+        from: 'select'
+        items: '[1:]'
+        condition:
+          items: '[0]'
+          empty: True
+        elements:
+            vep:
+                from: 'vep'
+                field: 'SYMBOL'
+            hotspot:
+                from: 'hotspot'
+                field: 'GENE'

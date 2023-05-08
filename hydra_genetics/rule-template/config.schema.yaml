@@ -1,0 +1,42 @@
+{% if append_schema_config == 0 -%}
+$schema: "http://json-schema.org/draft-04/schema#"
+description: snakemake configuration file
+type: object
+properties:
+  samples:
+    type: string
+  units:
+    type: string
+  resources:
+    type: string
+    description: Path to resources.yaml file
+  default_container:
+    type: string
+    description: name or path to a default docker/singularity container
+
+{% else %}
+
+{% endif -%}
+
+# Entry added using Hydra-Genetics CLI - please move it into alphabetically sorted order
+  {{ name }}:
+    type: object
+    description: parameters for {{ name }}
+    properties:
+      benchmark_repeats:
+        type: integer
+        description: set number of times benchmark should be repeated
+      container:
+        type: string
+        description: name or path to docker/singularity container
+      extra:
+        type: string
+        description: parameters that should be forwarded
+
+{% if append_schema_config == 0 -%}
+required:
+  - samples
+  - units
+  - resources
+  - default_container
+{% endif -%}

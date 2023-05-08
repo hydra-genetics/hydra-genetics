@@ -6,6 +6,7 @@ import re
 import sys
 
 import hydra_genetics.utils
+from hydra_genetics.commands.prep_pipeline_env import environment
 from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles
 import rich.console
 import rich.logging
@@ -69,7 +70,7 @@ def cli(verbose, log_file):
 
 def validate_wf_name_prompt(ctx, opts, value):
     """Force the workflow name to meet the hydra-core requirements"""
-    if not re.match(r"^[a-z_]+$", value):
+    if not re.match(r"^[a-z][a-z0-9_]+$", value):
         click.echo("Invalid workflow name: must be lowercase without punctuation.")
         value = click.prompt(opts.prompt)
         return validate_wf_name_prompt(ctx, opts, value)
@@ -78,14 +79,14 @@ def validate_wf_name_prompt(ctx, opts, value):
 
 def validate_rule_name_prompt(ctx, opts, value):
     """Force the rule name to meet the hydra-core requirements"""
-    if not re.match(r"^[a-z0-9_]+$", value):
+    if value is not None and not re.match(r"^[a-z0-9_]+$", value):
         click.echo("Invalid command/tool formatting: only lowercase and '_' is allowed.")
         value = click.prompt(opts.prompt)
         return validate_rule_name_prompt(ctx, opts, value)
     return value
 
 
-@cli.command(short_help="create bare bone project")
+@cli.command(short_help="create bare bone project, pipeline or module")
 @click.option(
     "-n",
     "--name",
@@ -104,7 +105,7 @@ def validate_rule_name_prompt(ctx, opts, value):
 @click.option("--no-git", is_flag=True, default=False, help="Do not create git repo")
 @click.option("-f", "--force", is_flag=True, default=False, help="Overwrite output directory if it already exists")
 @click.option("-o", "--outdir", type=str, help="Output directory for new pipeline (default: pipeline name)")
-def create_module(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
+def create_pipeline(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
     pipeline = PipelineCreate(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir)
     pipeline.init_pipeline()
 
@@ -122,12 +123,12 @@ def create_module(name, description, author, email, version, min_snakemake_versi
 @click.option(
     "-t",
     "--tool",
-    prompt="tool used run command (optional)",
     required=False,
     callback=validate_rule_name_prompt,
     type=str,
     default=None,
-    help="tool that will be used to run the command, if provided it will be used during the naming of the rule, ex samtools",
+    help="tool that will be used to run the command, if provided it will be used during the naming of the "
+         "rule, ex samtools, optional",
 )
 @click.option(
     "-m",
@@ -136,7 +137,7 @@ def create_module(name, description, author, email, version, min_snakemake_versi
     required=True,
     callback=validate_wf_name_prompt,
     type=str,
-    help="name module/workflow where rule will be added. Expected folder structure is module_name/workflow/, "
+    help="name module/pipeline where rule will be added. Expected folder structure is module_name_or_pipeline/workflow/, "
          " the rule will be added to a subfolder named rules, env.yaml to a subfolder named envs.")
 @click.option(
         "-a",
@@ -158,7 +159,6 @@ def create_module(name, description, author, email, version, min_snakemake_versi
         type=str,
         help="Output directory for where module is located (default: current dir)")
 def create_rule(command, tool, module, author, email, outdir):
-    print(": ".join([command, tool, module, author, email, str(outdir)]))
     rule = RuleCreate(command, module, author, email, tool, outdir)
     rule.init_rule()
 
@@ -218,6 +218,13 @@ def create_rule(command, tool, module, author, email, outdir):
         help="overwrite existing files",
         is_flag=True)
 @click.option(
+        "-b",
+        "--default-barcode",
+        help="default barcode value that should be used when the fastq files are missing barcode information in their header, "
+             "if not set the tool will fail if barcode can not be extracted",
+        type=str,
+        default=None)
+@click.option(
         "--tc",
         help="tumor contet",
         type=float,
@@ -247,9 +254,10 @@ def create_rule(command, tool, module, author, email, outdir):
         type=int,
         default=1000)
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
-                       sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every):
+                       sample_regex, read_number_regex, adapters, tc, force, default_barcode, validate, ask, th, nreads, every):
     input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
-                                   sample_regex, read_number_regex, adapters, tc, force, validate, ask, th, nreads, every)
+                                   sample_regex, read_number_regex, adapters, tc, force, default_barcode, validate, ask, th,
+                                   nreads, every)
     input_files.init()
 
 
@@ -257,6 +265,8 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
 def referece_data():
     pass
 
+
+cli.add_command(environment)
 
 if __name__ == "__main__":
     run()

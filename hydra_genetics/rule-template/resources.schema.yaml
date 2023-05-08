@@ -1,0 +1,60 @@
+{% if append_schema_resources == 0 -%}
+$schema: "http://json-schema.org/draft-04/schema#"
+description: snakemake configuration file
+type: object
+properties:
+  default_resources:
+    type: object
+    description: default resource definitions
+    properties:
+      mem_mb:
+        type: integer
+        description: max memory in MB to be available by default
+      mem_per_cpu:
+        type: integer
+        description: memory in MB used per cpu by default
+      partition:
+        type: string
+        description: partition to use on cluster by default
+      threads:
+        type: integer
+        description: number of threads to be available by default
+      time:
+        type: string
+        description: max execution time by default
+    required:
+      - mem_mb
+      - mem_per_cpu
+      - partition
+      - threads
+      - time
+
+{% else %}
+
+{% endif -%}
+
+# Entry added using Hydra-Genetics CLI - please move it into alphabetically sorted order
+  {{ name }}:
+    type: object
+    description: resource definitions for {{ name }}
+    properties:
+      mem_mb:
+        type: integer
+        description: max memory in MB to be available
+      mem_per_cpu:
+        type: integer
+        description: memory in MB used per cpu
+      partition:
+        type: string
+        description: partition to use on cluster
+      threads:
+        type: integer
+        description: number of threads to be available
+      time:
+        type: string
+        description: max execution time
+
+{% if append_schema_resources == 0 -%}
+required:
+  - default_resources
+{% endif -%}

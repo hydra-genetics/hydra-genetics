@@ -12,6 +12,7 @@ import jinja2
 import pathlib
 import os
 import re
+import shutil
 import sys
 import hydra_genetics
 
@@ -95,13 +96,18 @@ class PipelineCreate(object):
                 continue
 
             log.debug(f"Rendering template file: '{template_fn}'")
-            j_template = env.get_template(template_fn)
-            rendered_output = j_template.render(object_attrs)
 
-            # Write to the pipeline output file
-            with open(output_path, "w") as fh:
-                log.debug(f"Writing to output file: '{output_path}'")
-                fh.write(rendered_output)
+            if template_fn.endswith(".png"):
+                print(template_fn)
+                shutil.copy(template_fn, output_path)
+            else:
+                j_template = env.get_template(template_fn)
+                rendered_output = j_template.render(object_attrs)
+
+                # Write to the pipeline output file
+                with open(output_path, "w") as fh:
+                    log.debug(f"Writing to output file: '{output_path}'")
+                    fh.write(rendered_output)
 
         if not self.no_git:
             self.git_init_pipeline()
@@ -156,36 +162,77 @@ class RuleCreate(object):
             if not os.path.exists(outdir):
                 log.error(f"Can not find module directory, tried with:\n'{outdir_temp}'\n'{outdir}'")
                 exit(1)
-        outdir = os.path.join(outdir, "workflow")
-        output_rules = os.path.join(outdir, "rules")
-        output_envs = os.path.join(outdir, "envs")
+        outdir_workflow = os.path.join(outdir, "workflow")
+        # Rule path
+        output_rules = os.path.join(outdir_workflow, "rules")
+
+        # Schema path
+        output_schemas = os.path.join(outdir_workflow, "schemas")
+        output_schemas_config = os.path.join(output_schemas, "config.schema.yaml")
+        output_schemas_resources = os.path.join(output_schemas, "resources.schema.yaml")
+        output_schemas_rule = os.path.join(output_schemas, "rules.schema.yaml")
+
+        # Docs software path
+        output_docs_software = os.path.join(outdir, "docs", "softwares.md")
+
         if not os.path.exists(output_rules):
             log.error(f"Can not find output directory '{output_rules}'")
             sys.exit(2)
-        if not os.path.exists(output_envs):
-            log.error(f"Can not find output directory '{output_envs}' exists!")
-            sys.exit(3)
         self.append_rule = False
         self.name = self.command
         if self.tool is None:
-            log.info(f"Creating rule: '{output_rules}/{self.command}.smk'")
+            self.filename_rulename = f"{self.name}__{self.name}"
+            log.info(f"Creating rule: '{output_rules}/{self.name}.smk'")
+            output_rule = os.path.join(output_rules, f"{self.name}.smk")
         else:
             self.name = f"{self.tool}_{self.name}"
+            self.filename_rulename = f"{self.tool}__{self.name}"
             if os.path.exists(os.path.join(output_rules, f"{self.tool}.smk")):
                 log.info(f"Adding entry {self.name} to smk '{outdir}/{self.tool}.smk'")
                 output_rule = os.path.join(output_rules, f"{self.tool}.smk")
-                output_env = os.path.join(output_envs, f"{self.tool}.yaml")
                 self.append_rule = True
             else:
                 log.info(f"Creating smk file: '{output_rules}/{self.tool}.smk' with rule {self.name}")
                 output_rule = os.path.join(output_rules, f"{self.tool}.smk")
-                output_env = os.path.join(output_envs, f"{self.tool}.yaml")
         if os.path.exists(output_rule) and self.tool is None:
             log.error(f"Rule already exists '{output_rule}'")
             sys.exit(4)
-        if os.path.exists(output_env) and self.tool is None:
-            log.error(f"env file already exists '{output_env}'")
-            sys.exit(5)
+
+        if not os.path.exists(output_schemas):
+            log.info(f"Creating schema folder {output_schemas}")
+            os.mkdir(output_schemas)
+
+        if not os.path.exists(output_schemas_config):
+            log.info(f"Creating config schema file {output_schemas_config}")
+            self.append_schema_config = False
+        else:
+            log.info(f"Appending to config schema file {output_schemas_config}")
+            self.append_schema_config = True
+
+        if not os.path.exists(output_schemas_resources):
+            log.info(f"Creating resources schema file {output_schemas_resources}")
+            self.append_schema_resources = False
+        else:
+            log.info(f"Appending to resources schema file {output_schemas_resources}")
+            self.append_schema_resources = True
+
+        if not os.path.exists(output_schemas_rule):
+            log.info(f"Creating rule schema file {output_schemas_rule}")
+            self.append_schema_rule = False
+        else:
+            log.info(f"Appending to rule schema file {output_schemas_rule}")
+            self.append_schema_rule = True
+
+        if not os.path.exists(output_docs_software):
+            log.info(f"Creating docs file {output_docs_software}")
+            self.append_docs_software = False
+            parent_dir = os.path.dirname(output_docs_software)
+            if not os.path.exists(parent_dir):
+                os.mkdir(parent_dir)
+        else:
+            log.info(f"Appending to docs file {output_docs_software}")
+            self.append_docs_software = True
+
         env = jinja2.Environment(
             loader=jinja2.PackageLoader("hydra_genetics", "rule-template"), keep_trailing_newline=True
         )
@@ -193,8 +240,6 @@ class RuleCreate(object):
         rename_files = {
             "skeleton_rule.smk": output_rule,
         }
-        if self.tool is None or not self.append_rule:
-            rename_files["skeleton_env.yaml"] = os.path.join("envs", f"{self.tool}.yaml")
         object_attrs = vars(self)
         template_files = list(pathlib.Path(template_dir).glob("**/*"))
         ignore_strs = [".pyc", "__pycache__", ".pyo", ".pyd", ".DS_Store", ".egg", ".snakemake"]
@@ -212,20 +257,48 @@ class RuleCreate(object):
                 continue
 
             template_fn = os.path.relpath(template_fn_path, template_dir)
-            output_path = os.path.join(outdir, template_fn)
+            if template_fn.endswith(".smk"):
+                output_path = output_rules
+                self.append = self.append_rule
+            elif template_fn.endswith("config.schema.yaml"):
+                output_path = output_schemas_config
+                self.append = self.append_schema_config
+            elif template_fn.endswith("rules.schema.yaml"):
+                output_path = output_schemas_rule
+                self.append = self.append_schema_rule
+            elif template_fn.endswith("resources.schema.yaml"):
+                output_path = output_schemas_resources
+                self.append = self.append_schema_resources
+            elif template_fn.endswith(".md"):
+                output_path = output_docs_software
+                self.append = self.append_docs_software
+
             if template_fn in rename_files:
                 output_path = os.path.join(outdir, rename_files[template_fn])
 
-            log.debug(f"Rendering template file: '{template_fn}'")
+            log.info(f"Rendering template file: '{template_fn}' at {output_path}")
             j_template = env.get_template(template_fn)
-            rendered_output = j_template.render(object_attrs)
+            rendered_output = j_template.render(object_attrs, trim_blocks=False)
 
-            # Write to the pipeline output file
-            with open(output_path, "w" if not self.append_rule else "a") as fh:
-                log.debug(f"Writing to output file: '{output_path}'")
-                fh.write(rendered_output)
-
-        snakefile = os.path.join(outdir, "Snakefile")
+            if os.path.exists(output_path):
+                with open(output_path, "r+") as fh:
+                    lines = fh.readlines()
+                    line_number = 0
+                    for line in lines:
+                        if line.startswith('required:'):
+                            break
+                        else:
+                            line_number += 1
+                    fh.seek(0)
+                    lines.insert(line_number, rendered_output)
+                    log.info(f"Appending to output file: '{output_path}'")
+                    fh.writelines(lines)
+            else:
+                # Write to the content to a new file
+                with open(output_path, "w") as fh:
+                    log.info(f"Writing to new output file: '{output_path}'")
+                    fh.write(rendered_output)
+        snakefile = os.path.join(outdir_workflow, "Snakefile")
         with open(snakefile, 'r+') as fh:
             lines = fh.readlines()
             line_number = 0
@@ -262,6 +335,7 @@ class CreateInputFiles(object):
                  adapters="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
                  tc=1.0,
                  force=False,
+                 default_barcode=None,
                  validate_run_information=False,
                  ask_for_input=False,
                  occurrences_warning_th=0.9,
@@ -277,6 +351,7 @@ class CreateInputFiles(object):
         self.adapters = adapters
         self.tc = tc
         self.force = force
+        self.default_barcode = default_barcode
         self.validate_run_information = validate_run_information
         self.ask_for_input = ask_for_input
         self.occurrences_warning_th = occurrences_warning_th
@@ -335,6 +410,7 @@ class CreateInputFiles(object):
                 for read_number, f in file_dict[sample][files].items():
                     log.info("\t - {} for run information".format(str(f)))
                     machine_id, flowcell, lane_id, barcode = extract_run_information(f,
+                                                                                     self.default_barcode,
                                                                                      self.number_of_reads,
                                                                                      self.every_n_reads,
                                                                                      self.occurrences_warning_th,
@@ -418,13 +494,15 @@ class CreateInputFiles(object):
                                                      self.adapters]))
 
 
-def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,
+def extract_run_information(file_path, default_barcode=None, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,
                             compare_first_and_last_read=False, ask_for_input=False):
     """
     extract information from provided fastq.gz file and creates a consensus create_barcode
 
     :param file_path: path to fastq.gz file
     :type file_path: string
+    :param default_barcode: barcode string used when a barcode can not be extracted
+    :type default_barcode: string
     :param number_of_reads: number of reads that will be used to create consensus barcode
     :type number_of_reads: integer
     :param: warning_threshold: raise a warning for char with lower occurences this value
@@ -551,6 +629,11 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
         # Extract machine id, flowcell and lane
         machine_id, flowcell_id, lane = extract_run_informatio(line)
         barcode = extract_barcode(line)
+        if not re.match('^[A-Z-+]+$', barcode):
+            if default_barcode is not None:
+                return (machine_id, flowcell_id, lane, default_barcode)
+            else:
+                raise Exception("Undable to extract barcode from read name and no default barcode specified")
         skip_read_information(reader_it)
         counter -= 1
         length = len(barcode)
@@ -575,7 +658,7 @@ def extract_run_information(file_path, number_of_reads=200, every_n_reads=1000, 
                 skip_read_information(reader_it)
                 every -= 1
         if counter > 0:
-            logging.warning("Couldn't only select {} reads of {} from fastq file {} for evaluation!".
+            logging.warning("Could only select {} reads of {} from fastq file {} for evaluation!".
                             format(number_of_reads - counter, number_of_reads, file_path))
         if compare_first_and_last_read:
             if counter == 0:

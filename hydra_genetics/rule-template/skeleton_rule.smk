@@ -1,4 +1,4 @@
-{% if append_rule == 0 %}
+{% if append_rule == 0 -%}
 __author__ = "{{ author }}"
 __copyright__ = "Copyright {{ year }}, {{ author }}"
 __email__ = "{{ email }}"
@@ -7,19 +7,20 @@ __license__ = "GPL-3"
 
 {% else %}
 
-{% endif %}
+{% endif -%}
 rule {{ name }}:
     input:
-        "...",
+        input1="...",
     output:
-        "{{ module_name }}/{{ name }}/{sample}_{type}.output.txt"
+        output1="{{ module_name }}/{{ name }}/{sample}_{type}.output.txt",
     params:
         extra=config.get("{{ name }}", {}).get("extra", ""),
     log:
-        "{{ module_name }}/{{ name }}/{sample}_{type}.output.log"
+        "{{ module_name }}/{{ name }}/{sample}_{type}.output.log",
     benchmark:
         repeat(
-            "{{ module_name }}/{{ name }}/{sample}_{type}.output.benchmark.tsv", config.get("{{ name }}", {}).get("benchmark_repeats", 1)
+            "{{ module_name }}/{{ name }}/{sample}_{type}.output.benchmark.tsv",
+            config.get("{{ name }}", {}).get("benchmark_repeats", 1)
         )
     threads: config.get("{{ name }}", {}).get("threads", config["default_resources"]["threads"])
     resources:
@@ -30,9 +31,7 @@ rule {{ name }}:
         time=config.get("{{ name }}", {}).get("time", config["default_resources"]["time"]),
     container:
         config.get("{{ name }}", {}).get("container", config["default_container"])
-    conda:
-        "../envs/{{ name }}.yaml"
     message:
-       "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.type}.input"
+        "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.type}.input"
     wrapper:
         "..."

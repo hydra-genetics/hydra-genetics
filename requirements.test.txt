@@ -1,4 +1,4 @@
-click==7.1.2
+click>=8,<9
 gitpython
 jinja2==3.0.1
 pandas>=1.3.1
@@ -7,4 +7,4 @@ pycodestyle
 pysam
 pytest
 rich==10.9.0
-snakemake==6.8.0
+snakemake==7.13.0

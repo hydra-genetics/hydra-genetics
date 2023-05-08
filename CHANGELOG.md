@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.12.0](https://www.github.com/hydra-genetics/tools/compare/v0.11.0...v0.12.0) (2022-06-17)
+
+
+### Features
+
+* fix template for github actions ([01ba5e0](https://www.github.com/hydra-genetics/tools/commit/01ba5e093537e3a44a699aabe014930ecb4e2243))
+* make config.yaml location more flexible ([c8eaef1](https://www.github.com/hydra-genetics/tools/commit/c8eaef18b06ae1c47bf5b66649d55dbe17e2b9a1))
+* make configfile/configfiles argument mandatory ([88f5fe9](https://www.github.com/hydra-genetics/tools/commit/88f5fe923fd02d9e93d6d24b0d1dd6136f67c3fa))
+* make it possible to format string and values ([ac4624e](https://www.github.com/hydra-genetics/tools/commit/ac4624eb31286a430fac1bc6c183ad63527035b0))
+
+
+### Bug Fixes
+
+* handle bug the arise when specifying output folder ([9ea716f](https://www.github.com/hydra-genetics/tools/commit/9ea716f72ec264ff6ebc53c8bcd64103c2440f9c))
+* make it possible to set a default barcode ([1f0008f](https://www.github.com/hydra-genetics/tools/commit/1f0008f51331c915d107ea62d1de57fff760f979))
+
+## [0.11.0](https://www.github.com/hydra-genetics/tools/compare/v0.10.1...v0.11.0) (2022-05-17)
+
+
+### Features
+
+* extrac_chr return list with empty string if file not exist ([dcf1afb](https://www.github.com/hydra-genetics/tools/commit/dcf1afb2f7602c35a5c66359fcf7250e341d85b0))
+
 ### [0.10.1](https://www.github.com/hydra-genetics/tools/compare/v0.10.0...v0.10.1) (2022-05-16)
 
 

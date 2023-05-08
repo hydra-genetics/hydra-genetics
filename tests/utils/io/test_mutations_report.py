@@ -297,7 +297,7 @@ class TestWp1Reports(unittest.TestCase):
             vcf.write("\n")
             vcf.write(r"chr16	81954789	.	C	GT	165	PASS	ADJAF=0;AF=0.024;BIAS=2:2;CALLERS=vardict;DP=1207;DUPRATE=0;HIAF=0.0254;HICNT=29;HICOV=1140;LSEQ=ATTATTCCATTTCTTTCTTT;MQ=60;MSI=0;MSILEN=0;NM=0.5;ODDRATIO=1.04315;PMEAN=45;PSTD=1;QSTD=1;QUAL=34.1;REFBIAS=699:473;RSEQ=TTTTTTTTTCCAGGAAAGAG;SAMPLE=UP-VAL-74_T;SBF=1;SHIFT3=0;SN=58;SPANPAIR=0;SPLITREAD=0;TYPE=Complex;VARBIAS=17:12;VD=29;CSQ=GT|intron_variant|MODIFIER|PLCG2|5336|Transcript|NM_002661.3|protein_coding||20/32|NM_002661.3:c.2236-14delinsGT|||||||||1||indel|EntrezGene||YES||||NP_002652.2|||||C|C|||||||||||||||||||||||||||||||	GT:DP:VD:AD:AF:RD:ALD	0/1:1207:29:1172,29:0.024:699,473:17,12")  # noqa
             vcf.write("\n")
-            vcf.write(r"chr16	81954789	.	C	G	292	PASS	ADJAF=0;AF=0.4044;BIAS=2:2;CALLERS=vardict,mutect2;DP=863;DUPRATE=0;HIAF=0.448;HICNT=340;HICOV=759;LSEQ=ATTATTCCATTTCTTTCTTT;MQ=60;MSI=9;MSILEN=1;NM=1.4;ODDRATIO=1.03992;PMEAN=39.9;PSTD=1;QSTD=1;QUAL=34.6;REFBIAS=255:187;RSEQ=TTTTTTTTTCCAGGAAAGAG;SAMPLE=UP-VAL-77_T;SBF=0.82815;SHIFT3=0;SN=37.778;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=198:151;VD=349;CSQ=G|intron_variant|MODIFIER|PLCG2|5336|Transcript|NM_002661.3|protein_coding||20/32|NM_002661.3:c.2236-14C>G|||||||rs12446127||1||SNV|EntrezGene||YES||||NP_002652.2|||||C|C||||||||0.171|0.7032|0.7788|0.5567|0.5562|0.5946|0.2338|0.7249|0.6063|0.7799|0.5725|0.5863|0.606|0.5575|0.7799|gnomAD_EAS|benign|||24033266||||	GT:DP:VD:AD:AF:RD:ALD	0/1:863:349:442,349:0.4044:255,187:198,151")  # noqa
+            vcf.write(r"chr16	81954789	.	C	G	292	PASS	ADJAF=0;AF=0.4044;BIAS=2:2;CALLERS=vardict,mutect2;DP=863;DUPRATE=0;HIAF=0.448;HICNT=340;HICOV=759;LSEQ=ATTATTCCATTTCTTTCTTT;MQ=60;MSI=9;MSILEN=1;NM=1.4;ODDRATIO=1.03992;PMEAN=39.9;PSTD=1;QSTD=1;QUAL=34.6;REFBIAS=255:187;RSEQ=TTTTTTTTTCCAGGAAAGAG;SAMPLE=UP-VAL-77_T;SBF=0.82815;SHIFT3=0;SN=37.778;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=198:151;VD=349;CSQ=G|intron_variant|MODIFIER|SEPT|5336|Transcript|NM_002661.3|protein_coding||20/32|NM_002661.3:c.2236-14C>G|||||||rs12446127||1||SNV|EntrezGene||YES||||NP_002652.2|||||C|C||||||||0.171|0.7032|0.7788|0.5567|0.5562|0.5946|0.2338|0.7249|0.6063|0.7799|0.5725|0.5863|0.606|0.5575|0.7799|gnomAD_EAS|benign|||24033266||||	GT:DP:VD:AD:AF:RD:ALD	0/1:863:349:442,349:0.4044:255,187:198,151")  # noqa
 
         tabix_index(self.vcf_vep, preset="vcf")
 
@@ -411,7 +411,7 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
             self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	protein_coding	intron_variant	vardict	-")  # noqa
             self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
-            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	PLCG2	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
 
     def test_filtered_mutation_change_output_order(self):
         from hydra_genetics.utils.io.hotspot_report import generate_hotspot_report
@@ -444,7 +444,7 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[9].rstrip(), "145742514	145742514	NC_000008.11	RECQL4	sample1	A	G	3-check	0	0	839	not analyzable	low	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
             self.assertEqual(result[10].rstrip(), "81954789	81954789	NC_000016.11	PLCG2	sample1	C	GT	2-indel	1144	1172	29	yes	ok	protein_coding	intron_variant	vardict	-")  # noqa
             self.assertEqual(result[11].rstrip(), "29445282	29445282	NC_000002.11	ALK	sample1	G	A	4-other	520	284	3	yes	ok	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
-            self.assertEqual(result[12].rstrip(), "81954789	81954789	NC_000016.11	PLCG2	sample1	C	G	4-other	1144	442	349	yes	ok	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "81954789	81954789	NC_000016.11	SEPT	sample1	C	G	4-other	1144	442	349	yes	ok	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
 
     def test_filtered_mutation_hide_column(self):
         from hydra_genetics.utils.io.hotspot_report import generate_hotspot_report
@@ -477,7 +477,7 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[9].rstrip(), "RECQL4	sample1	145742514	A	G	3-check	0	0	839	not analyzable	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
             self.assertEqual(result[10].rstrip(), "PLCG2	sample1	81954789	C	GT	2-indel	1144	1172	29	yes	protein_coding	intron_variant	vardict	-")  # noqa
             self.assertEqual(result[11].rstrip(), "ALK	sample1	29445282	G	A	4-other	520	284	3	yes	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
-            self.assertEqual(result[12].rstrip(), "PLCG2	sample1	81954789	C	G	4-other	1144	442	349	yes	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "SEPT	sample1	81954789	C	G	4-other	1144	442	349	yes	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
 
     def test_filtered_vep_regex_extract(self):
         from hydra_genetics.utils.io.hotspot_report import generate_hotspot_report
@@ -561,19 +561,19 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(head.rstrip(), "\t".join(["sample", "chr", "start", "stop", "ref", "alt", "report", 'gvcf_depth', "ref_depth", "alt_depth", 'Analyzable', 'Min_read_depth300', 'Gene_vep;hotspot', 'Variant_type', 'Consequence', 'Callers', 'Comment']))  # noqa
             result = report_result.readlines()
             self.assertEqual(len(result), 13)
-            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359	4	yes	ok	ALK;ALK	protein_coding	synonymous_variant	vardict	resistance_mutation")  # noqa
-            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27	4	yes	low	BRAF;EGFR	protein_coding	intron_variant	mutect2	-")  # noqa
+            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359.00	4	yes	ok	ALK;ALK	protein_coding	synonymous_variant	vardict	resistance_mutation")  # noqa
+            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27.00	4	yes	low	BRAF;EGFR	protein_coding	intron_variant	mutect2	-")  # noqa
             self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	1-hotspot	89	-	-	yes	low	-;EGFR	-	-	-	-")   # noqa
             self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	1-hotspot	0	-	-	not analyzable	low	-;BRAF	-	-	-	-")  # noqa
             self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	1-hotspot	0	-	-	not analyzable	low	-;MET	-	-	-	-")  # noqa
             self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	3-check	221	-	-	yes	low	-;ALK	-	-	-	-")  # noqa
             self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	3-check	182	-	-	yes	low	-;ALK	-	-	-	-")  # noqa
-            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5	27	yes	ok	LRRC14;-	protein_coding	upstream_gene_variant	vardict	-")  # noqa
+            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5.00	27	yes	ok	LRRC14;-	protein_coding	upstream_gene_variant	vardict	-")  # noqa
             self.assertEqual(result[8].rstrip(), "sample1	NC_000008.11	145738776	145738776	-	-	3-check	0	-	-	not analyzable	low	-;-	-	-	-	-")  # noqa
-            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4;-	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
-            self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2;-	protein_coding	intron_variant	vardict	-")  # noqa
-            self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK;-	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
-            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	PLCG2;-	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
+            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0.00	839	not analyzable	low	RECQL4;-	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
+            self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172.00	29	yes	ok	PLCG2;-	protein_coding	intron_variant	vardict	-")  # noqa
+            self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284.00	3	yes	ok	ALK;-	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442.00	349	yes	ok	´SEPT;-	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
 
         report = os.path.join(self.tempdir, "filtered.report")
         generate_hotspot_report("sample1",
@@ -601,7 +601,41 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4;-:-	protein_coding	synonymous_variant	vardict,mutect2	-")  # noqa
             self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2;-:-	protein_coding	intron_variant	vardict	-")  # noqa
             self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK;-:-	protein_coding	splice_region_variant&intron_variant	vardict	-")  # noqa
-            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	PLCG2;-:-	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT;-:-	protein_coding	intron_variant	vardict,mutect2	-")  # noqa
+
+    def test_filtered_mutation_select_one_columns(self):
+        from hydra_genetics.utils.io.hotspot_report import generate_hotspot_report
+        levels = [(300, "ok", "yes"), (30, "low", "yes"), (0, "low", "not analyzable")]
+
+        self.maxDiff = 10000
+
+        report = os.path.join(self.tempdir, "filtered.report")
+        generate_hotspot_report("sample1",
+                                report,
+                                levels,
+                                self.hotspot,
+                                self.vcf_vep + ".gz",
+                                self.gvcf + ".gz",
+                                self.reference,
+                                "tests/utils/files/report_columns_select_column.yaml")
+        with open(report, 'r') as report_result:
+            head = report_result.readline()
+            self.assertEqual(head.rstrip(), "\t".join(["sample", "chr", "start", "stop", "ref", "alt", "report", 'gvcf_depth', "ref_depth", "alt_depth", 'Analyzable', 'Min_read_depth300', 'Gene', 'Variant_type', 'Consequence', 'Callers', 'Comment', 'Not_Empty', 'Empty']))  # noqa
+            result = report_result.readlines()
+            self.assertEqual(len(result), 13)
+            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359	4	yes	ok	ALK	protein_coding	synonymous_variant	vardict	resistance_mutation	ALK	-")  # noqa
+            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27	4	yes	low	BRAF	protein_coding	intron_variant	mutect2	-	EGFR	-")  # noqa
+            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	1-hotspot	89	-	-	yes	low	EGFR	-	-	-	-	-	EGFR")   # noqa
+            self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	1-hotspot	0	-	-	not analyzable	low	BRAF	-	-	-	-	-	BRAF")  # noqa
+            self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	1-hotspot	0	-	-	not analyzable	low	MET	-	-	-	-	-	MET")  # noqa
+            self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	3-check	221	-	-	yes	low	ALK	-	-	-	-	-	ALK")  # noqa
+            self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	3-check	182	-	-	yes	low	ALK	-	-	-	-	-	ALK")  # noqa
+            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5	27	yes	ok	LRRC14	protein_coding	upstream_gene_variant	vardict	-	-	-")  # noqa
+            self.assertEqual(result[8].rstrip(), "sample1	NC_000008.11	145738776	145738776	-	-	3-check	0	-	-	not analyzable	low	-	-	-	-	-	-	-")  # noqa
+            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4	protein_coding	synonymous_variant	vardict,mutect2	-	-	-")  # noqa
+            self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	protein_coding	intron_variant	vardict	-	-	-")  # noqa
+            self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	protein_coding	splice_region_variant&intron_variant	vardict	-	-	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT	protein_coding	intron_variant	vardict,mutect2	-	-	-")  # noqa
 
 
 if __name__ == '__main__':

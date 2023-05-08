@@ -1,2 +1,2 @@
 sample	type	platform	machine	flowcell	lane	barcode	fastq1	fastq2	adapter
-NA12878
+NA12878	T	Illumina	NextSeq	HCGT	L001	ACG+GCT	f1.fastq.gz	f2.fastq.gz	ACGTGCT

@@ -10,14 +10,20 @@ This tutorial will guide you through making a pipeline that trim and then align 
 * Do code testing
 * Add your own rule
 
+<hr />
+
 ## Pre-requirements:
 
 * Python => 3.8 (with pip and venv)
 * Singularity >= 3.8.6
 * graphviz
 
+<hr />
+
 ## Download test data
 Download fastq and reference files from [google drive](https://drive.google.com/drive/folders/1PEw05fKo-P-vJHl9y6U0Y82M1s5LdOjb)
+
+<hr />
 
 ## Setup environment
 ```bash
@@ -25,6 +31,8 @@ python3 -m venv hackaton_venv
 source hackaton_venv/bin/activate
 pip install hydra-genetics==1.0.0
 ```
+
+<hr />
 
 ## Create pipeline
 
@@ -104,9 +112,11 @@ Make a rulegraph of your pipeline, look at the figure and enjoy your success!
 snakemake -s workflow/Snakefile --configfile config/config.yaml --rulegraph | dot -Tsvg > images/rulegraph.svg
 ```
 
-### Code testing
+<hr />
+
+## Code testing
 Before making a pull-request to a hydra-genetics module or pipeline it is recommended to run a number of tests locally.  
-Install test programs
+Install test programs:
 ```bash
 pip install -r requirements.test.txt
 ```
@@ -130,7 +140,8 @@ Run linting of the pipeline
 ```bash
 snakemake --lint -s workflow/Snakefile --configfile config/config.yaml
 ```
-<br />
+
+<hr />
 
 ## Add a rule
 In this step we will add a new rule to the pipeline. The new rule should use a program of your choice from [picard](https://broadinstitute.github.io/picard/).  
@@ -164,3 +175,29 @@ snakemake -s workflow/Snakefile \
       -c1 \
       --configfile config/config.yaml
 ```
+
+<hr />
+
+## Add documentation
+When using the hydra-genetics create-pipeline and create-rule readthedocs documentation is already prepared for you. All you need to do is update the schemas. Follow the instruction to view a local copy of your corrent documentation and then update it.
+
+### Install local mkdocs server and plugins
+```bash
+pip install -r docs/requirements.txt
+```
+
+### Start server
+```bash
+mkdocs serve
+```
+
+### View documentation in browser
+[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+### Update schemas
+Update the descriptions in the schemas and the software documetantion page will update with this new information. (Might need restart of server). Look at `docs/softwares.md` to see the code that generates the documentation.  
+Schemas:
+
+* `simple_pipeline/workflow/schemas/rule.schema.yaml` #Description of the rule input and output
+* `simple_pipeline/workflow/schemas/config.schema.yaml` #Description of the configurations (params, container, ...)
+* `simple_pipeline/workflow/schemas/resources.schema.yaml` #Description of the computer resources (modify if extra resources are needed)

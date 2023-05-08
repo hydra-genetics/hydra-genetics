@@ -1,0 +1,38 @@
+site_name: Hydra-genetics
+nav:
+  - Introduction: index.md
+  - Modules: modules.md
+  - Snakemake rules: rules.md
+  - Code standards: standards.md
+  - Code testing: testing.md
+  - How-to make a pipeline:
+    - Create a pipeline skeleton: create.md
+    - Import modules and rules: import.md
+    - Pipeline configuration: config.md
+    - Result files: results.md
+  - How-to run a pipeline:
+    - Cluster profile: profile.md
+    - Create sample files: create_sample_files.md
+    - Make a python environment: environment.md
+  - Tutorials:
+    - Make a simple pipeline: simple_pipeline.md
+
+
+theme: readthedocs
+extra_css: [extra.css]
+theme: readthedocs
+extra_css: [extra.css]
+markdown_extensions:
+  - abbr
+  - attr_list
+  - pymdownx.details
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
+      base_path: ["docs/", "workflow/rules/"]
+      url_download: "True"
+  - mdx_spanner
+  - admonition
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg

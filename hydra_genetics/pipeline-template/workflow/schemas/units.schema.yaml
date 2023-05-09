@@ -14,6 +14,10 @@ properties:
   flowcell:
     type: string
     description: flowcell id
+  barcode:
+    type: string
+    description: flowcell barcode
+    pattern: "^[A-Z+-]+$"
   lane:
     type: string
     description: lane number
@@ -28,6 +32,7 @@ properties:
     description: one or more sequence, separated by ","
 required:
   - adapter
+  - barcode
   - fastq1
   - fastq2
   - flowcell

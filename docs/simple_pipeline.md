@@ -94,7 +94,7 @@ Run pipeline
 snakemake -s workflow/Snakefile \
       --use-singularity \
       -c1 \
-      --singularity-args "-B path/to/fastq_and_reference_files/"
+      --singularity-args "-B path/to/fastq_and_reference_files/" \
       --configfile config/config.yaml \
       --until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam
 ```

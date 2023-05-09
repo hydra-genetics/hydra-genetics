@@ -98,8 +98,7 @@ class PipelineCreate(object):
             log.debug(f"Rendering template file: '{template_fn}'")
 
             if template_fn.endswith(".png"):
-                print(template_fn)
-                shutil.copy(template_fn, output_path)
+                shutil.copy(os.path.join(template_dir, template_fn), output_path)
             else:
                 j_template = env.get_template(template_fn)
                 rendered_output = j_template.render(object_attrs)

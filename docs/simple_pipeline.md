@@ -54,6 +54,7 @@ Add the [prealignment module](https://github.com/hydra-genetics/prealignment) to
 Add the [alignment module](https://github.com/hydra-genetics/alignment) to `workflow/Snakefile` (use tag=”v0.4.0”). See instructions in the module README.  
 
 ### Create input files
+The below command will not find anything due to how the files are named. First, try the command and the try to modify it by adding --read-number-regex "modified_regex" to match the file names.  
 ```bash
 hydra-genetics create-input-files \
    -d path/to/fastq/ \
@@ -61,17 +62,16 @@ hydra-genetics create-input-files \
    --nreads 10
 ```
 
-The above command will not find anything due to how the files are named, try to modify --read-number-regex to match the file names.  
 Check out the input files created: `samples.tsv` and `units.tsv`.
 
 ### Config pipeline
 The pipeline is supposed to trim the fastq files and then output merged and sorted bamfiles.  
 Look at the schemas, example configs and documentation for prealignment and alignment to find out what is required to be added in the config (`config/config.yaml`).
 
-* `prealignment/workflow/schemas/config.schemas.yaml`
-* `alignment/workflow/schemas/config.schemas.yaml`
 * `prealignment/config/config.yaml`
 * `alignment/config/config.yaml`
+* `prealignment/workflow/schemas/config.schemas.yaml`
+* `alignment/workflow/schemas/config.schemas.yaml`
 
 ### Run pipeline
 Install required programs (snakemake, …):
@@ -94,6 +94,7 @@ Run pipeline
 snakemake -s workflow/Snakefile \
       --use-singularity \
       -c1 \
+      --singularity-args "-B path/to/fastq_and_reference_files/"
       --configfile config/config.yaml \
       --until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam
 ```
@@ -103,13 +104,14 @@ Modify workflow/rules/common.smk so that you don’t have to include “--until 
 snakemake -s workflow/Snakefile \
       --use-singularity \
       -c1 \
+      --singularity-args "-B path/to/fastq_and_reference_files/"
       --configfile config/config.yaml
 ```
 
 ### Make a rulegraph
 Make a rulegraph of your pipeline, look at the figure and enjoy your success!
 ```bash
-snakemake -s workflow/Snakefile --configfile config/config.yaml --rulegraph | dot -Tsvg > images/rulegraph.svg
+snakemake -s workflow/Snakefile --configfile config/config.yaml --until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam --rulegraph | dot -Tsvg > images/rulegraph.svg
 ```
 
 <hr />
@@ -173,6 +175,7 @@ Run the pipeline to generate the new output files.
 snakemake -s workflow/Snakefile \
       --use-singularity \
       -c1 \
+      --singularity-args "-B path/to/fastq_and_reference_files/"
       --configfile config/config.yaml
 ```
 

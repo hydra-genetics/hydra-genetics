@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.2.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.1.0...v1.2.0) (2023-05-09)
+
+
+### Features
+
+* output list/rule copy function added. ([57d9840](https://www.github.com/hydra-genetics/hydra-genetics/commit/57d98407f4603eb0ec1ec38e84165ddb97e766ae))
+* remove dummy rule ([2d5a3d8](https://www.github.com/hydra-genetics/hydra-genetics/commit/2d5a3d881ff8bd3feb9cce26e2051030df7d58f9))
+* remove report since it not used ([f9c8af0](https://www.github.com/hydra-genetics/hydra-genetics/commit/f9c8af0803c5718098177b5228fa90b792356489))
+
+
+### Bug Fixes
+
+* add abs path template for png copying ([553f622](https://www.github.com/hydra-genetics/hydra-genetics/commit/553f622e86b1aa84b75dfff8e5ed06c6082273bb))
+* add barcode to units schema ([a3f980a](https://www.github.com/hydra-genetics/hydra-genetics/commit/a3f980a81b730095938c014b853b5b54b0cb21d6))
+* change to correct parameter name ([d55270b](https://www.github.com/hydra-genetics/hydra-genetics/commit/d55270b86883013534b756c7277e32deefc45d05))
+
+
+### Documentation
+
+* added documentation templates ([fa97363](https://www.github.com/hydra-genetics/hydra-genetics/commit/fa9736358b4496d959b5a4ae5db90d5f47a5b554))
+* added mkdocs instructions ([f3b5468](https://www.github.com/hydra-genetics/hydra-genetics/commit/f3b54682fa6daa6788d6096de6c45e601517e600))
+* updated tutorial ([6c2eb91](https://www.github.com/hydra-genetics/hydra-genetics/commit/6c2eb91f3ab9647eab42d2648d6863f6a1911b2b))
+
 ## [1.1.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.0.0...v1.1.0) (2023-05-05)
 
 

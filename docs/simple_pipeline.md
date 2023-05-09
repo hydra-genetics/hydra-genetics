@@ -29,7 +29,7 @@ Download fastq and reference files from [google drive](https://drive.google.com/
 ```bash
 python3 -m venv hackaton_venv
 source hackaton_venv/bin/activate
-pip install hydra-genetics==1.0.0
+pip install hydra-genetics==1.2.0
 ```
 
 <hr />
@@ -38,7 +38,7 @@ pip install hydra-genetics==1.0.0
 
 ### Create skeleton pipeline
 ```bash
-hydra-genetics create-module \
+hydra-genetics create-pipeline \
     --name simple_pipeline \
     --description "A simple pipeline" \
     --author "Patrik Smeds" \

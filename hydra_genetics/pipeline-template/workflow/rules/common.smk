@@ -66,7 +66,7 @@ def compile_output_file_list(wildcards):
         # that the output strings should be formatted with.
         outputpaths = set(
             [
-                f['output'].format(sample=sample, type=unit_type)
+                f["output"].format(sample=sample, type=unit_type)
                 for sample in get_samples(samples)
                 for unit_type in get_unit_types(units, sample)
             ]

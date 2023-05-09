@@ -11,6 +11,9 @@ properties:
   platform:
     type: string
     description: sequence platform that have been used to generate data, ex NextSeq
+  machine: 
+    type: string
+    description: machine id
   flowcell:
     type: string
     description: flowcell id
@@ -38,5 +41,7 @@ required:
   - flowcell
   - lane
   - platform
+  - barcode
+  - machine
   - sample
   - type

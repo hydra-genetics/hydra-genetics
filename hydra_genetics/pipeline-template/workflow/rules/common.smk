@@ -7,6 +7,7 @@ import itertools
 import numpy as np
 import pathlib
 import pandas as pd
+import yaml
 from snakemake.utils import validate
 from snakemake.utils import min_version
 
@@ -46,7 +47,7 @@ with open(config["output"]) as output:
     if config["output"].endswith("json"):
         output_spec = json.load(output)
     elif config["output"].endswith("yaml") or config["output"].endswith("yml"):
-        output_spec = yaml.safe_load(f.read())
+        output_spec = yaml.safe_load(output.read())
 
 validate(output_spec, schema="../schemas/output_files.schema.yaml")
 

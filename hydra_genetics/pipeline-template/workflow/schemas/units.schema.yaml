@@ -41,7 +41,6 @@ required:
   - flowcell
   - lane
   - platform
-  - barcode
   - machine
   - sample
   - type

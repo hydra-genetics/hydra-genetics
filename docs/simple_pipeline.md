@@ -28,7 +28,7 @@ Download fastq and reference files from [google drive](https://drive.google.com/
 pip install gdown
 
 # Download reference data
-gdown https://drive.google.com/drive/folders/1lWUAg83k0H3RtEoI6Rr3flCPpFTQ5p57?usp=share_link -O reference_data --folder 
+gdown https://drive.google.com/drive/folders/1lWUAg83k0H3RtEoI6Rr3flCPpFTQ5p57?usp=share_link -O reference --folder 
 
 # Download fastq files
 gdown https://drive.google.com/drive/folders/1X1tRvHp6bKGESBixD2hpbmIL0CWeaEe2?usp=share_link -O fastq_data --folder 

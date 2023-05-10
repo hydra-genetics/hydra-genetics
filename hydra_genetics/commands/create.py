@@ -114,7 +114,7 @@ class PipelineCreate(object):
     def git_init_pipeline(self):
         """Initialises the new pipeline as a Git repository and submits first commit."""
         log.info("Initialising pipeline git repository")
-        repo = git.Repo.init(self.outdir)
+        repo = git.Repo.init(self.outdir, initial_branch='main')
         repo.git.add(A=True)
         repo.index.commit(f"initial template build from hydra-genetics/tools, version {hydra_genetics.__version__}")
         # Add TEMPLATE branch to git repository

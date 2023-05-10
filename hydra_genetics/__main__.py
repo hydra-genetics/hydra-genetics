@@ -57,7 +57,7 @@ def cli(verbose, log_file):
             level=logging.DEBUG if verbose else logging.INFO,
             console=rich.console.Console(stderr=True, force_terminal=rich_force_colors()),
             show_time=False,
-            markup=True,sort entries in template resources.schema.yaml in alphabetically order
+            markup=True,
         )
     )
 

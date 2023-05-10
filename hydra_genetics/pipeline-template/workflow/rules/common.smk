@@ -7,6 +7,7 @@ import itertools
 import numpy as np
 import pathlib
 import pandas as pd
+import yaml
 from snakemake.utils import validate
 from snakemake.utils import min_version
 
@@ -46,7 +47,7 @@ with open(config["output"]) as output:
     if config["output"].endswith("json"):
         output_spec = json.load(output)
     elif config["output"].endswith("yaml") or config["output"].endswith("yml"):
-        output_spec = yaml.safe_load(f.read())
+        output_spec = yaml.safe_load(output.read())
 
 validate(output_spec, schema="../schemas/output_files.schema.yaml")
 
@@ -61,18 +62,17 @@ def compile_output_file_list(wildcards):
     outdir = pathlib.Path(output_spec.get("directory", "./"))
     output_files = []
 
-    callers = config.get("bcbio_variation_recall_ensemble", {}).get("callers", [])
-    wc_df = pd.DataFrame(np.repeat(units.values, len(callers), axis=0))
-    wc_df.columns = units.columns
-    caller_gen = itertools.cycle(callers)
-    wc_df = wc_df.assign(caller=[next(caller_gen) for i in range(wc_df.shape[0])])
-
     for f in output_spec["files"]:
-        outputpaths = set(expand(f["output"], zip, **wc_df.to_dict("list")))
-        if len(outputpaths) == 0:
-            # Using expand with zip on a pattern without any wildcards results
-            # in an empty list. Then just add the output filename as it is.
-            outputpaths = [f["output"]]
+        # Please remember to add any additional values down below
+        # that the output strings should be formatted with.
+        outputpaths = set(
+            [
+                f["output"].format(sample=sample, type=unit_type)
+                for sample in get_samples(samples)
+                for unit_type in get_unit_types(units, sample)
+            ]
+        )
+
         for op in outputpaths:
             output_files.append(outdir / Path(op))
 

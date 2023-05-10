@@ -57,7 +57,7 @@ def cli(verbose, log_file):
             level=logging.DEBUG if verbose else logging.INFO,
             console=rich.console.Console(stderr=True, force_terminal=rich_force_colors()),
             show_time=False,
-            markup=True,
+            markup=True,sort entries in template resources.schema.yaml in alphabetically order
         )
     )
 
@@ -261,9 +261,9 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
     input_files.init()
 
 
-@cli.command(short_help="download reference data")
-def referece_data():
-    pass
+#@cli.command(short_help="download reference data")
+#def referece_data():
+#    pass
 
 
 cli.add_command(environment)

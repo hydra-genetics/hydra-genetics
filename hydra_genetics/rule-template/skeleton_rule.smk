@@ -32,6 +32,6 @@ rule {{ name }}:
     container:
         config.get("{{ name }}", {}).get("container", config["default_container"])
     message:
-        "{rule}: Do stuff on {{ module_name }}/{rule}/{wildcards.sample}_{wildcards.type}.input"
+        "{rule}: do stuff on {input.input1}"
     wrapper:
         "..."

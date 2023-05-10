@@ -23,6 +23,17 @@ This tutorial will guide you through making a pipeline that trim and then align 
 ## Download test data
 Download fastq and reference files from [google drive](https://drive.google.com/drive/folders/1PEw05fKo-P-vJHl9y6U0Y82M1s5LdOjb)
 
+```
+# gdown need to be installed
+pip install gdown
+
+# Download reference data
+gdown https://drive.google.com/drive/folders/1lWUAg83k0H3RtEoI6Rr3flCPpFTQ5p57?usp=share_link -O reference --folder 
+
+# Download fastq files
+gdown https://drive.google.com/drive/folders/1X1tRvHp6bKGESBixD2hpbmIL0CWeaEe2?usp=share_link -O fastq_data --folder 
+```
+
 <hr />
 
 ## Setup environment

@@ -20,22 +20,6 @@ This tutorial will guide you through making a pipeline that trim and then align 
 
 <hr />
 
-## Download test data
-Download fastq and reference files from [google drive](https://drive.google.com/drive/folders/1PEw05fKo-P-vJHl9y6U0Y82M1s5LdOjb)
-
-```
-# gdown need to be installed
-pip install gdown
-
-# Download reference data
-gdown https://drive.google.com/drive/folders/1lWUAg83k0H3RtEoI6Rr3flCPpFTQ5p57?usp=share_link -O reference --folder 
-
-# Download fastq files
-gdown https://drive.google.com/drive/folders/1X1tRvHp6bKGESBixD2hpbmIL0CWeaEe2?usp=share_link -O fastq_data --folder 
-```
-
-<hr />
-
 ## Setup environment
 ```bash
 python3 -m venv hackaton_venv
@@ -59,6 +43,22 @@ cd simple_pipeline
 ```
 
 Look through the generated files
+
+<hr />
+
+### Download test data
+Download fastq and reference files from [google drive](https://drive.google.com/drive/folders/1PEw05fKo-P-vJHl9y6U0Y82M1s5LdOjb)
+
+```
+# gdown need to be installed
+pip install gdown
+
+# Download reference data
+gdown https://drive.google.com/drive/folders/1lWUAg83k0H3RtEoI6Rr3flCPpFTQ5p57?usp=share_link -O reference --folder
+
+# Download fastq files
+gdown https://drive.google.com/drive/folders/1X1tRvHp6bKGESBixD2hpbmIL0CWeaEe2?usp=share_link -O fastq_data --folder
+```
 
 ### Add hydra-genetics modules
 Add the [prealignment module](https://github.com/hydra-genetics/prealignment) to `workflow/Snakefile` (use tag=”v1.1.0”). See instructions in the module README.  

@@ -8,7 +8,7 @@ def create_docker_file_path(storage_path, container):
     return os.path.join(storage_path, container.replace('docker://', '').replace("/", "_").replace(":", "_") + ".sif")
 
 
-@click.group("prepare-environment", short_help="prepare for singularty environment")
+@click.group("prepare-environment", short_help="prepare for singularity environment")
 def environment():
     pass
 

@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.3.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.2.0...v1.3.0) (2023-05-10)
+
+
+### Features
+
+* update hydra-genetics version for template ([808687a](https://www.github.com/hydra-genetics/hydra-genetics/commit/808687a7db4a61594a85b9433738ae36d1bac7a7))
+
+
+### Bug Fixes
+
+* add missing library name and update variable name ([7e5d32d](https://www.github.com/hydra-genetics/hydra-genetics/commit/7e5d32dfebcf7b50b7c0b025dd9bd2d3f66ec7f9))
+* update output list function ([7aee418](https://www.github.com/hydra-genetics/hydra-genetics/commit/7aee4182dcdae4ce107a719abf7d14b26e8386fd))
+
+
+### Documentation
+
+* add command to download reference and fastq data from gdrive ([bf4f788](https://www.github.com/hydra-genetics/hydra-genetics/commit/bf4f788992607a81338489a15a7ffd6cab438e0e))
+* add missing \ to tutorial command ([1d38a0e](https://www.github.com/hydra-genetics/hydra-genetics/commit/1d38a0eadd816bee407350622d94ab2f5e7460cb))
+* bump hydra-genetics version ([eeefbfc](https://www.github.com/hydra-genetics/hydra-genetics/commit/eeefbfc1d2ac0ea2ed76066856b1e1c78169dc0d))
+* bump hydra-genetics version ([2046064](https://www.github.com/hydra-genetics/hydra-genetics/commit/2046064c7c059a37554c41c6246c38d2d67aa014))
+* download test data later ([b664f5a](https://www.github.com/hydra-genetics/hydra-genetics/commit/b664f5a38a803aa0f1dd94cdd4c79f7b814b2525))
+* update tutorial ([46c63e7](https://www.github.com/hydra-genetics/hydra-genetics/commit/46c63e75aafcba13c52cc0cd6e541dd3d39c71c5))
+* update tutorial ([ec375ef](https://www.github.com/hydra-genetics/hydra-genetics/commit/ec375ef96a955d002e95dd7c19cdfd7a5c6df991))
+
 ## [1.2.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.1.0...v1.2.0) (2023-05-09)
 
 

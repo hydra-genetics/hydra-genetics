@@ -115,7 +115,7 @@ Modify workflow/rules/common.smk so that you don’t have to include “--until 
 snakemake -s workflow/Snakefile \
       --use-singularity \
       -c1 \
-      --singularity-args "-B path/to/fastq_and_reference_files/"
+      --singularity-args "-B path/to/fastq_and_reference_files/" \
       --configfile config/config.yaml
 ```
 

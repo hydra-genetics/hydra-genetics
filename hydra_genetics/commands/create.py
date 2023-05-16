@@ -330,7 +330,7 @@ class CreateInputFiles(object):
                  platform="Illumina",
                  sample_type="T",
                  sample_regex=r"^([A-Za-z0-9-]+)_.*\.fastq.gz",
-                 read_number_regex="_(R[12]{1})_",
+                 read_number_regex="_(R[12]{1})[_.]{1}",
                  adapters="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
                  tc=1.0,
                  force=False,

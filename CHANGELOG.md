@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.4.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.3.0...v1.4.0) (2023-05-16)
+
+
+### Features
+
+* add output yaml file to pipeline template integration test ([231bede](https://www.github.com/hydra-genetics/hydra-genetics/commit/231bededd41faee8a6ef008ca2303f77199dfe9f))
+* for pipeline template, change branch name master to main ([fff35d8](https://www.github.com/hydra-genetics/hydra-genetics/commit/fff35d85e0700628d687d80c789fcc4fea9f6d51))
+* make read regex less stringent ([44439b6](https://www.github.com/hydra-genetics/hydra-genetics/commit/44439b61c32d1d25e3940bf4ec71583a67c7d596))
+* remove dropna for units ([2146cfa](https://www.github.com/hydra-genetics/hydra-genetics/commit/2146cfafe9d4faf7a11539aa88de0d33c8d022af))
+* update pipeline template, change to yaml as deault for output_files ([5065898](https://www.github.com/hydra-genetics/hydra-genetics/commit/5065898cb74a6eac31b01216cfabf7f6babc55cd))
+* update snakemake versionm allow range up to version 8 ([e0d9b19](https://www.github.com/hydra-genetics/hydra-genetics/commit/e0d9b192a5b22352670a72e2e7307037bb9b8cff))
+
+
+### Bug Fixes
+
+* add preserve timestamp to output rule function ([0e3e779](https://www.github.com/hydra-genetics/hydra-genetics/commit/0e3e779fd58d68c1fc7b5c22020f8635a7efd4a7))
+* cli spelling error ([06011dc](https://www.github.com/hydra-genetics/hydra-genetics/commit/06011dce1e57ccde22b25498d76105ba353ea68f))
+* sort entries in template resources.schema.yaml in alphabetically order ([9eb85ac](https://www.github.com/hydra-genetics/hydra-genetics/commit/9eb85ac57dd8e69f88716eced51d97869d8abb78))
+
+
+### Documentation
+
+* Update skeleton_rule.smk message ([63109e7](https://www.github.com/hydra-genetics/hydra-genetics/commit/63109e7f3336d83d32d4bcf4c3bbe94618f459df))
+
 ## [1.3.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.2.0...v1.3.0) (2023-05-10)
 
 

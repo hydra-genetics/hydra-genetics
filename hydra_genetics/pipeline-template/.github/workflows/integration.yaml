@@ -46,4 +46,4 @@ jobs:
       - name: Integration test - small dataset
         working-directory: .tests/integration
         run: |
-          snakemake -s ../../workflow/Snakefile -j 1 --show-failed-logs --configfile config.yaml  --use-singularity --singularity-args  " --cleanenv --bind /home/runner "
+          snakemake -s ../../workflow/Snakefile -j 1 --show-failed-logs --configfile config/config.yaml  --use-singularity --singularity-args  " --cleanenv --bind /home/runner "

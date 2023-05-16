@@ -261,9 +261,9 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
     input_files.init()
 
 
-@cli.command(short_help="download reference data")
-def referece_data():
-    pass
+#  @cli.command(short_help="download reference data")
+#  def referece_data():
+#    pass
 
 
 cli.add_command(environment)

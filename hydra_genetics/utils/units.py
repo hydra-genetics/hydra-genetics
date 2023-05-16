@@ -18,7 +18,7 @@ def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pand
     Raises:
         raises an exception (KeyError) if no unit can be extracted from the Dataframe
     """
-    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.flowcell, wildcards.lane, wildcards.barcode)].dropna()
+    unit = units.loc[(wildcards.sample, wildcards.type, wildcards.flowcell, wildcards.lane, wildcards.barcode)]
     return unit
 
 
@@ -76,7 +76,7 @@ def get_unit_barcodes(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
         (units['sample'] == wildcards.sample) &
         (units['flowcell'] == wildcards.flowcell) &
         (units['type'] == wildcards.type),
-    ].dropna().itertuples()])
+    ].itertuples()])
 
 
 def get_unit_machine(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
@@ -146,9 +146,9 @@ def get_units(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: 
         raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
     """
     if type is None:
-        files = units.loc[(wildcards.sample, wildcards.type)].dropna()
+        files = units.loc[(wildcards.sample, wildcards.type)]
     else:
-        files = units.loc[(wildcards.sample, type)].dropna()
+        files = units.loc[(wildcards.sample, type)]
     if isinstance(files, pandas.Series):
         files = pandas.DataFrame(
             [[f[1] for f in files.items()], ], columns=[f[0] for f in files.items()]
@@ -187,7 +187,7 @@ def get_platforms(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) ->
     Raises:
         raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
     """
-    return set([u.platform for u in units.loc[(wildcards.sample, wildcards.type)].dropna().itertuples()])
+    return set([u.platform for u in units.loc[(wildcards.sample, wildcards.type)].itertuples()])
 
 
 def get_unit_types(units: pandas.DataFrame, sample: str) -> set:
@@ -203,7 +203,7 @@ def get_unit_types(units: pandas.DataFrame, sample: str) -> set:
     Raises:
         raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
     """
-    return set([u.type for u in units.loc[(sample,)].dropna().itertuples()])
+    return set([u.type for u in units.loc[(sample,)].itertuples()])
 
 
 def get_units_per_flowcell(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards):

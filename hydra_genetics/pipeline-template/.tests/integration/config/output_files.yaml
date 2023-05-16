@@ -1,0 +1,5 @@
+---
+ files: 
+   - name: "_copy_samples_tsv"
+     output: "result/samples.tsv"
+     input: "samples.tsv"

@@ -20,7 +20,7 @@ The module consists of alignment  ....
 
 In order to use this module, the following dependencies are required:
 
-[![hydra-genetics](https://img.shields.io/badge/hydragenetics-v0.9.1-blue)](https://github.com/hydra-genetics/)
+[![hydra-genetics](https://img.shields.io/badge/hydragenetics-v1.3.0-blue)](https://github.com/hydra-genetics/)
 [![pandas](https://img.shields.io/badge/pandas-1.3.1-blue)](https://pandas.pydata.org/)
 [![python](https://img.shields.io/badge/python-3.8-blue)
 [![snakemake](https://img.shields.io/badge/snakemake-{{ min_snakemake_version }}-blue)](https://snakemake.readthedocs.io/en/stable/)
@@ -55,9 +55,9 @@ The workflow repository contains a small test dataset `.tests/integration` which
 
 ```bash
 $ cd .tests/integration
-$ snakemake -s ../../Snakefile -j1 --use-singularity
+$ snakemake -s ../../Snakefile --configfiles ../../config/config.yaml config/config.yaml -j1 --use-singularity
 ```
-
+`../../config/config.yaml` is the original config-file, while `config/config.yaml` is the test config. By defining two config-files the latter overwrites any overlapping variables in the first config-file.
 ## :rocket: Usage
 
 To use this module in your workflow, follow the description in the
@@ -88,3 +88,4 @@ The following output files should be targeted via another rule:
 | `{{ short_name }}/PATH/FILE` | DESCRIPTION |
 
 ## :judge: Rule Graph
+![rule_graph_reference](images/rulegraph.svg)

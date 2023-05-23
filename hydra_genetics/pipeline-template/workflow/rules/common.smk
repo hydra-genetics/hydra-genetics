@@ -22,8 +22,25 @@ min_version("{{ min_snakemake_version }}")
 if not workflow.overwrite_configfiles:
     "At least one config file must be passed using --configfile/--configfiles, by command line or a profile!"
 
+try:
+    validate(config, schema="../schemas/config.schema.yaml")
+except WorkflowError as we:
+    # Probably a validation error, but the original exception in lost in
+    # snakemake. Pull out the most relevant information instead of a potentially
+    # *very* long error message.
+    if not we.args[0].lower().startswith("error validating config file"):
+        raise
+    error_msg = "\n".join(we.args[0].splitlines()[:2])
+    parent_rule_ = we.args[0].splitlines()[3].split()[-1]
+    if parent_rule_ == "schema:":
+        sys.exit(error_msg)
+    else:
+        schema_hiearachy = parent_rule_.split()[-1]
+        schema_section = ".".join(re.findall(r"\['([^']+)'\]", schema_hiearachy)[1::2])
+        sys.exit(f"{error_msg} in {schema_section}")
 
-validate(config, schema="../schemas/config.schema.yaml")
+### Read and validate resources file
+
 config = load_resources(config, config["resources"])
 validate(config, schema="../schemas/resources.schema.yaml")
 
@@ -42,6 +59,8 @@ units = (
 )
 
 validate(units, schema="../schemas/units.schema.yaml")
+
+### Read and validate output file
 
 with open(config["output"]) as output:
     if config["output"].endswith("json"):

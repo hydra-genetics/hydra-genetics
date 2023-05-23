@@ -193,7 +193,7 @@ snakemake -s workflow/Snakefile \
 <hr />
 
 ## Add documentation
-When using the hydra-genetics create-pipeline and create-rule readthedocs documentation is already prepared for you. All you need to do is update the schemas. Follow the instruction to view a local copy of your corrent documentation and then update it.
+When using the hydra-genetics create-pipeline and create-rule readthedocs documentation is already prepared for you. All you need to do is update the schemas. Follow the instruction to view a local copy of your current documentation and then update it.
 
 ### Install local mkdocs server and plugins
 ```bash
@@ -209,7 +209,7 @@ mkdocs serve
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ### Update schemas
-Update the descriptions in the schemas and the software documetantion page will update with this new information. (Might need restart of server). Look at `docs/softwares.md` to see the code that generates the documentation.  
+Update the descriptions in the schemas and the software documentation page will update with this new information. (Might need restart of server). Look at `docs/softwares.md` to see the code that generates the documentation.  
 Schemas:
 
 * `simple_pipeline/workflow/schemas/rule.schema.yaml` #Description of the rule input and output

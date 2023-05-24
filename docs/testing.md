@@ -13,7 +13,7 @@ The small execution tests will make sure that the pipeline actually can be execu
 ## Small integration test
 * A small (KB to a few MB if necessary) dataset for testing is to be included and placed under .tests/integration/.
 * Original input should be contained in the input directory while references, such as fasta-files or databases, should go into reference. If output from previous modules is necessary, the path structure of these files should be adapted.
-* For configuration, add an appropriate config.yaml, resources.yaml as well as tsv-files.
+* For configuration, add an test-config.yaml to overwrite any overlapping variables from the first config.yaml. `resources.yaml` and `.tsv`-files are needed as well.
 * If the module offers different routes, include configuration for each of them.
 * To avoid committing output from the test runs, add output file patterns to your .gitignore:
 ```
@@ -33,7 +33,7 @@ snakefmt --compact-diff
 pycodestyle --max-line-length=130 --statistics workflow/scripts
 python -m pytest workflow/scripts/python_script_test.py
 cd .tests/integration
-snakemake --lint -s ../../workflow/Snakefile
-snakemake -n -s ../../workflow/Snakefile
-snakemake -s ../../workflow/Snakefile -j 1 --use-singularity
+snakemake --lint -s ../../workflow/Snakefile --configfiles ../../config/config.yaml config/config.yaml
+snakemake -n -s ../../workflow/Snakefile --configfiles ../../config/config.yaml config/config.yaml
+snakemake -s ../../workflow/Snakefile -j 1 --use-singularity --configfiles ../../config/config.yaml config/config.yaml
 ```

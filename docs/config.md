@@ -1,6 +1,6 @@
 # Pipeline configuration (`config.yaml`, `resources.yaml`)
 Configuration of the pipeline is set up in the `config.yaml` file. Both general settings and rule specific settings are set here.
-The `config.yaml` can also point to other config-files, such as a config for reasources `resources.yaml`.
+The `config.yaml` can also point to other config-files, such as a config for resources `resources.yaml`.
 ## Basic setup
 Basic setup for `config.yaml`:
 ```

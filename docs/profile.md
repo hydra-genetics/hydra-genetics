@@ -12,7 +12,7 @@ singularity-args: "--cleanenv -B /data"               # Singularity arguments
 singularity-prefix: "/data/singularity_cache/"        # Singularity cache
 drmaa: " -t {resources.time} -n {resources.threads} --mem={resources.mem_mb} --mem-per-cpu={resources.mem_per_cpu} --mem-per-cpu={resources.mem_per_cpu} --partition={resources.partition} -J {rule} -e slurm_out/{rule}_%j.err -o slurm_out/{rule}_%j.out" # drmaa options
 drmaa-log-dir: "slurm_out"                            # Directory for slurm output log files
-default-resources: [threads=1, time="04:00:00", partition="low", mem_mb="3074", mem_per_cpu="3074"] # Default resources, overwritten by default values in resourses.yaml
+default-resources: [threads=1, time="04:00:00", partition="core", mem_mb="3074", mem_per_cpu="3074"] # Default resources, overwritten by default values in resources.yaml
 ```
 To run a pipeline with a profile just specify the profile like this:
 ```bash

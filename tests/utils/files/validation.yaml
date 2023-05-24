@@ -25,4 +25,14 @@
      path: RNA_DATA/design.interval_list
      checksum: 390e076bf05a18d113b26e8485b248e6
      url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/RNA_DATA/design.interval_list
+
+   design_intervals_rna_v2:
+     path: RNA_DATA/design.interval_listv2
+     checksum: 390e076bf05a18d113b26e8485b248e6
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/RNA_DATA/design.interval_listv2
+  
+   design_intervals_rna_v3:
+     path: RNA_DATA/design.interval_listv3
+     checksum: 390e076bf05a18d113b26e8485b248e6
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/RNA_DATA/design.interval_listv2
     

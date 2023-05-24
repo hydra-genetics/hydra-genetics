@@ -81,7 +81,9 @@ def fetch_reference_data(validation_data, output_dir,
     return fetched, failed, skipped, files_fetched, files_failed, files_skipped
 
 
-def validate_reference_data(validation_data, path_to_ref_data, file_list=[], counter_pass=0, counter_fail=0):
+def validate_reference_data(validation_data, path_to_ref_data,
+                            file_list=[], not_found_in_config=[],
+                            counter_pass=0, counter_fail=0):
     '''
         Validate all entries in the validation dict
 
@@ -90,6 +92,7 @@ def validate_reference_data(validation_data, path_to_ref_data, file_list=[], cou
                                     ex {key: {key_s1: {path: value}, key_s2: {path: value}, k2: {path: value}}
             path_to_ref_data (str): path to where data is stored
             file_list (list): list with files in config file
+            not_found_in_config (list): files in loaded validation that couldn't be found in the configuration file
             counter_pass (int): counter variable for files that passed test
             counter_fail (int): counter variable for files that did not pass test
 
@@ -100,21 +103,30 @@ def validate_reference_data(validation_data, path_to_ref_data, file_list=[], cou
         # A validation entry
         if "path" in validation_data[k]:
             file_path = os.path.join(path_to_ref_data, validation_data[k]['path'])
-            calculated_md5 = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
-            if not calculated_md5 == validation_data[k]['checksum']:
 
+            if not os.path.exists(file_path):
                 counter_fail += 1
-                logging.error(f"Incorrect checksum for {file_path}, expected"
-                              f" {validation_data[k]['checksum']}, got {calculated_md5}")
+                logging.error(f"Could not locate: {file_path}")
             else:
-                counter_pass += 1
-                logging.info(f"PASS: {file_path}")
-            file_list.remove(validation_data[k]['path'])
+                calculated_md5 = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+                if not calculated_md5 == validation_data[k]['checksum']:
+
+                    counter_fail += 1
+                    logging.error(f"Incorrect checksum for {file_path}, expected"
+                                  f" {validation_data[k]['checksum']}, got {calculated_md5}")
+                else:
+                    counter_pass += 1
+                    logging.info(f"PASS: {file_path}")
+
+                if validation_data[k]['path'] in file_list:
+                    file_list.remove(validation_data[k]['path'])
+                else:
+                    not_found_in_config.append(validation_data[k]['path'])
         else:
             # Nested entry, recursively process content
-            file_list, counter_pass, counter_fail = validate_reference_data(validation_data[k],
-                                                                            path_to_ref_data,
-                                                                            file_list,
-                                                                            counter_pass,
-                                                                            counter_fail)
-    return file_list, counter_pass, counter_fail
+            (file_list, not_found_in_config,
+             counter_pass, counter_fail) = validate_reference_data(validation_data[k],
+                                                                   path_to_ref_data,
+                                                                   file_list, not_found_in_config,
+                                                                   counter_pass, counter_fail)
+    return file_list, not_found_in_config, counter_pass, counter_fail

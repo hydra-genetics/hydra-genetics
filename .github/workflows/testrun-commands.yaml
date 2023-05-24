@@ -47,3 +47,7 @@ jobs:
         run: hydra-genetics create-rule -c rule1234 -t my_tool -m test_pipeline -a s -e g 
       - name: Add additional rule to tool
         run: hydra-genetics create-rule -c rule5231 -t my_tool -m test_pipeline -a s -e g 
+      - name: Fetch references
+        run: hydra-genetics  references download -v tests/utils/files/validation.yaml -v tests/utils/files/validation.json -o test_new
+      - name: Validate references
+        run: hydra-genetics references validate -c tests/utils/files/configs.yaml -c tests/utils/files/configs.ref.yaml -c tests/utils/files/configs.rna.yaml -v tests/utils/files/validation.json -v tests/utils/files/validation.yaml -v tests/utils/files/validation.json -p test_new

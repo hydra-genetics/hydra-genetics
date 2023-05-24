@@ -107,11 +107,20 @@ def validate(config_file, validation_file, path_to_ref_data):
     possible_files = locate_possible_files_in_config(config_data)
 
     # List of files that haven't been validated and counters for success and failures
-    possible_files, counter_pass, counter_fail = validate_reference_data(validation_data, path_to_ref_data, possible_files)
+    possible_files, files_not_in_config, counter_pass, counter_fail = validate_reference_data(validation_data,
+                                                                                              path_to_ref_data,
+                                                                                              possible_files)
 
     logging.info(f"Files pass: {counter_pass}, fail: {counter_fail}")
     if len(possible_files) > 0:
         logging.warning(f"Found more possible files in config ({', '.join(possible_files)}) that haven't been validated!")
+
+    if len(files_not_in_config) > 0:
+        logging.warning("The following files in provided validation files couldn't"
+                        f" be located in the provided config: ({', '.join(files_not_in_config)})")
+
+    if counter_fail > 0:
+        exit(1)
 
 
 @references.command(short_help="download reference data, if needed")

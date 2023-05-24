@@ -1,11 +1,2 @@
 bwa_mem:
   extra: "some settings"
-
-reference:
-  background: "DNA_DATA/background_panel.tsv"
-  artifacts: "DNA_DATA/artifact_panel.tsv"
-  fasta: "ref_genomes/hg19.with.mt.fasta"
-  design_bed: "DNA_DATA/design.bed"
-  design_intervals_rna: "RNA_DATA/design.interval_list"
-  design_intervals_rna_v2: "RNA_DATA/design.interval_list"
-  

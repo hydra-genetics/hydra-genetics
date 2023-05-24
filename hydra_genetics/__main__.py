@@ -7,10 +7,12 @@ import sys
 
 import hydra_genetics.utils
 from hydra_genetics.commands.prep_pipeline_env import environment
+from hydra_genetics.commands.references import references
 from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles
 import rich.console
 import rich.logging
 import rich.traceback
+
 
 # Set up logging as the root logger
 # Submodules should all traverse back to this
@@ -47,19 +49,28 @@ def run():
 
 
 @click.group(help="CLI tool to prepare and initialize snakemake projects")
-@click.option("-v", "--verbose", is_flag=True, default=False, help="Print verbose output to the console.")
+@click.option("--verbose", is_flag=True, default=False, help="Print verbose output to the console.")
 @click.option("-l", "--log-file", help="Save a verbose log to a file.", metavar="<filename>")
-def cli(verbose, log_file):
-    log.setLevel(logging.DEBUG)
+@click.option('--debug/--no-debug', default=False)
+def cli(verbose, log_file, debug):
+    loglevel = logging.WARNING
+    if debug:
+        loglevel = logging.DEBUG
+    elif verbose:
+        loglevel = logging.INFO
 
+    logging.basicConfig(level=loglevel)
+    log.setLevel(loglevel)
+    log.handlers.clear()
     log.addHandler(
         rich.logging.RichHandler(
-            level=logging.DEBUG if verbose else logging.INFO,
+            level=loglevel,
             console=rich.console.Console(stderr=True, force_terminal=rich_force_colors()),
             show_time=False,
             markup=True,
         )
     )
+    log.propagate = False
 
     if log_file:
         log_fh = logging.FileHandler(log_file, encoding="utf-8")
@@ -261,10 +272,7 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
     input_files.init()
 
 
-#  @cli.command(short_help="download reference data")
-#  def referece_data():
-#    pass
-
+cli.add_command(references)
 
 cli.add_command(environment)
 

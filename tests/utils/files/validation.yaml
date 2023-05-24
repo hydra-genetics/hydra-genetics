@@ -1,0 +1,28 @@
+---
+ 
+ reference:
+   background: 
+     path: DNA_DATA/background_panel.tsv
+     checksum: e4590e29500132ce2659e9903674108e
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/DNA_DATA/background_panel.tsv
+  
+   artifacts:
+     path: DNA_DATA/artifact_panel.tsv
+     checksum: d2ef1c4e8c4e6a36a4ed1f372caffa0e
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/DNA_DATA/artifact_panel.tsv
+
+   fasta:
+     path: ref_genomes/hg19.with.mt.fasta
+     checksum:  2d0065f49766670be5735d49199e0408
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/ref_genomes/hg19.with.mt.fasta
+
+   design_bed:
+     path: DNA_DATA/design.bed
+     checksum: cb95be79b7fafa3dac05bc7972a83ddb
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/DNA_DATA/design.bed
+    
+   design_intervals_rna:
+     path: RNA_DATA/design.interval_list
+     checksum: 390e076bf05a18d113b26e8485b248e6
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/RNA_DATA/design.interval_list
+    

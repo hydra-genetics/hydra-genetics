@@ -1,0 +1,11 @@
+bwa_mem:
+  extra: "some settings"
+
+reference:
+  fasta: "ref_genomes/hg19.with.mt.fasta"
+  
+arriba:
+  assembly: "ref_genomes/hg19.with.mt.fasta"
+  blacklist: "ref_data/blacklist_hg19_hs37d5_GRCh37_v2.3.0.tsv.gz"
+  container: "docker://hydragenetics/arriba:2.3.0"
+  gtf: "ref_genomes/hg19.refGene.gtf"

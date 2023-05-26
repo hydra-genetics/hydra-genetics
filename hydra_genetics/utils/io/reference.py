@@ -47,7 +47,7 @@ def fetch_reference_data(validation_data, output_dir,
                 # Fetch and create parent directories
                 parent_dir = os.path.dirname(file_path)
                 if not os.path.exists(parent_dir):
-                    Path(parent_dir).mkdirs(parents=True)
+                    Path(parent_dir).mkdir(parents=True)
                 r = requests.get(url, allow_redirects=True)
 
                 open(file_path, 'wb').write(r.content)

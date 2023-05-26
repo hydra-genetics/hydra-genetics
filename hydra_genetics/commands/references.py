@@ -56,6 +56,9 @@ def validate(config_file, validation_file, path_to_ref_data):
             Returns:
                 bool: if file has been found
         '''
+        if not isinstance(possible_file, str):
+            return False
+        
         extension = pathlib.Path(possible_file)
         # docker container aren't files
         if ":" in possible_file:

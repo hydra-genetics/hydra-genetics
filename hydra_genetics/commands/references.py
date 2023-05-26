@@ -56,9 +56,18 @@ def validate(config_file, validation_file, path_to_ref_data):
             Returns:
                 bool: if file has been found
         '''
+        if not isinstance(possible_file, str):
+            return False
+
         extension = pathlib.Path(possible_file)
         # docker container aren't files
         if ":" in possible_file:
+            return False
+        # Skip files that are configured per analysis/site
+        if possible_file.endswith("samples.tsv") \
+           or possible_file.endswith("resources.tsv") \
+           or possible_file.endswith("units.tsv"):
+            logging.debug(f"Ignore: {possible_file}")
             return False
         # If a extension can be found we consider it as a file
         if extension.suffix:

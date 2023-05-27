@@ -83,7 +83,7 @@ def fetch_reference_data(validation_data, output_dir,
 
 
 def validate_reference_data(validation_data, path_to_ref_data,
-                            file_list=[], not_found_in_config=[],
+                            file_list=[], not_found_in_config=[], found=[],
                             counter_pass=0, counter_fail=0):
     '''
         Validate all entries in the validation dict
@@ -100,34 +100,50 @@ def validate_reference_data(validation_data, path_to_ref_data,
         Returns:
             (list, int, int): list with files that haven't been validated, pass counter, fail counter
     '''
-    for k in validation_data:
-        # A validation entry
-        if "path" in validation_data[k]:
-            file_path = os.path.join(path_to_ref_data, validation_data[k]['path'])
+    def track_files(path, file_list=[], not_found_in_config=[], found=[]):
+        if path in found:
+            pass
+        else:
+            file_found = ""
+            for f in file_list:
+                if f.endswith(path) or f == path:
+                    file_found = f
+                    break
+            if file_found:
+                file_list.remove(f)
+                found.append(path)
+            else:
+                if path not in found:
+                    not_found_in_config.append(path)
+        return file_list, not_found_in_config, found
 
+    for k, item in validation_data.items():
+        # A validation entry
+        if "path" in item:
+            file_path = os.path.join(path_to_ref_data, item['path'])
             if not os.path.exists(file_path):
                 counter_fail += 1
                 logging.error(f"Could not locate: {file_path}")
+                file_list, not_found_in_config, found = track_files(item['path'], file_list, not_found_in_config, found)
             else:
-                calculated_md5 = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
-                if not calculated_md5 == validation_data[k]['checksum']:
-
-                    counter_fail += 1
-                    logging.error(f"Incorrect checksum for {file_path}, expected"
-                                  f" {validation_data[k]['checksum']}, got {calculated_md5}")
-                else:
+                if 'checksum' not in item:
                     counter_pass += 1
-                    logging.info(f"PASS: {file_path}")
-
-                if validation_data[k]['path'] in file_list:
-                    file_list.remove(validation_data[k]['path'])
+                    logging.debug(f"{item[path]} found, no checksum validation!")
                 else:
-                    not_found_in_config.append(validation_data[k]['path'])
+                    calculated_md5 = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+                    if not calculated_md5 == item['checksum']:
+                        counter_fail += 1
+                        logging.error(f"Incorrect checksum for {file_path}, expected"
+                                      f" {validation_data[k]['checksum']}, got {calculated_md5}")
+                    else:
+                        counter_pass += 1
+                        logging.info(f"PASS: {file_path}")
+                file_list, not_found_in_config, found = track_files(item['path'], file_list, not_found_in_config, found)
         else:
             # Nested entry, recursively process content
-            (file_list, not_found_in_config,
+            (file_list, not_found_in_config, found,
              counter_pass, counter_fail) = validate_reference_data(validation_data[k],
                                                                    path_to_ref_data,
-                                                                   file_list, not_found_in_config,
+                                                                   file_list, not_found_in_config, found,
                                                                    counter_pass, counter_fail)
-    return file_list, not_found_in_config, counter_pass, counter_fail
+    return file_list, not_found_in_config, found, counter_pass, counter_fail

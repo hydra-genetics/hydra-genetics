@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import pathlib
+import re
 import requests
 import yaml
 
@@ -45,8 +46,17 @@ def references():
     default="",
     help="path to where reference files are stored",
 )
-def validate(config_file, validation_file, path_to_ref_data):
-    def is_file(possible_file):
+@click.option(
+    "-s",
+    "--skip-regex",
+    required=False,
+    multiple=True,
+    default=[r"config\/\S+\.(json|yaml|yml|tsv|html|hg19)"],
+    type=str,
+    help="regex for warning skip",
+)
+def validate(config_file, validation_file, path_to_ref_data, skip_regex):
+    def is_file_or_folder(possible_file):
         '''
             Function used to make sure that the provided argument is a file.
 
@@ -59,23 +69,32 @@ def validate(config_file, validation_file, path_to_ref_data):
         if not isinstance(possible_file, str):
             return False
 
+        if re.match("^[0-9.]+$", possible_file):
+            return False
+
         extension = pathlib.Path(possible_file)
         # docker container aren't files
         if ":" in possible_file:
             return False
         # Skip files that are configured per analysis/site
         if possible_file.endswith("samples.tsv") \
-           or possible_file.endswith("resources.tsv") \
-           or possible_file.endswith("units.tsv"):
+           or possible_file.endswith("resources.yaml") \
+           or possible_file.endswith("units.tsv") \
+           or possible_file.endswith("output_list.yaml") \
+           or possible_file.endswith("output_list.json"):
             logging.debug(f"Ignore: {possible_file}")
             return False
         # If a extension can be found we consider it as a file
         if extension.suffix:
+            # File
             return True
         else:
+            if re.match(r"\/([A-Za-z0-9_.-]*)", possible_file):
+                # Folder
+                return True
             return False
 
-    def locate_possible_files_in_config(config_data, files=[]):
+    def locate_possible_files_in_config(config_data, files=[], skip_regex=[]):
         '''
             function used to extract files from provided config
 
@@ -87,12 +106,22 @@ def validate(config_file, validation_file, path_to_ref_data):
                 files (list): all files found in the config dict
         '''
         for config in config_data:
-            if isinstance(config_data[config], dict):
-                files = locate_possible_files_in_config(config_data[config], files)
+            possible_file = config_data[config]
+            if isinstance(possible_file, dict):
+                files = locate_possible_files_in_config(possible_file, files, skip_regex)
             else:
-                possible_file = config_data[config]
-                if is_file(possible_file):
-                    files.append(possible_file)
+                if not isinstance(possible_file, str):
+                    continue
+                result = re.search(r"(\S+)", possible_file)
+                if result:
+                    for f in re.findall(r"(\S+)", possible_file):
+                        skip_file = False
+                        for skip in skip_regex:
+                            if re.match(skip, f):
+                                skip_file = True
+                                break
+                        if not skip_file and is_file_or_folder(f):
+                            files.append(f)
         return files
 
     # Load and merge multiple config
@@ -113,12 +142,12 @@ def validate(config_file, validation_file, path_to_ref_data):
             raise IOError(f"Unknown file format passed as validation data: {validation}")
 
     # All files that we should validate, note that all may not be specified in the validation files
-    possible_files = locate_possible_files_in_config(config_data)
+    possible_files = [*set(locate_possible_files_in_config(config_data, skip_regex=skip_regex))]
 
     # List of files that haven't been validated and counters for success and failures
-    possible_files, files_not_in_config, counter_pass, counter_fail = validate_reference_data(validation_data,
-                                                                                              path_to_ref_data,
-                                                                                              possible_files)
+    possible_files, files_not_in_config, found, counter_pass, counter_fail = validate_reference_data(validation_data,
+                                                                                                     path_to_ref_data,
+                                                                                                     possible_files)
 
     logging.info(f"Files pass: {counter_pass}, fail: {counter_fail}")
     if len(possible_files) > 0:

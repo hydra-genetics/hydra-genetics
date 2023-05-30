@@ -6,11 +6,11 @@ on:
   push:
     branches:
      - develop
-     - master
+     - main
   pull_request:
     branches:
      - develop
-     - master
+     - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -30,4 +30,5 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           GITHUB_TOKEN: {{ '${{' }} secrets.GITHUB_TOKEN {{'}}'}}
           VALIDATE_SNAKEMAKE_SNAKEFMT: true
+          DEFAULT_BRANCH: main
           OUTPUT_FOLDER: .github/linters/report

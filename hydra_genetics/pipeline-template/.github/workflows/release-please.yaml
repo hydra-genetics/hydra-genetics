@@ -2,7 +2,7 @@ name: release-please
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   release-please:
@@ -13,4 +13,4 @@ jobs:
         with:
           release-type: python
           package-name: hydra-genetics
-          default-branch: master
+          default-branch: main

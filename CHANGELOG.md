@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.5.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.4.0...v1.5.0) (2023-05-30)
+
+
+### Features
+
+* cli to fetch/validate reference data ([e3ffeef](https://www.github.com/hydra-genetics/hydra-genetics/commit/e3ffeef6ae54dbf203d7cdd2fdb6ca71570312ea))
+
+
+### Bug Fixes
+
+* add sys.exit if no --configfile ([d17942f](https://www.github.com/hydra-genetics/hydra-genetics/commit/d17942fa036c34ad24c62745ea28afb24dde80ad))
+* create parent folder for references ([54f240d](https://www.github.com/hydra-genetics/hydra-genetics/commit/54f240d922ca0017b593b01d10010aa3801154a5))
+* don't look at pipeline files ([95dac27](https://www.github.com/hydra-genetics/hydra-genetics/commit/95dac27fce6a568182eb3290e53066b7ade0e678))
+* handle case when array or number is passed to is_file ([86a9f83](https://www.github.com/hydra-genetics/hydra-genetics/commit/86a9f8358c86463d17394544ec5d57e02a0293fb))
+* improve validation ([db01db0](https://www.github.com/hydra-genetics/hydra-genetics/commit/db01db0694feb1e9b734d5186b45c73e2331f731))
+* incorrect path to `mkdocs.yaml` ([9dcb14f](https://www.github.com/hydra-genetics/hydra-genetics/commit/9dcb14fd0bb1cdea7db50766a2d06974cb0d8de2))
+* make style check happy with regex in template for common.smk ([d8473d5](https://www.github.com/hydra-genetics/hydra-genetics/commit/d8473d56ed358a8f3b42b92e7cb12e9e0186b371))
+* revert incorrect path to `mkdocs.yaml` ([e35a3ce](https://www.github.com/hydra-genetics/hydra-genetics/commit/e35a3ce3977adc4a75fca027e8df8f32b940c5bb))
+* update dry-run workflow to match latest template ([ff835ac](https://www.github.com/hydra-genetics/hydra-genetics/commit/ff835acacf7ee8a809d8516b636fd9e337985a87))
+* update lint workflow to match current template ([82b8370](https://www.github.com/hydra-genetics/hydra-genetics/commit/82b83706b310eaaa3df202194c46b1e0e7b02dfa))
+* update readthedocs with correct mkdocs,yaml file name ([89e52d3](https://www.github.com/hydra-genetics/hydra-genetics/commit/89e52d3df4142b90d18999dec45aedc4378dcda2))
+* update snakefmt workflow to match latest template ([b9ef634](https://www.github.com/hydra-genetics/hydra-genetics/commit/b9ef634cf0e9a1bad002233a3d001da0e9e28901))
+* update test links in template ([a49afff](https://www.github.com/hydra-genetics/hydra-genetics/commit/a49afff172874ef691f39a23037083f78ae31591))
+
+
+### Documentation
+
+* spelling ([34e9ce2](https://www.github.com/hydra-genetics/hydra-genetics/commit/34e9ce2d61a52f8185236d8a4203cf74969ebf61))
+
 ## [1.4.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.3.0...v1.4.0) (2023-05-16)
 
 

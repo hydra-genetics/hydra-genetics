@@ -74,14 +74,15 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
 
         extension = pathlib.Path(possible_file)
         # docker container aren't files
-        if ":" in possible_file:
+        if ":" in possible_file or possible_file.endswith(".sif"):
             return False
         # Skip files that are configured per analysis/site
         if possible_file.endswith("samples.tsv") \
            or possible_file.endswith("resources.yaml") \
            or possible_file.endswith("units.tsv") \
            or possible_file.endswith("output_list.yaml") \
-           or possible_file.endswith("output_list.json"):
+           or possible_file.endswith("output_list.json") \
+           or possible_file.endswith("snakemake-wrappers"):
             logging.debug(f"Ignore: {possible_file}")
             return False
         # If a extension can be found we consider it as a file

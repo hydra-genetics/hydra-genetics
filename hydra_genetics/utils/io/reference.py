@@ -128,7 +128,7 @@ def validate_reference_data(validation_data, path_to_ref_data,
             else:
                 if 'checksum' not in item:
                     counter_pass += 1
-                    logging.debug(f"{item[path]} found, no checksum validation!")
+                    logging.debug(f"{item['path']} found, no checksum validation!")
                 else:
                     calculated_md5 = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
                     if not calculated_md5 == item['checksum']:

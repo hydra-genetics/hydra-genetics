@@ -77,7 +77,7 @@ def container_path_update(configfile, new_configfile, singularity_cache_path):
     help="path to update config file",
 )
 @click.option(
-    "--reference-paths",
+    "--reference-path",
     multiple=True,
     prompt="path",
     required=True,
@@ -87,7 +87,7 @@ def container_path_update(configfile, new_configfile, singularity_cache_path):
         " file and replace all occurrences of oldpath with new path"
     ),
 )
-def reference_path_update(configfile, new_configfile, reference_paths):
+def reference_path_update(configfile, new_configfile, reference_path):
     def process_yaml_data(yaml_data, reference_path):
         for key in yaml_data:
             if isinstance(yaml_data[key], dict):
@@ -98,7 +98,7 @@ def reference_path_update(configfile, new_configfile, reference_paths):
                         if old_path in yaml_data[key]:
                             yaml_data[key] = yaml_data[key].replace(old_path, new_path)
         return yaml_data
-    reference_paths = [r.split(":") for r in reference_paths]
+    reference_paths = [r.split(":") for r in reference_path]
     with open(configfile, "r") as stream:
         try:
             yaml_data = yaml.safe_load(stream)
@@ -106,7 +106,7 @@ def reference_path_update(configfile, new_configfile, reference_paths):
             print(exc)
             exit(1)
 
-    yaml_data = process_yaml_data(yaml_data, reference_path)
+    yaml_data = process_yaml_data(yaml_data, reference_paths)
 
     with open(new_configfile, 'w') as file:
         for key, value in yaml_data.items():

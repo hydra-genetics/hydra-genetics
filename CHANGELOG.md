@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.5.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.5.0...v1.5.1) (2023-06-02)
+
+
+### Bug Fixes
+
+* minor bug fixes ([437cb97](https://www.github.com/hydra-genetics/hydra-genetics/commit/437cb9754d801ea87cf3c7611730a061ce6be1ba))
+
 ## [1.5.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.4.0...v1.5.0) (2023-05-30)
 
 

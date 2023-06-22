@@ -19,7 +19,7 @@ def get_module_snakefile(config, repo, path, tag):
                 repo_path = repo_path_v2
         if not os.path.isdir(repo_path):
             raise FileNotFoundError(f"{repo_path} isn't a folder!")
-        return LocalGitFile(repo_path), path=path, tag=tag)
+        return LocalGitFile(repo_path, path=path, tag=tag)
     else:
         return GithubFile(repo, path=path, tag=tag)
 

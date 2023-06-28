@@ -30,6 +30,9 @@ def fetch_reference_data(validation_data, output_dir,
         # If validation entry
         if "path" in validation_data[k]:
             file_path = os.path.join(output_dir, validation_data[k]['path'])
+            if 'url' not in validation_data[k]:
+                logging.debug(f"File {file_path} contains no url entry, i.e will not be retrieved!")
+                continue
             url = validation_data[k]['url']
             fetch_file = False
             if force and os.path.isfile(file_path):

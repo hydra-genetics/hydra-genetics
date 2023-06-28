@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.5.1...v1.6.0) (2023-06-28)
+
+
+### Features
+
+* make it possible to entries without url when fetching data ([c41c0e8](https://www.github.com/hydra-genetics/hydra-genetics/commit/c41c0e85bcef868e46595042d8d4f80a3eaf7ec5))
+
+
+### Bug Fixes
+
+* handle location determination of repositories better for local module ([517bbf5](https://www.github.com/hydra-genetics/hydra-genetics/commit/517bbf59e117916d866608e29b843af5ca5fde78))
+* remove conda from template ([93a909f](https://www.github.com/hydra-genetics/hydra-genetics/commit/93a909f5f8787110e0ff974f6d121f3ef7ac2c59))
+* set valid common container version in config.yaml ([b59cecc](https://www.github.com/hydra-genetics/hydra-genetics/commit/b59cecc38b6614dfd5983ace8f679f7a1f3b4504))
+
 ### [1.5.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.5.0...v1.5.1) (2023-06-02)
 
 

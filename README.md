@@ -1,3 +1,6 @@
+<p align="center">
+<a href="https://hydra-genetics.readthedocs.io">https://hydra-genetics.readthedocs.io</a>
+</p>
 
 # <img src="images/hydragenetics.png" width=40 /> Hydra-genetics
 

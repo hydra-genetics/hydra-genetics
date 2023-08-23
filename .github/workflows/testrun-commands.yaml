@@ -17,7 +17,7 @@ on:
 
 jobs:
   python_code:
-    name: check pycodestyle and unittest
+    name: run hydra-genetics commands
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -55,3 +55,7 @@ jobs:
         run: hydra-genetics --debug --verbose references download --validation-file tests/utils/files/references_fetch.yaml
       - name: "Validate, include compressed data"
         run: hydra-genetics --debug references validate -c tests/utils/files/references_config.yaml -v tests/utils/files/references_fetch.yaml
+      - name: "Download, split data"
+        run: hydra-genetics --debug --verbose references download --validation-file tests/utils/files/references_divided_file_fetch.yaml
+      - name: "Validate, split data"
+        run: hydra-genetics --debug references validate -c tests/utils/files/references_config.yaml -v tests/utils/files/references_divided_file_fetch.yaml

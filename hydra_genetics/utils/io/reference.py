@@ -4,7 +4,9 @@ import logging
 import os
 from pathlib import Path
 import requests
+import shutil
 import tarfile
+import tempfile
 
 
 def fetch_reference_data(validation_data, output_dir,
@@ -42,7 +44,7 @@ def fetch_reference_data(validation_data, output_dir,
 
             # Files and folders are handled differently
             # Folder will only be checked if they exist, files will have there checksum validated
-            if content_type == "file":
+            if content_type in ["file", "split_file"]:
                 fetch_file = False
 
                 if force and os.path.isfile(content_path):
@@ -71,43 +73,44 @@ def fetch_reference_data(validation_data, output_dir,
                     if not os.path.exists(parent_dir):
                         logging.debug(f"Creating directory {parent_dir}")
                         Path(parent_dir).mkdir(parents=True)
+                    with tempfile.TemporaryDirectory() as tmpdirname:
+                        temp_content_holder = os.path.join(tmpdirname, "tempfile")
 
-                    r = requests.get(url, allow_redirects=True)
+                        fetch_url_content(url, temp_content_holder, tmpdirname)
 
-                    if "compressed_checksum" in validation_data[k]:
-                        compressed_content_path = validation_data[k]['compressed_name']
-                        compressed_checksum = validation_data[k]['compressed_checksum']
-                        open(compressed_content_path, 'wb').write(r.content)
+                        if "compressed_checksum" in validation_data[k]:
+                            compressed_content_path = temp_content_holder
+                            compressed_checksum = validation_data[k]['compressed_checksum']
 
-                        calculated_md5 = hashlib.md5(open(compressed_content_path, 'rb').read()).hexdigest()
-                        if not calculated_md5 == compressed_checksum:
-                            files_failed += 1
-                            failed.append(content_path)
-                            logging.error(f"Failed to download compressed file {url} to {compressed_content_path}, "
-                                          "checksum didn't match, "
-                                          f"got {calculated_md5}, expected {compressed_checksum}")
+                            calculated_md5 = hashlib.md5(open(temp_content_holder, 'rb').read()).hexdigest()
+                            if not calculated_md5 == compressed_checksum:
+                                files_failed += 1
+                                failed.append(content_path)
+                                logging.error(f"Failed to download compressed file {url} to {compressed_content_path}, "
+                                              "checksum didn't match, "
+                                              f"got {calculated_md5}, expected {compressed_checksum}")
+                            else:
+                                with gzip.open(compressed_content_path, 'rb') as file:
+                                    with open(content_path, 'wb') as writer:
+                                        for line in file:
+                                            writer.write(line)
                         else:
-                            with gzip.open(compressed_content_path, 'rb') as file:
-                                with open(content_path, 'wb') as writer:
-                                    for line in file:
-                                        writer.write(line)
-                    else:
-                        open(content_path, 'wb').write(r.content)
+                            shutil.move(temp_content_holder, content_path)
 
-                    # Make sure that the final file was has't changed
-                    calculated_md5 = hashlib.md5(open(content_path, 'rb').read()).hexdigest()
-                    if not calculated_md5 == validation_data[k]['checksum']:
-                        failed.append(content_path)
-                        files_failed += 1
-                        logging.error(f"Failed to download file {url} to {content_path}, checksum didn't match, "
-                                      f"got {calculated_md5}, expected {validation_data[k]['checksum']}")
-                    else:
-                        logging.info(f"Retrieved: {url} to {content_path}")
-                        fetched.append(content_path)
-                        files_fetched += 1
-            elif content_type == "folder":
+                        # Make sure that the final file was has't changed
+                        calculated_md5 = hashlib.md5(open(content_path, 'rb').read()).hexdigest()
+                        if not calculated_md5 == validation_data[k]['checksum']:
+                            failed.append(content_path)
+                            files_failed += 1
+                            logging.error(f"Failed to download file {url} to {content_path}, checksum didn't match, "
+                                          f"got {calculated_md5}, expected {validation_data[k]['checksum']}")
+                        else:
+                            logging.info(f"Retrieved: {url} to {content_path}")
+                            fetched.append(content_path)
+                            files_fetched += 1
+            elif content_type in ["folder", "split_folder"]:
                 fetch_dir = False
-                compressed_content_path = validation_data[k]['compressed_name']
+                validation_data[k]['compressed_name']
                 compressed_checksum = validation_data[k]['compressed_checksum']
                 if os.path.isdir(content_path):
                     if force:
@@ -121,23 +124,24 @@ def fetch_reference_data(validation_data, output_dir,
                     fetch_dir = True
 
                 if fetch_dir:
-                    r = requests.get(url, allow_redirects=True)
+                    with tempfile.TemporaryDirectory() as tmpdirname:
+                        temp_content_holder = os.path.join(tmpdirname, "tempfile")
+                        compressed_content_path = temp_content_holder
+                        fetch_url_content(url, temp_content_holder, tmpdirname)
 
-                    open(compressed_content_path, 'wb').write(r.content)
-
-                    calculated_md5 = hashlib.md5(open(compressed_content_path, 'rb').read()).hexdigest()
-                    if not calculated_md5 == compressed_checksum:
-                        files_failed += 1
-                        failed.append(content_path)
-                        logging.error(f"Failed to download compressed folder {url} to {compressed_content_path}, "
-                                      "checksum didn't match, "
-                                      f"got {calculated_md5}, expected {compressed_checksum}")
-                    else:
-                        with tarfile.open(compressed_content_path, mode="r|gz") as tar:
-                            tar.extractall(content_path)
-                        fetched.append(content_path)
-                        files_fetched += 1
-                        logging.info(f"Retrieved: {url} and decompressed it to {content_path}")
+                        calculated_md5 = hashlib.md5(open(compressed_content_path, 'rb').read()).hexdigest()
+                        if not calculated_md5 == compressed_checksum:
+                            files_failed += 1
+                            failed.append(content_path)
+                            logging.error(f"Failed to download compressed folder {url} to {compressed_content_path}, "
+                                          "checksum didn't match, "
+                                          f"got {calculated_md5}, expected {compressed_checksum}")
+                        else:
+                            with tarfile.open(compressed_content_path, mode="r|gz") as tar:
+                                tar.extractall(content_path)
+                            fetched.append(content_path)
+                            files_fetched += 1
+                            logging.info(f"Retrieved: {url} and decompressed it to {content_path}")
             else:
                 raise Exception(f"Unhandled content_type: {content_type}")
         else:
@@ -152,6 +156,33 @@ def fetch_reference_data(validation_data, output_dir,
                                                                                                         files_skipped,
                                                                                                         force)
     return fetched, failed, skipped, files_fetched, files_failed, files_skipped
+
+
+def fetch_url_content(url, temp_content_holder, tmpdirname):
+    if isinstance(url, dict):
+        counter = 1
+        list_of_temp_files = []
+        for part_url, part_checksum in url.items():
+            temp_file = os.path.join(tmpdirname, f"file{counter}")
+            list_of_temp_files.append(temp_file)
+            r = requests.get(part_url, allow_redirects=True)
+            open(temp_file, 'wb').write(r.content)
+            calculated_md5 = hashlib.md5(open(temp_file, 'rb').read()).hexdigest()
+            if not calculated_md5 == part_checksum:
+                logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {calculated_md5}, got {part_checksum}")
+                return False
+            else:
+                logging.info(f"Retrieved part {counter}: {part_url}")
+            counter += 1
+        with open(temp_content_holder, 'wb') as writer:
+            for temp_content in list_of_temp_files:
+                with open(temp_content, 'rb') as reader:
+                    for line in reader:
+                        writer.write(line)
+    else:
+        r = requests.get(url, allow_redirects=True)
+        open(temp_content_holder, 'wb').write(r.content)
+    return True
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

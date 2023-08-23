@@ -1,0 +1,5 @@
+---
+
+combine_files:
+  bed:
+    path: reference_data/combined.bed

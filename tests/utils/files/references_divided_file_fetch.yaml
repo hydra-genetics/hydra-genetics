@@ -1,0 +1,12 @@
+---
+
+  combine_files:
+    bed:
+      type: split_file
+      path: reference_data/combined.bed
+      checksum: 8c9c8ab40bfc81aed5c16ab77a80250f
+      url: 
+        https://raw.githubusercontent.com/genomic-medicine-sweden/Twist_Solid_pipeline_files/v0.1.0/design/ID_SNPs.bed: ab9b7084d599606bb52142d26158f5e1
+        https://raw.githubusercontent.com/genomic-medicine-sweden/Twist_Solid_pipeline_files/v0.1.0/design/Twist_RNA_Design5.annotated.bed: 7fe64299477aa4b6a5f5783cce9fa30f
+
+  

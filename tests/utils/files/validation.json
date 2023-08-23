@@ -2,6 +2,7 @@
     "reference": {
         "fasta": {
             "path": "ref_genomes/hg19.with.mt.fasta",
+            "type": "file",
             "checksum": "2d0065f49766670be5735d49199e0408",
             "url": "https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/ref_genomes/hg19.with.mt.fasta"
         }
@@ -9,16 +10,19 @@
     "arriba":  {
         "assembly": {
             "path": "ref_genomes/hg19.with.mt.fasta",
+            "type": "file",
             "checksum": "2d0065f49766670be5735d49199e0408",
             "url": "https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/ref_genomes/hg19.with.mt.fasta"
         },
         "blacklist": {
             "path": "ref_data/blacklist_hg19_hs37d5_GRCh37_v2.3.0.tsv.gz",
+            "type": "file",
             "checksum": "a0bc9791616492b14e330a7e0ef35512",
             "url": "https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/ref_data/blacklist_hg19_hs37d5_GRCh37_v2.3.0.tsv.gz"
         },
         "gtf": {
             "path": "ref_genomes/hg19.refGene.gtf",
+            "type": "file",
             "checksum": "2e491a600a37904b9d522dd6574c7835",
             "url": "https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/ref_genomes/hg19.refGene.gtf"
         }

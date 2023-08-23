@@ -1,0 +1,10 @@
+---
+
+bwa_mem:
+  ann: "path: reference_data/hg19.with.mt.fasta.ann"
+
+snv:
+  variant: reference_data/small_exac_common_3.hg19.vcf
+
+fuseq_wes:
+  reference: reference_data/fuseq_wes

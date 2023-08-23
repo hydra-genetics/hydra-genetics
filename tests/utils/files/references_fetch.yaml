@@ -1,0 +1,26 @@
+---
+
+  bwa:
+    ann:
+     checksum: 745e9a6afe1951cc54e8cc1b6c1429ff
+     type: file
+     path: reference_data/hg19.with.mt.fasta.ann
+     url: https://figshare.scilifelab.se/ndownloader/files/42061206
+  snv:
+    variant:
+      checksum: 00f39019a9141db70eed9a437ca05cf4
+      type: file
+      path: reference_data/small_exac_common_3.hg19.vcf
+      compressed_name: small_exac_common_3.hg19.vcf.gz
+      compressed_checksum: 1eb85e09195f0092e389510b40765f5e
+      url: https://figshare.scilifelab.se/ndownloader/files/40933373
+
+  fuseq_wes:
+    reference:
+      type: folder
+      compressed_name: fuseq_wes.tar.gz
+      compressed_checksum: c57e4cc16949727e24ba38436526f3b5
+      path: reference_data/fuseq_wes
+      url: https://figshare.scilifelab.se/ndownloader/files/42061197
+
+  

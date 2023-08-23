@@ -90,7 +90,7 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
             # File
             return True
         else:
-            if re.match(r"\/([A-Za-z0-9_.-]*)", possible_file):
+            if re.search(r"\/([A-Za-z0-9_.-]*)", possible_file):
                 # Folder
                 return True
             return False
@@ -121,6 +121,7 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
                             if re.match(skip, f):
                                 skip_file = True
                                 break
+
                         if not skip_file and is_file_or_folder(f):
                             files.append(f)
         return files
@@ -150,7 +151,7 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
                                                                                                      path_to_ref_data,
                                                                                                      possible_files)
 
-    logging.info(f"Files pass: {counter_pass}, fail: {counter_fail}")
+    logging.info(f"Files/Folders pass: {counter_pass}, fail: {counter_fail}")
     if len(possible_files) > 0:
         logging.warning(f"Found more possible files in config ({', '.join(possible_files)}) that haven't been validated!")
 

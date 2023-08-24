@@ -2,11 +2,33 @@ import gzip
 import hashlib
 import logging
 import os
-from pathlib import Path
 import requests
 import shutil
 import tarfile
 import tempfile
+
+# Expected input file format
+# --------------------------
+# rule_name1:
+#     variable1:
+#        entry
+#
+# rule_name2:
+#     variable2:
+#        entry
+#
+#
+# --------------------------
+#
+# Expected formats for an entry
+# A file
+# {checksum: md5sum_value, type: file, path: path_to_file, url: url_path}
+# Compressed file that will be extracted
+# {checksum: md5sum_value, compressed_checksum: md5sum_value, type: file, path: path_storage_location, url: url_path}
+# Folder (it must be compressed)
+# {type: folder, compressed_checksum: md5sum_value, path: folder_storage_location,
+#   content_checksum: { file1:md5sum_value, file2:md5sum_value}, url: url_path}
+# content_checksum is optional, when it's not set the only validation made is the existence of the folder
 
 
 def fetch_reference_data(validation_data, output_dir,
@@ -30,144 +52,44 @@ def fetch_reference_data(validation_data, output_dir,
             (list, list, list, int, int, int): (fetched files, failed files, skipped files,
                                                 counter fetched files, counter failed files , counter skipped files)
     '''
-    for k in validation_data:
+    for k, value in validation_data.items():
         # If validation entry
-        if "path" in validation_data[k]:
-            content_path = os.path.join(output_dir, validation_data[k]['path'])
-            content_type = validation_data[k]['type']
-            md5_validation = False
-            if 'url' not in validation_data[k]:
+        if "path" in value:
+            content_path = os.path.join(output_dir, value['path'])
+            content_type = value['type']
+
+            # Some entries may not be fetchable and only added for validation
+            if 'url' not in value:
                 logging.debug(f"Content {content_path} contains no url entry, i.e will not be retrieved!")
                 continue
 
-            url = validation_data[k]['url']
+            # Check if content needs to be updated
+            update_needed = update_needed_for_entry(value)
 
-            # Files and folders are handled differently
-            # Folder will only be checked if they exist, files will have there checksum validated
-            if content_type in ["file", "split_file"]:
-                fetch_file = False
+            if update_needed or force:
+                with tempfile.TemporaryDirectory() as tmpdirname:
+                    temp_content_holder = os.path.join(tmpdirname, "tempfile")
 
-                if force and os.path.isfile(content_path):
-                    logging.debug(f"Overwriting {content_path}")
-                    fetch_file = True
-                elif not os.path.isfile(content_path):
-                    fetch_file = True
-                    logging.debug(f"Fetching new file {content_path}")
-                elif os.path.isfile(content_path):
-                    md5_validation = hashlib.md5(open(content_path, 'rb').read()).hexdigest() == validation_data[k]['checksum']
-                    if not md5_validation:
-                        fetch_file = True
-                        logging.debug(f"Checksum changed: {url}, {content_path}")
+                    # Fetch content and merge any split files
+                    fetch_url_content(value['url'], temp_content_holder, tmpdirname)
+
+                    checksum_value = value['compressed_checksum'] if 'compressed_checksum' in value else value['checksum']
+
+                    if not checksum_validate_file(temp_content_holder, checksum_value, content_path):
+                        files_failed += 1
+                        failed.append(content_path)
                     else:
-                        logging.debug(f"Checksum not changed: {url}, {content_path}")
-                else:
-                    raise Exception("Unhandled case!!!")
-
-                if md5_validation:
-                    # Skip file if it exist, the checksum hasn't changed and force hasn't been used
-                    files_skipped += 1
-                    skipped.append(content_path)
-                    logging.debug(f"Skipping {content_path}, checksum matched")
-                elif fetch_file:
-                    parent_dir = os.path.dirname(content_path)
-                    if not os.path.exists(parent_dir):
-                        logging.debug(f"Creating directory {parent_dir}")
-                        Path(parent_dir).mkdir(parents=True)
-                    with tempfile.TemporaryDirectory() as tmpdirname:
-                        temp_content_holder = os.path.join(tmpdirname, "tempfile")
-
-                        fetch_url_content(url, temp_content_holder, tmpdirname)
-
-                        if "compressed_checksum" in validation_data[k]:
-                            compressed_content_path = temp_content_holder
-                            compressed_checksum = validation_data[k]['compressed_checksum']
-
-                            calculated_md5 = hashlib.md5(open(temp_content_holder, 'rb').read()).hexdigest()
-                            if not calculated_md5 == compressed_checksum:
-                                files_failed += 1
-                                failed.append(content_path)
-                                logging.error(f"Failed to download compressed file {url} to {compressed_content_path}, "
-                                              "checksum didn't match, "
-                                              f"got {calculated_md5}, expected {compressed_checksum}")
-                            else:
-                                with gzip.open(compressed_content_path, 'rb') as file:
-                                    with open(content_path, 'wb') as writer:
-                                        for line in file:
-                                            writer.write(line)
-                        else:
-                            shutil.move(temp_content_holder, content_path)
-
-                        # Make sure that the final file was has't changed
-                        calculated_md5 = hashlib.md5(open(content_path, 'rb').read()).hexdigest()
-                        if not calculated_md5 == validation_data[k]['checksum']:
-                            failed.append(content_path)
-                            files_failed += 1
-                            logging.error(f"Failed to download file {url} to {content_path}, checksum didn't match, "
-                                          f"got {calculated_md5}, expected {validation_data[k]['checksum']}")
-                        else:
-                            logging.info(f"Retrieved: {url} to {content_path}")
-                            fetched.append(content_path)
-                            files_fetched += 1
-            elif content_type in ["folder", "split_folder"]:
-                fetch_dir = False
-                validation_data[k]['compressed_name']
-                compressed_checksum = validation_data[k]['compressed_checksum']
-                if os.path.isdir(content_path):
-                    if force:
-                        logging.info(f"Removing folder: {content_path}")
-                        fetch_dir = True
-                    else:
-                        if "content_checksum" in validation_data[k]:
-                            logging.info(f"Folder found: {content_path}, "
-                                         "the files in variable \"content_checksum\" will be validated")
-                        else:
-                            logging.info(f"Folder found: {content_path}, no validation will be made")
-                            skipped += 1
-                        fetched.append(content_path)
-                else:
-                    fetch_dir = True
-
-                if fetch_dir:
-                    with tempfile.TemporaryDirectory() as tmpdirname:
-                        temp_content_holder = os.path.join(tmpdirname, "tempfile")
-                        compressed_content_path = temp_content_holder
-                        fetch_url_content(url, temp_content_holder, tmpdirname)
-
-                        calculated_md5 = hashlib.md5(open(compressed_content_path, 'rb').read()).hexdigest()
-                        if not calculated_md5 == compressed_checksum:
-                            files_failed += 1
-                            failed.append(content_path)
-                            logging.error(f"Failed to download compressed folder {url} to {compressed_content_path}, "
-                                          "checksum didn't match, "
-                                          f"got {calculated_md5}, expected {compressed_checksum}")
-                        else:
-                            logging.debug(f"Valid checksum: {content_path}")
-                            with tarfile.open(compressed_content_path, mode="r|gz") as tar:
-                                tar.extractall(content_path)
-                            fetched.append(content_path)
-                            logging.info(f"Retrieved: {url} and decompressed it to {content_path}")
-                            valid_content = True
-                            if "content_checksum" in validation_data[k]:
-                                for file_path, checksum in validation_data[k]["content_checksum"].items():
-                                    f = os.path.join(content_path, file_path)
-                                    calculated_md5 = hashlib.md5(open(f, 'rb').read()).hexdigest()
-                                    if calculated_md5 == checksum:
-                                        logging.debug(f"checksum valid: {f}")
-                                    else:
-                                        valid_content = False
-                                        logging.error(f"checksum validation failed: {f}, "
-                                                      "got {calculated_md5}, expected {checksum} ")
-                            if valid_content:
+                        if 'compressed_checksum' in value:
+                            if extract_compressed_data(value, content_type, content_path, temp_content_holder, force):
                                 files_fetched += 1
                             else:
-                                files_failed += 1
                                 failed.append(content_path)
-                else:
-                    if "content_checksum" in validation_data[k]:
-                        for file_path, checksum in validation_data[k]["content_checksum"].items():
-                            logging.info(f"{file_path}")
+                                files_failed += 1
+                        else:
+                            files_fetched += 1
+                            move_content(temp_content_holder, content_path)
             else:
-                raise Exception(f"Unhandled content_type: {content_type}")
+                skipped += content_path
         else:
             # Nested entry, recursively process content
             fetched, failed, skipped, files_fetched, files_failed, files_skipped = fetch_reference_data(validation_data[k],
@@ -182,12 +104,23 @@ def fetch_reference_data(validation_data, output_dir,
     return fetched, failed, skipped, files_fetched, files_failed, files_skipped
 
 
-def fetch_url_content(url, temp_content_holder, tmpdirname):
+def fetch_url_content(url, content_holder, tmpdir) -> None:
+    """
+        Fetch content from the provided url and make sure that the downloaded file
+        has the correct md5 value.
+
+        Parameters:
+            url (string): url to file
+            content_holder (string): path where the data will be saved
+            tmpdir: folder where we can save data temporary
+
+
+    """
     if isinstance(url, dict):
         counter = 1
         list_of_temp_files = []
         for part_url, part_checksum in url.items():
-            temp_file = os.path.join(tmpdirname, f"file{counter}")
+            temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
             r = requests.get(part_url, allow_redirects=True)
             open(temp_file, 'wb').write(r.content)
@@ -198,15 +131,14 @@ def fetch_url_content(url, temp_content_holder, tmpdirname):
             else:
                 logging.info(f"Retrieved part {counter}: {part_url}")
             counter += 1
-        with open(temp_content_holder, 'wb') as writer:
+        with open(content_holder, 'wb') as writer:
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:
                     for line in reader:
                         writer.write(line)
     else:
         r = requests.get(url, allow_redirects=True)
-        open(temp_content_holder, 'wb').write(r.content)
-    return True
+        open(content_holder, 'wb').write(r.content)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,
@@ -255,31 +187,19 @@ def validate_reference_data(validation_data, path_to_ref_data,
             else:
                 if 'checksum' not in item and "content_checksum" not in item:
                     counter_pass += 1
-                    logging.info(f"{item['path']} found, no checksum validation!")
+                    logging.debug(f"{item['path']} found, no checksum validation!")
                 elif "content_checksum" in item:
-                    logging.info(f"Folder found: {item['path']}")
-                    valid_content = True
-                    for path, checksum in item['content_checksum'].items():
-                        f = os.path.join(item['path'], path)
-                        calculated_md5 = hashlib.md5(open(f, 'rb').read()).hexdigest()
-                        if calculated_md5 == checksum:
-                            logging.info(f"Pass folder content: {f}")
-                        else:
-                            valid_content = False
-                            logging.error(f"Failed folder content: {f}, expected {checksum}, got {calculated_md5}")
-                    if valid_content:
+                    logging.debug(f"Folder found: {item['path']}")
+                    _, failed = checksum_validate_content(item['content_checksum'], file_path)
+                    if not failed:
                         counter_pass += 1
                     else:
                         counter_fail += 1
                 else:
-                    calculated_md5 = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
-                    if not calculated_md5 == item['checksum']:
-                        counter_fail += 1
-                        logging.error(f"Failed file: {file_path}, expected"
-                                      f" {validation_data[k]['checksum']}, got {calculated_md5}")
-                    else:
+                    if checksum_validate_file(file_path, validation_data[k]['checksum']):
                         counter_pass += 1
-                        logging.info(f"Pass file: {file_path}")
+                    else:
+                        counter_fail += 1
                 file_list, not_found_in_config, found = track_files(item['path'], file_list, not_found_in_config, found)
         else:
             # Nested entry, recursively process content
@@ -289,3 +209,138 @@ def validate_reference_data(validation_data, path_to_ref_data,
                                                                    file_list, not_found_in_config, found,
                                                                    counter_pass, counter_fail)
     return file_list, not_found_in_config, found, counter_pass, counter_fail
+
+
+def update_needed_for_entry(item):
+    """
+        Checks if entry needs to be update, i.e checksum has change or the file/folder doesn't exist
+
+        Patameters:
+            item (dict): see top part of this page
+
+        Returns:
+            bool: if the entry needs to be updated
+    """
+    content_path = item['path']
+
+    if 'file' in item['type'] and not os.path.isfile(content_path) or \
+       'folder' in item['type'] and not os.path.isdir(content_path):
+        logging.debug(f"{content_path} not found")
+        return True
+    else:
+        if "checksum" in item:
+            return not checksum_validate_file(content_path, item['checksum'])
+        elif "content_checksum" in item:
+            _, failed = checksum_validate_content(item['content_checksum'], content_path)
+            if failed:
+                return True
+            else:
+                return False
+        else:
+            logging.debug(f"{content_path} not validation done")
+
+
+def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=None) -> (int, int):
+    """
+        Used to validate content of a folders using a dict with path:md5sum values.
+
+        Parameters:
+            file_checksum (dict): dict with the following format {file_path: md5sum_value, }
+            parent_dir (string): path to where the file is located
+            print_path_name (string): when storing a file/folder using a temporary name this makes it possible to
+                                      print a more human readable string.
+
+        Returns:
+            (int, int): file that passed checksum validation followed by files that failed checksum validation
+    """
+    passed = 0
+    failed = 0
+    for file, checksum in file_checksums.items():
+        if checksum_validate_file(
+            os.path.join(parent_dir if parent_dir is not None else "./", file),
+            checksum,
+            print_path_name
+        ):
+            passed += 1
+        else:
+            failed += 1
+    logging.debug(f"folder content validation, valid: {passed}, invalid {failed}")
+    return passed, failed
+
+
+def checksum_validate_file(file, expected_checksum, print_path_name=None) -> bool:
+    """
+        function used to validate checksum.
+
+        Parameters:
+            file (str): path to file
+            expected_checksum (str): md5sum value
+            print_path_name (str): when storing a file/folder using a temporary name this makes it possible to
+                                   print a more human readable string.
+
+        Returns
+            bool: true passed validation
+    """
+    calculated_md5 = hashlib.md5(open(file, 'rb').read()).hexdigest()
+    print_name = print_path_name if print_path_name is not None else file
+    if calculated_md5 == expected_checksum:
+        logging.debug(f"{print_name}: valid checksum")
+        return True
+    else:
+        logging.error(f"{print_name}: invalid checksum, got {calculated_md5}, expected {expected_checksum}")
+        return False
+
+
+def extract_compressed_data(item, content_type, content_path, temp_content_holder, force=False) -> bool:
+    """
+        Function used to extract compressed content, both files and folders.
+
+        Parameters:
+            item (dict): a dict with checksum or content_checksum (a dict with path:md5sum values)
+            content_path (string): path to where the file or folder will be saved
+            temp_content_folder (string): path to where content can be temporary stored
+
+        Returns:
+            bool: if extraction was succefull
+    """
+    extracted_content_path = f"{temp_content_holder}_extracted"
+    print(extracted_content_path)
+    if "file" in content_type:
+        with gzip.open(temp_content_holder, 'rb') as file:
+            with open(extracted_content_path, 'wb') as writer:
+                for line in file:
+                    writer.write(line)
+        if checksum_validate_file(extracted_content_path, item['checksum']):
+            move_content(extracted_content_path, content_path)
+            return True
+        else:
+            return False
+    else:
+        with tarfile.open(temp_content_holder, mode="r|gz") as tar:
+            tar.extractall(extracted_content_path)
+        if 'content_checksum' in item:
+            if checksum_validate_content(item['content_checksum'], extracted_content_path, content_path):
+                if force and os.path.isdir(content_path):
+                    shutil.rmtree(content_path)
+                move_content(extracted_content_path, content_path)
+                return True
+            else:
+                return False
+        else:
+            move_content(extracted_content_path, content_path)
+            return True
+
+
+def move_content(old_path, new_path):
+    """
+        Helper function that will make sure that all
+        parent folders for new path exists.
+
+        Parameters:
+            old_path (string): location of data that will be moved
+            new_path (string): where the data will be saved
+    """
+    parent_dir = os.path.dirname(new_path)
+    if not os.path.isdir(parent_dir):
+        os.makedirs(parent_dir)
+    shutil.move(old_path, new_path)

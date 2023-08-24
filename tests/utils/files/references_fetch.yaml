@@ -11,14 +11,12 @@
       checksum: 00f39019a9141db70eed9a437ca05cf4
       type: file
       path: reference_data/small_exac_common_3.hg19.vcf
-      compressed_name: small_exac_common_3.hg19.vcf.gz
       compressed_checksum: 1eb85e09195f0092e389510b40765f5e
       url: https://figshare.scilifelab.se/ndownloader/files/40933373
 
   fuseq_wes:
     reference:
       type: folder
-      compressed_name: fuseq_wes.tar.gz
       compressed_checksum: c66a0ba6fe5b76fedf16b404f67fcda4
       path: reference_data/fuseq_wes
       content_checksum:
@@ -28,4 +26,9 @@
         UCSC_hg19_wes_contigSize3000_bigLen130000_r100.sqlite: 92357e04c72c06ab39b7cff59d24a852
       url: https://figshare.scilifelab.se/ndownloader/files/42116949
 
-  
+  fuseq_wes_v2:
+    reference:
+      type: folder
+      compressed_checksum: c66a0ba6fe5b76fedf16b404f67fcda4
+      path: reference_data/fuseq_wes_v2
+      url: https://figshare.scilifelab.se/ndownloader/files/42116949

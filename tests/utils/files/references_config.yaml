@@ -8,3 +8,6 @@ snv:
 
 fuseq_wes:
   reference: reference_data/fuseq_wes
+
+fuseq_wes_v2:
+  reference: reference_data/fuseq_wes_v2

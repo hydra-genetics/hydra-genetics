@@ -1,0 +1,34 @@
+---
+
+  bwa:
+    ann:
+     checksum: 745e9a6afe1951cc54e8cc1b6c1429ff
+     type: file
+     path: reference_data/hg19.with.mt.fasta.ann
+     url: https://figshare.scilifelab.se/ndownloader/files/42061206
+  snv:
+    variant:
+      checksum: 00f39019a9141db70eed9a437ca05cf4
+      type: file
+      path: reference_data/small_exac_common_3.hg19.vcf
+      compressed_checksum: 1eb85e09195f0092e389510b40765f5e
+      url: https://figshare.scilifelab.se/ndownloader/files/40933373
+
+  fuseq_wes:
+    reference:
+      type: folder
+      compressed_checksum: c66a0ba6fe5b76fedf16b404f67fcda4
+      path: reference_data/fuseq_wes
+      content_checksum:
+        ensmbl_paralogs_grch37.RData: af95895660e6b09ca07ffcedcc6c7ef1
+        Mitelman_fusiondb.RData: e4fbf81b5b02b9fe201161d324405822
+        UCSC_hg19_wes_contigSize3000_bigLen130000_r100.json: 30d56f2305d33734e0bff3eb888b12ba
+        UCSC_hg19_wes_contigSize3000_bigLen130000_r100.sqlite: 92357e04c72c06ab39b7cff59d24a852
+      url: https://figshare.scilifelab.se/ndownloader/files/42116949
+
+  fuseq_wes_v2:
+    reference:
+      type: folder
+      compressed_checksum: c66a0ba6fe5b76fedf16b404f67fcda4
+      path: reference_data/fuseq_wes_v2
+      url: https://figshare.scilifelab.se/ndownloader/files/42116949

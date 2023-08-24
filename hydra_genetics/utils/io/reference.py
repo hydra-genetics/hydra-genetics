@@ -117,9 +117,13 @@ def fetch_reference_data(validation_data, output_dir,
                         logging.info(f"Removing folder: {content_path}")
                         fetch_dir = True
                     else:
-                        logging.info(f"Folder found: {content_path}, no validation will be made")
+                        if "content_checksum" in validation_data[k]:
+                            logging.info(f"Folder found: {content_path}, "
+                                         "the files in variable \"content_checksum\" will be validated")
+                        else:
+                            logging.info(f"Folder found: {content_path}, no validation will be made")
+                            skipped += 1
                         fetched.append(content_path)
-                        skipped += 1
                 else:
                     fetch_dir = True
 
@@ -137,11 +141,31 @@ def fetch_reference_data(validation_data, output_dir,
                                           "checksum didn't match, "
                                           f"got {calculated_md5}, expected {compressed_checksum}")
                         else:
+                            logging.debug(f"Valid checksum: {content_path}")
                             with tarfile.open(compressed_content_path, mode="r|gz") as tar:
                                 tar.extractall(content_path)
                             fetched.append(content_path)
-                            files_fetched += 1
                             logging.info(f"Retrieved: {url} and decompressed it to {content_path}")
+                            valid_content = True
+                            if "content_checksum" in validation_data[k]:
+                                for file_path, checksum in validation_data[k]["content_checksum"].items():
+                                    f = os.path.join(content_path, file_path)
+                                    calculated_md5 = hashlib.md5(open(f, 'rb').read()).hexdigest()
+                                    if calculated_md5 == checksum:
+                                        logging.debug(f"checksum valid: {f}")
+                                    else:
+                                        valid_content = False
+                                        logging.error(f"checksum validation failed: {f}, "
+                                                      "got {calculated_md5}, expected {checksum} ")
+                            if valid_content:
+                                files_fetched += 1
+                            else:
+                                files_failed += 1
+                                failed.append(content_path)
+                else:
+                    if "content_checksum" in validation_data[k]:
+                        for file_path, checksum in validation_data[k]["content_checksum"].items():
+                            logging.info(f"{file_path}")
             else:
                 raise Exception(f"Unhandled content_type: {content_type}")
         else:
@@ -229,18 +253,33 @@ def validate_reference_data(validation_data, path_to_ref_data,
                 logging.error(f"Could not locate: {file_path}")
                 file_list, not_found_in_config, found = track_files(item['path'], file_list, not_found_in_config, found)
             else:
-                if 'checksum' not in item:
+                if 'checksum' not in item and "content_checksum" not in item:
                     counter_pass += 1
-                    logging.debug(f"{item['path']} found, no checksum validation!")
+                    logging.info(f"{item['path']} found, no checksum validation!")
+                elif "content_checksum" in item:
+                    logging.info(f"Folder found: {item['path']}")
+                    valid_content = True
+                    for path, checksum in item['content_checksum'].items():
+                        f = os.path.join(item['path'], path)
+                        calculated_md5 = hashlib.md5(open(f, 'rb').read()).hexdigest()
+                        if calculated_md5 == checksum:
+                            logging.info(f"Pass folder content: {f}")
+                        else:
+                            valid_content = False
+                            logging.error(f"Failed folder content: {f}, expected {checksum}, got {calculated_md5}")
+                    if valid_content:
+                        counter_pass += 1
+                    else:
+                        counter_fail += 1
                 else:
                     calculated_md5 = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
                     if not calculated_md5 == item['checksum']:
                         counter_fail += 1
-                        logging.error(f"Incorrect checksum for {file_path}, expected"
+                        logging.error(f"Failed file: {file_path}, expected"
                                       f" {validation_data[k]['checksum']}, got {calculated_md5}")
                     else:
                         counter_pass += 1
-                        logging.info(f"PASS: {file_path}")
+                        logging.info(f"Pass file: {file_path}")
                 file_list, not_found_in_config, found = track_files(item['path'], file_list, not_found_in_config, found)
         else:
             # Nested entry, recursively process content

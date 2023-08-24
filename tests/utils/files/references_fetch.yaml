@@ -19,8 +19,13 @@
     reference:
       type: folder
       compressed_name: fuseq_wes.tar.gz
-      compressed_checksum: c57e4cc16949727e24ba38436526f3b5
+      compressed_checksum: c66a0ba6fe5b76fedf16b404f67fcda4
       path: reference_data/fuseq_wes
-      url: https://figshare.scilifelab.se/ndownloader/files/42061197
+      content_checksum:
+        ensmbl_paralogs_grch37.RData: af95895660e6b09ca07ffcedcc6c7ef1
+        Mitelman_fusiondb.RData: e4fbf81b5b02b9fe201161d324405822
+        UCSC_hg19_wes_contigSize3000_bigLen130000_r100.json: 30d56f2305d33734e0bff3eb888b12ba
+        UCSC_hg19_wes_contigSize3000_bigLen130000_r100.sqlite: 92357e04c72c06ab39b7cff59d24a852
+      url: https://figshare.scilifelab.se/ndownloader/files/42116949
 
   

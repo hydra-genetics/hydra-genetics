@@ -88,7 +88,7 @@ def fetch_reference_data(validation_data, output_dir,
                                 failed.append(content_path)
                                 files_failed += 1
                         else:
-                            logging.info(f"file {content_type} retrieved")
+                            logging.info(f"file {content_path} retrieved")
                             files_fetched += 1
                             move_content(temp_content_holder, content_path)
             else:

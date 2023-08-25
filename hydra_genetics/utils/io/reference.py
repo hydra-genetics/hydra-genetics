@@ -67,6 +67,7 @@ def fetch_reference_data(validation_data, output_dir,
             update_needed = update_needed_for_entry(value)
 
             if update_needed or force:
+                logging.info(f"updating {content_path}")
                 with tempfile.TemporaryDirectory() as tmpdirname:
                     temp_content_holder = os.path.join(tmpdirname, "tempfile")
 
@@ -81,14 +82,17 @@ def fetch_reference_data(validation_data, output_dir,
                     else:
                         if 'compressed_checksum' in value:
                             if extract_compressed_data(value, content_type, content_path, temp_content_holder, force):
+                                logging.info(f"folder {content_path} retrieved")
                                 files_fetched += 1
                             else:
                                 failed.append(content_path)
                                 files_failed += 1
                         else:
+                            logging.info(f"file {content_path} retrieved")
                             files_fetched += 1
                             move_content(temp_content_holder, content_path)
             else:
+                logging.debug(f"skipped {content_path}")
                 skipped += content_path
         else:
             # Nested entry, recursively process content

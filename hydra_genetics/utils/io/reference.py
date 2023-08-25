@@ -304,7 +304,6 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
             bool: if extraction was succefull
     """
     extracted_content_path = f"{temp_content_holder}_extracted"
-    print(extracted_content_path)
     if "file" in content_type:
         with gzip.open(temp_content_holder, 'rb') as file:
             with open(extracted_content_path, 'wb') as writer:

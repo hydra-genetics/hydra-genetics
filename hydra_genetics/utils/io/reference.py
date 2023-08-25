@@ -81,14 +81,17 @@ def fetch_reference_data(validation_data, output_dir,
                     else:
                         if 'compressed_checksum' in value:
                             if extract_compressed_data(value, content_type, content_path, temp_content_holder, force):
+                                logging.info(f"folder {content_type} retrieved")
                                 files_fetched += 1
                             else:
                                 failed.append(content_path)
                                 files_failed += 1
                         else:
+                            logging.info(f"file {content_type} retrieved")
                             files_fetched += 1
                             move_content(temp_content_holder, content_path)
             else:
+                logging.debug(f"skipped {content_type}")
                 skipped += content_path
         else:
             # Nested entry, recursively process content

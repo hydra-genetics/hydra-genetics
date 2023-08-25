@@ -123,6 +123,7 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
             r = requests.get(part_url, allow_redirects=True)
+            open(temp_file, 'wb').write(r.content)
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {calculated_md5}, got {part_checksum}")
                 return False

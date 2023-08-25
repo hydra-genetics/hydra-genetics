@@ -64,7 +64,7 @@ def fetch_reference_data(validation_data, output_dir,
                 continue
 
             # Check if content needs to be updated
-            update_needed = update_needed_for_entry(value)
+            update_needed = update_needed_for_entry(value, output_dir)
 
             if update_needed or force:
                 logging.info(f"updating {content_path}")
@@ -80,6 +80,8 @@ def fetch_reference_data(validation_data, output_dir,
                         files_failed += 1
                         failed.append(content_path)
                     else:
+                        if 'folder' in content_type and os.path.isdir(content_path):
+                            shutil.rmtree(content_path)
                         if 'compressed_checksum' in value:
                             if extract_compressed_data(value, content_type, content_path, temp_content_holder, force):
                                 logging.info(f"folder {content_path} retrieved")
@@ -215,17 +217,21 @@ def validate_reference_data(validation_data, path_to_ref_data,
     return file_list, not_found_in_config, found, counter_pass, counter_fail
 
 
-def update_needed_for_entry(item):
+def update_needed_for_entry(item, parent_dir="./"):
     """
         Checks if entry needs to be update, i.e checksum has change or the file/folder doesn't exist
 
         Patameters:
             item (dict): see top part of this page
+            parent_dir (string): path to where content will be saved
 
         Returns:
             bool: if the entry needs to be updated
     """
-    content_path = item['path']
+    if item['path'].startswith("/"):
+        content_path = item['path']
+    else:
+        content_path = os.path.join(parent_dir, item['path'])
 
     if 'file' in item['type'] and not os.path.isfile(content_path) or \
        'folder' in item['type'] and not os.path.isdir(content_path):

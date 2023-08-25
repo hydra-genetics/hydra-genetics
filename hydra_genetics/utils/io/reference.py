@@ -213,12 +213,13 @@ def validate_reference_data(validation_data, path_to_ref_data,
     return file_list, not_found_in_config, found, counter_pass, counter_fail
 
 
-def update_needed_for_entry(item):
+def update_needed_for_entry(item, parent_dir="./"):
     """
         Checks if entry needs to be update, i.e checksum has change or the file/folder doesn't exist
 
         Patameters:
             item (dict): see top part of this page
+            parent_dir (string): path to where content will be saved
 
         Returns:
             bool: if the entry needs to be updated

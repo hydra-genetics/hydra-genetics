@@ -67,6 +67,7 @@ def fetch_reference_data(validation_data, output_dir,
             update_needed = update_needed_for_entry(value)
 
             if update_needed or force:
+                logging.info(f"updating {content_path}")
                 with tempfile.TemporaryDirectory() as tmpdirname:
                     temp_content_holder = os.path.join(tmpdirname, "tempfile")
 

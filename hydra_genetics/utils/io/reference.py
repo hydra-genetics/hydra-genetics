@@ -64,7 +64,7 @@ def fetch_reference_data(validation_data, output_dir,
                 continue
 
             # Check if content needs to be updated
-            update_needed = update_needed_for_entry(value)
+            update_needed = update_needed_for_entry(value, output_dir)
 
             if update_needed or force:
                 with tempfile.TemporaryDirectory() as tmpdirname:
@@ -79,6 +79,8 @@ def fetch_reference_data(validation_data, output_dir,
                         files_failed += 1
                         failed.append(content_path)
                     else:
+                        if 'folder' in content_type and os.path.isdir(content_path):
+                            shutil.rmtree(content_path)
                         if 'compressed_checksum' in value:
                             if extract_compressed_data(value, content_type, content_path, temp_content_holder, force):
                                 files_fetched += 1
@@ -221,7 +223,10 @@ def update_needed_for_entry(item):
         Returns:
             bool: if the entry needs to be updated
     """
-    content_path = item['path']
+    if item['path'].startswith("/"):
+        content_path = item['path']
+    else:
+        content_path = os.path.join(parent_dir, item['path'])
 
     if 'file' in item['type'] and not os.path.isfile(content_path) or \
        'folder' in item['type'] and not os.path.isdir(content_path):

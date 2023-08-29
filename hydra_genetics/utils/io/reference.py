@@ -286,7 +286,6 @@ def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=N
     return passed, failed
 
 
-
 def checksum_validate_file(file, expected_checksum, print_path_name=None) -> bool:
     """
         function used to validate checksum.

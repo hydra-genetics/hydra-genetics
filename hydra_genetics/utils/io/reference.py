@@ -265,17 +265,26 @@ def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=N
     """
     passed = 0
     failed = 0
+    failed_files = []
     for file, checksum in file_checksums.items():
-        if checksum_validate_file(
-            os.path.join(parent_dir if parent_dir is not None else "./", file),
-            checksum,
-            print_path_name
-        ):
-            passed += 1
+        full_file_path = os.path.join(parent_dir if parent_dir is not None else "./", file)
+        if os.path.isfile(full_file_path):
+            if checksum_validate_file(
+                os.path.join(full_file_path),
+                checksum,
+                file
+            ):
+                passed += 1
+            else:
+                failed_files.append(file)
+                failed += 1
         else:
+            logging.debug(f"{full_file_path} not found")
             failed += 1
     logging.debug(f"folder content validation, valid: {passed}, invalid {failed}")
+    logging.debug(f"failed files: {failed_files}")
     return passed, failed
+
 
 
 def checksum_validate_file(file, expected_checksum, print_path_name=None) -> bool:

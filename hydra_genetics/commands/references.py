@@ -160,7 +160,10 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
                         f" be located in the provided config: ({', '.join(files_not_in_config)})")
 
     if counter_fail > 0:
+        print(f"PASS: {counter_pass}, FAILED: {counter_fail}")
         exit(1)
+    else:
+        print(f"PASS: {counter_pass}")
 
 
 @references.command(short_help="download reference data, if needed")
@@ -219,5 +222,10 @@ def download(validation_file, output_dir, force):
         logging.debug(f"Skipped: {', '.join(skipped_list)}")
 
     if files_fetched > 0:
-        logging.info(f"Fetched {files_fetched} files")
+        logging.info(f"Retrieved {files_fetched} files")
         logging.debug(f"Retrieved: {', '.join(fetched_list)}")
+
+    print(f"UPDATED: {files_fetched}")
+    print(f"NOT UPDATED: {files_skipped}")
+
+    return 0

@@ -95,6 +95,7 @@ def fetch_reference_data(validation_data, output_dir,
                             move_content(temp_content_holder, content_path)
             else:
                 logging.debug(f"skipped {content_path}")
+                files_skipped += 1
                 skipped += content_path
         else:
             # Nested entry, recursively process content

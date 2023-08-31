@@ -196,8 +196,8 @@ def validate_reference_data(validation_data, path_to_ref_data,
                     logging.debug(f"{item['path']} found, no checksum validation!")
                 elif "content_checksum" in item:
                     logging.debug(f"Folder found: {item['path']}")
-                    _, failed = checksum_validate_content(item['content_checksum'], file_path)
-                    if not failed:
+                    _, failed, not_found = checksum_validate_content(item['content_checksum'], file_path)
+                    if not failed and not not_found:
                         counter_pass += 1
                     else:
                         counter_fail += 1
@@ -241,8 +241,8 @@ def update_needed_for_entry(item, parent_dir="./"):
         if "checksum" in item:
             return not checksum_validate_file(content_path, item['checksum'])
         elif "content_checksum" in item:
-            _, failed = checksum_validate_content(item['content_checksum'], content_path)
-            if failed:
+            _, failed, not_found = checksum_validate_content(item['content_checksum'], content_path)
+            if failed or not_found:
                 return True
             else:
                 return False
@@ -250,7 +250,7 @@ def update_needed_for_entry(item, parent_dir="./"):
             logging.debug(f"{content_path} not validation done")
 
 
-def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=None) -> (int, int):
+def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=None) -> (int, int, int):
     """
         Used to validate content of a folders using a dict with path:md5sum values.
 
@@ -261,21 +261,33 @@ def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=N
                                       print a more human readable string.
 
         Returns:
-            (int, int): file that passed checksum validation followed by files that failed checksum validation
+            (int, int, int): file that passed checksum validation, files that failed checksum validation, files not found
     """
     passed = 0
     failed = 0
+    not_found = 0
+    failed_files = []
+    files_not_found = []
     for file, checksum in file_checksums.items():
-        if checksum_validate_file(
-            os.path.join(parent_dir if parent_dir is not None else "./", file),
-            checksum,
-            print_path_name
-        ):
-            passed += 1
+        full_file_path = os.path.join(parent_dir if parent_dir is not None else "./", file)
+        if os.path.isfile(full_file_path):
+            if checksum_validate_file(
+                os.path.join(full_file_path),
+                checksum,
+                file
+            ):
+                passed += 1
+            else:
+                failed_files.append(file)
+                failed += 1
         else:
-            failed += 1
-    logging.debug(f"folder content validation, valid: {passed}, invalid {failed}")
-    return passed, failed
+            logging.debug(f"{full_file_path} not found")
+            files_not_found.append(file)
+            not_found += 1
+    logging.debug(f"folder content validation, valid: {passed}, invalid {failed}, missing {not_found}")
+    logging.debug(f"failed files: {failed_files}")
+    logging.debug(f"failed files: {files_not_found}")
+    return passed, failed, not_found
 
 
 def checksum_validate_file(file, expected_checksum, print_path_name=None) -> bool:

@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.7.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.6.0...v1.7.0) (2023-09-04)
+
+
+### Features
+
+* function used to add variable optios to a yaml file ([4cc2733](https://www.github.com/hydra-genetics/hydra-genetics/commit/4cc2733c91faaf1a8a7763ed62ed562f1929a67e))
+* make it possible to download and decompress zipped files and folders ([2a14a81](https://www.github.com/hydra-genetics/hydra-genetics/commit/2a14a81d2a49aac08c2c4b33a239098fc3a8757e))
+* make it possible to split files into smaller parts ([f886244](https://www.github.com/hydra-genetics/hydra-genetics/commit/f88624439e88849c3ec24b173d4ec9615d4e878d))
+* make it possible to validate content of compressed files ([cae730c](https://www.github.com/hydra-genetics/hydra-genetics/commit/cae730c1b09eebd587df37fd7c950ef333af383f))
+* output more information about download/validation for ref files ([c9524a3](https://www.github.com/hydra-genetics/hydra-genetics/commit/c9524a3daf23a1b132f18d94e1609e6575972dae))
+
+
+### Bug Fixes
+
+* parent folder bug and remove existing folder if it needs updating ([61032a5](https://www.github.com/hydra-genetics/hydra-genetics/commit/61032a5c7bbdaa4d54e0614e782786d1ffc2354d))
+
+
+### Documentation
+
+* correcting rtd links ([fcd00c9](https://www.github.com/hydra-genetics/hydra-genetics/commit/fcd00c9e5d9d556e3ff283dcc194b4cb359d4e50))
+* update rtd links ([ecb845a](https://www.github.com/hydra-genetics/hydra-genetics/commit/ecb845aa6185a8cfb7a2f782e276e0441e7889d0))
+* update rtd links ([153bfe4](https://www.github.com/hydra-genetics/hydra-genetics/commit/153bfe402e75d32b60e3070e710a721a642881e7))
+
 ## [1.6.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.5.1...v1.6.0) (2023-06-28)
 
 

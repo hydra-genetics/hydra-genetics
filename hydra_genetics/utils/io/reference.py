@@ -307,7 +307,7 @@ def checksum_validate_file(file, expected_checksum, print_path_name=None) -> boo
     with open(file, 'rb') as fp:
         for chunk in fp:
             m.update(chunk)
-    calculated_md5 =  m.hexdigest()
+    calculated_md5 = m.hexdigest()
     print_name = print_path_name if print_path_name is not None else file
     if calculated_md5 == expected_checksum:
         logging.debug(f"{print_name}: valid checksum")

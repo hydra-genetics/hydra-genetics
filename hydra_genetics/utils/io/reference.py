@@ -250,7 +250,7 @@ def update_needed_for_entry(item, parent_dir="./"):
             logging.debug(f"{content_path} not validation done")
 
 
-def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=None) -> (int, int, int):
+def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=None, ) -> (int, int, int):
     """
         Used to validate content of a folders using a dict with path:md5sum values.
 
@@ -303,7 +303,11 @@ def checksum_validate_file(file, expected_checksum, print_path_name=None) -> boo
         Returns
             bool: true passed validation
     """
-    calculated_md5 = hashlib.md5(open(file, 'rb').read()).hexdigest()
+    m = hashlib.md5()
+    with open(file, 'rb') as fp:
+        for chunk in fp:
+            m.update(chunk)
+    calculated_md5 =  m.hexdigest()
     print_name = print_path_name if print_path_name is not None else file
     if calculated_md5 == expected_checksum:
         logging.debug(f"{print_name}: valid checksum")

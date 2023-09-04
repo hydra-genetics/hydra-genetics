@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import unittest
+import yaml
 
 
 class TestResourcesUtils(unittest.TestCase):
@@ -31,3 +32,14 @@ class TestResourcesUtils(unittest.TestCase):
                                      'chr13', 'chr14', 'chr15', 'chr16', 'chr18', 'chr19', 'chr20', 'chr21', 'chr22', 'chrY',
                                      'chrM'])
         self.assertEqual(extract_chr(""), [''])
+
+    def test_variable_replacement(self):
+        with open("tests/utils/files/config_variable_replacement.yaml") as f:
+            config = yaml.load(f, Loader=yaml.loader.SafeLoader)
+        print(config)
+        self.assertEqual(config,
+                         {'PROJECT': 'MY variable', 'bwa_mem': {'extra': 'some settings {{PROJECT}}'}})
+
+        from hydra_genetics.utils.misc import replace_dict_variables
+        self.assertEqual(replace_dict_variables(config),
+                         {'PROJECT': 'MY variable', 'bwa_mem': {'extra': 'some settings MY variable'}})

@@ -3,6 +3,7 @@
 from collections.abc import Mapping
 from copy import deepcopy
 import os
+import re
 from snakemake.sourcecache import GithubFile, LocalGitFile
 
 
@@ -43,3 +44,22 @@ def extract_chr(file, filter_out=["chrM"]):
             chr = [line.split("\t")[0] for line in lines]
         return [c for c in chr if c not in filter_out]
     return [""]
+
+
+def replace_dict_variables(config):
+    '''
+        Make it possible to defina a variable in a  vaue string using ´{{}}´,
+        ex {{PROJECT_VARIABLE}}. PROJECT_VARIABLE must exist as a variable
+        in the yaml file and will be used to replace all occurences of
+        {{PROJECT_VARAIBLE}} in the yaml file.
+    '''
+    def update_dict(temp_config):
+        for k in temp_config:
+            if type(temp_config[k]) is dict:
+                temp_config[k] = update_dict(temp_config[k])
+            elif type(temp_config[k]) is str:
+                match = re.findall(r'\{\{([A-Za-z0-9_]+)\}\}', temp_config[k])
+                for m in match:
+                    temp_config[k] = temp_config[k].replace("{{" + m + "}}", config[m])
+        return temp_config
+    return update_dict(config)

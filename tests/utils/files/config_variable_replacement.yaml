@@ -1,0 +1,4 @@
+PROJECT: "MY variable"
+
+bwa_mem:
+  extra: "some settings {{PROJECT}}"

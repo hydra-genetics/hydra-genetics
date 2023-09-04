@@ -17,7 +17,7 @@ on:
 
 jobs:
   python_code:
-    name: check pycodestyle and unittest
+    name: run hydra-genetics commands
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -47,7 +47,15 @@ jobs:
         run: hydra-genetics create-rule -c rule1234 -t my_tool -m test_pipeline -a s -e g 
       - name: Add additional rule to tool
         run: hydra-genetics create-rule -c rule5231 -t my_tool -m test_pipeline -a s -e g 
-      - name: Fetch references
+      - name: Download references
         run: hydra-genetics  references download -v tests/utils/files/validation.yaml -v tests/utils/files/validation.json -o test_new
       - name: Validate references
         run: hydra-genetics references validate -c tests/utils/files/configs.yaml -c tests/utils/files/configs.ref.yaml -c tests/utils/files/configs.rna.yaml -v tests/utils/files/validation.json -v tests/utils/files/validation.yaml -v tests/utils/files/validation.json -p test_new
+      - name: "Download, include compressed data"
+        run: hydra-genetics --debug --verbose references download --validation-file tests/utils/files/references_fetch.yaml
+      - name: "Validate, include compressed data"
+        run: hydra-genetics --debug references validate -c tests/utils/files/references_config.yaml -v tests/utils/files/references_fetch.yaml
+      - name: "Download, split data"
+        run: hydra-genetics --debug --verbose references download --validation-file tests/utils/files/references_divided_file_fetch.yaml
+      - name: "Validate, split data"
+        run: hydra-genetics --debug references validate -c tests/utils/files/references_config.yaml -v tests/utils/files/references_divided_file_fetch.yaml

@@ -32,8 +32,8 @@ import tempfile
 
 
 def fetch_reference_data(validation_data, output_dir,
-                         fetched=[], failed=[], skipped=[],
-                         files_fetched=0, files_failed=0, files_skipped=0,
+                         fetched=[], links=[], failed=[], skipped=[],
+                         files_fetched=0, links_created=0, files_failed=0, files_skipped=0,
                          force=False):
     '''
         Function used to validate entries found in validation files
@@ -42,15 +42,17 @@ def fetch_reference_data(validation_data, output_dir,
             validation_data (dict):
             output_dir (str): path to where data will be stored
             fetched (list): list with files that have been retrieved.
+            links (list): list with links that have been retrieved.
             failed (list): list with files that couldn't correctly be retrieved
             skipped (list): list with files that weren't retrieved, checksum haven't changed
             files_fetched (int): counter variable for files that have been retrieved.
+            links_created (int): counter variable for links that have been retrieved.
             files_failed (int): counter variable for files that couldn't correctly be retrieved
             files_skipped (int): counter variable for files that weren't retrieved, checksum haven't changed
 
         Returns:
-            (list, list, list, int, int, int): (fetched files, failed files, skipped files,
-                                                counter fetched files, counter failed files , counter skipped files)
+            (list, list, list, list, int, int, int, int): (fetched files, failed files, skipped files,
+                        counter fetched files, counter links created, counter failed files , counter skipped files)
     '''
     for k, value in validation_data.items():
         # If validation entry
@@ -96,19 +98,44 @@ def fetch_reference_data(validation_data, output_dir,
             else:
                 logging.debug(f"skipped {content_path}")
                 files_skipped += 1
-                skipped += content_path
+                skipped.append(content_path)
+
+            if 'link' in value:
+                link_path = os.path.join(output_dir, value['link'])
+
+                if not os.path.lexists(link_path):
+                    logging.info(f"Creating link: {link_path}")
+                    content_path = os.path.abspath(os.path.join(output_dir, value['path']))
+                    links.append(link_path)
+                    link_path = os.path.abspath(link_path)
+                    if not os.path.isdir(os.path.dirname(link_path)):
+                        os.mkdir(os.path.dirname(link_path))
+                    relpath = os.path.relpath(os.path.dirname(content_path), os.path.dirname(link_path))
+                    if relpath == ".":
+                        content_path = os.path.basename(content_path)
+                    elif relpath == "..":
+                        content_path = os.path.join(relpath, os.path.basename(content_path))
+                    else:
+                        content_path = os.path.join(output_dir, value['path'])
+                    links_created += 1
+                    os.symlink(content_path, link_path)
+                else:
+                    logging.info(f"link already exist: {link_path}")
         else:
             # Nested entry, recursively process content
-            fetched, failed, skipped, files_fetched, files_failed, files_skipped = fetch_reference_data(validation_data[k],
-                                                                                                        output_dir,
-                                                                                                        fetched,
-                                                                                                        failed,
-                                                                                                        skipped,
-                                                                                                        files_fetched,
-                                                                                                        files_failed,
-                                                                                                        files_skipped,
-                                                                                                        force)
-    return fetched, failed, skipped, files_fetched, files_failed, files_skipped
+            (fetched, links, failed, skipped,
+             files_fetched, links_created, files_failed, files_skipped) = fetch_reference_data(validation_data[k],
+                                                                                               output_dir,
+                                                                                               fetched,
+                                                                                               links,
+                                                                                               failed,
+                                                                                               skipped,
+                                                                                               files_fetched,
+                                                                                               links_created,
+                                                                                               files_failed,
+                                                                                               files_skipped,
+                                                                                               force)
+    return fetched, links, failed, skipped, files_fetched, links_created, files_failed, files_skipped
 
 
 def fetch_url_content(url, content_holder, tmpdir) -> None:
@@ -149,8 +176,8 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
 
 
 def validate_reference_data(validation_data, path_to_ref_data,
-                            file_list=[], not_found_in_config=[], found=[],
-                            counter_pass=0, counter_fail=0):
+                            file_list=[], link_list=[], not_found_in_config=[], found=[],
+                            counter_pass=0, counter_links=0, counter_fail=0):
     '''
         Validate all entries in the validation dict
 
@@ -159,12 +186,15 @@ def validate_reference_data(validation_data, path_to_ref_data,
                                     ex {key: {key_s1: {path: value}, key_s2: {path: value}, k2: {path: value}}
             path_to_ref_data (str): path to where data is stored
             file_list (list): list with files in config file
+            link_list (list): list with links defined in validation yaml
             not_found_in_config (list): files in loaded validation that couldn't be found in the configuration file
             counter_pass (int): counter variable for files that passed test
+            counter_links (int): counter variable for links found
             counter_fail (int): counter variable for files that did not pass test
 
         Returns:
-            (list, int, int): list with files that haven't been validated, pass counter, fail counter
+            (list, list, int, int, int): list with files that haven't been validated,
+                        links found, pass counter, counter, links, fail counter
     '''
     def track_files(path, file_list=[], not_found_in_config=[], found=[]):
         if path in found:
@@ -183,6 +213,14 @@ def validate_reference_data(validation_data, path_to_ref_data,
                     not_found_in_config.append(path)
         return file_list, not_found_in_config, found
 
+    def valid_link(output_dir, item):
+        if 'link' in item:
+            link_path = os.path.join(path_to_ref_data, item['link'])
+            if not os.path.lexists(link_path):
+                logging.info(f"Missing link: {link_path}")
+                return False
+        return True
+
     for k, item in validation_data.items():
         # A validation entry
         if "path" in item:
@@ -193,8 +231,14 @@ def validate_reference_data(validation_data, path_to_ref_data,
                 file_list, not_found_in_config, found = track_files(item['path'], file_list, not_found_in_config, found)
             else:
                 if 'checksum' not in item and "content_checksum" not in item:
-                    counter_pass += 1
-                    logging.debug(f"{item['path']} found, no checksum validation!")
+                    if not valid_link(path_to_ref_data, item):
+                        counter_fail += 1
+                    else:
+                        if 'link' in item:
+                            counter_links += 1
+                            link_list.append(item['link'])
+                        counter_pass += 1
+                        logging.debug(f"{item['path']} found, no checksum validation!")
                 elif "content_checksum" in item:
                     logging.debug(f"Folder found: {item['path']}")
                     _, failed, not_found = checksum_validate_content(item['content_checksum'], file_path)
@@ -203,19 +247,23 @@ def validate_reference_data(validation_data, path_to_ref_data,
                     else:
                         counter_fail += 1
                 else:
-                    if checksum_validate_file(file_path, validation_data[k]['checksum']):
+                    if checksum_validate_file(file_path, validation_data[k]['checksum']) and valid_link(path_to_ref_data, item):
+                        if 'link' in item:
+                            counter_links += 1
+                            link_list.append(item['link'])
                         counter_pass += 1
                     else:
                         counter_fail += 1
                 file_list, not_found_in_config, found = track_files(item['path'], file_list, not_found_in_config, found)
         else:
             # Nested entry, recursively process content
-            (file_list, not_found_in_config, found,
-             counter_pass, counter_fail) = validate_reference_data(validation_data[k],
-                                                                   path_to_ref_data,
-                                                                   file_list, not_found_in_config, found,
-                                                                   counter_pass, counter_fail)
-    return file_list, not_found_in_config, found, counter_pass, counter_fail
+            (file_list, link_list, not_found_in_config, found,
+             counter_pass, counter_links, counter_fail) = validate_reference_data(validation_data[k],
+                                                                                  path_to_ref_data,
+                                                                                  file_list, link_list, not_found_in_config,
+                                                                                  found,
+                                                                                  counter_pass, counter_links, counter_fail)
+    return file_list, link_list, not_found_in_config, found, counter_pass, counter_links, counter_fail
 
 
 def update_needed_for_entry(item, parent_dir="./"):

@@ -6,6 +6,7 @@ import requests
 import shutil
 import tarfile
 import tempfile
+from urllib.request import urlretrieve
 
 # Expected input file format
 # --------------------------
@@ -129,8 +130,7 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
         for part_url, part_checksum in url.items():
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
-            r = requests.get(part_url, allow_redirects=True)
-            open(temp_file, 'wb').write(r.content)
+            urlretrieve(part_url, temp_file)
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {calculated_md5}, got {part_checksum}")
                 return False
@@ -144,8 +144,7 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
                     for line in reader:
                         writer.write(line)
     else:
-        r = requests.get(url, allow_redirects=True)
-        open(content_holder, 'wb').write(r.content)
+        urlretrieve(url, content_holder)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,
@@ -251,7 +250,7 @@ def update_needed_for_entry(item, parent_dir="./"):
             logging.debug(f"{content_path} not validation done")
 
 
-def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=None) -> (int, int, int):
+def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=None, ) -> (int, int, int):
     """
         Used to validate content of a folders using a dict with path:md5sum values.
 
@@ -304,7 +303,11 @@ def checksum_validate_file(file, expected_checksum, print_path_name=None) -> boo
         Returns
             bool: true passed validation
     """
-    calculated_md5 = hashlib.md5(open(file, 'rb').read()).hexdigest()
+    m = hashlib.md5()
+    with open(file, 'rb') as fp:
+        for chunk in fp:
+            m.update(chunk)
+    calculated_md5 = m.hexdigest()
     print_name = print_path_name if print_path_name is not None else file
     if calculated_md5 == expected_checksum:
         logging.debug(f"{print_name}: valid checksum")

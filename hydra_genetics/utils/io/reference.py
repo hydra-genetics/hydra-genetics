@@ -74,7 +74,6 @@ def fetch_reference_data(validation_data, output_dir,
                     checksum_value = value['compressed_checksum'] if 'compressed_checksum' in value else value['checksum']
 
                     if not checksum_validate_file(temp_content_holder, checksum_value, content_path):
-                        files_failed += 1
                         failed.append(content_path)
                     else:
                         if 'folder' in content_type and os.path.isdir(content_path):

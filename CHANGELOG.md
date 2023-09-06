@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.8.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.7.0...v1.8.0) (2023-09-06)
+
+
+### Features
+
+* make it possible to define links handling fetching data ([35fa20a](https://www.github.com/hydra-genetics/hydra-genetics/commit/35fa20aec38c441d0b7eba0d1d91103b43ac3544))
+
+
+### Bug Fixes
+
+* reduce memory usage when downloading files ([3e6b4b6](https://www.github.com/hydra-genetics/hydra-genetics/commit/3e6b4b696248d8e5058b7f3ae70f18c780cf6ea5))
+
 ## [1.7.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.6.0...v1.7.0) (2023-09-04)
 
 

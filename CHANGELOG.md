@@ -5,7 +5,7 @@
 
 ### Features
 
-* make it possible to define links handling fetching data ([35fa20a](https://www.github.com/hydra-genetics/hydra-genetics/commit/35fa20aec38c441d0b7eba0d1d91103b43ac3544))
+* make it possible to define links when fetching data ([35fa20a](https://www.github.com/hydra-genetics/hydra-genetics/commit/35fa20aec38c441d0b7eba0d1d91103b43ac3544))
 
 
 ### Bug Fixes

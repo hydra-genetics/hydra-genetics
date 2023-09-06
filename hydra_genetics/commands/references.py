@@ -213,7 +213,7 @@ def download(validation_file, output_dir, force):
 
     # Make sure that output directory exists
     if output_dir and not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
     fetched_list, links_list, failed_list, skipped_list = fetch_reference_data(validation_data,
                                                                                output_dir,

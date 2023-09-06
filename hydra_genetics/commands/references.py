@@ -147,11 +147,16 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
     possible_files = [*set(locate_possible_files_in_config(config_data, skip_regex=skip_regex))]
 
     # List of files that haven't been validated and counters for success and failures
-    possible_files, files_not_in_config, found, counter_pass, counter_fail = validate_reference_data(validation_data,
-                                                                                                     path_to_ref_data,
-                                                                                                     possible_files)
+    (possible_files, files_not_in_config, found,
+     pass_list, link_list, failed_list) = validate_reference_data(validation_data,
+                                                                  path_to_ref_data,
+                                                                  possible_files)
 
-    logging.info(f"Files/Folders pass: {counter_pass}, fail: {counter_fail}")
+    logging.info(f"Files/Folders pass: {len(pass_list)}, links; {len(link_list)}, fail: {len(failed_list)}")
+    logging.debug(f"Files/Folders pass: {pass_list}")
+    logging.debug(f"links; {link_list}")
+    logging.debug(f"fail: {failed_list}")
+
     if len(possible_files) > 0:
         logging.warning(f"Found more possible files in config ({', '.join(possible_files)}) that haven't been validated!")
 
@@ -159,11 +164,12 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
         logging.warning("The following files in provided validation files couldn't"
                         f" be located in the provided config: ({', '.join(files_not_in_config)})")
 
-    if counter_fail > 0:
-        print(f"PASS: {counter_pass}, FAILED: {counter_fail}")
+    if len(failed_list) > 0:
+        print(f"PASS: {len(pass_list)}, FAILED: {len(failed_list)}")
         exit(1)
     else:
-        print(f"PASS: {counter_pass}")
+        print(f"PASS: {len(pass_list)}")
+        print(f"Links PASS: {len(link_list)}")
 
 
 @references.command(short_help="download reference data, if needed")
@@ -209,23 +215,27 @@ def download(validation_file, output_dir, force):
     if output_dir and not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    fetched_list, failed_list, skipped_list, files_fetched, files_failed, files_skipped = fetch_reference_data(validation_data,
-                                                                                                               output_dir,
-                                                                                                               force=force)
+    fetched_list, links_list, failed_list, skipped_list = fetch_reference_data(validation_data,
+                                                                               output_dir,
+                                                                               force=force)
 
-    if files_failed > 0:
-        logging.error(f"Failed to retrieve {files_failed}")
+    if len(failed_list) > 0:
+        logging.error(f"Failed to retrieve {len(failed_list)}")
         logging.error(f"Failed: {', '.join(failed_list)}")
 
-    if files_skipped > 0:
-        logging.info(f"Skipped {files_skipped} since checksum didn't change")
+    if len(skipped_list) > 0:
+        logging.info(f"Skipped {len(skipped_list)} since checksum didn't change")
         logging.debug(f"Skipped: {', '.join(skipped_list)}")
 
-    if files_fetched > 0:
-        logging.info(f"Retrieved {files_fetched} files")
+    if len(fetched_list) > 0:
+        logging.info(f"Retrieved {len(fetched_list)} files")
         logging.debug(f"Retrieved: {', '.join(fetched_list)}")
 
-    print(f"UPDATED: {files_fetched}")
-    print(f"NOT UPDATED: {files_skipped}")
+    if len(links_list) > 0:
+        logging.info(f"Links created: {len(links_list)}")
+        logging.debug(f"Links: {', '.join(links_list)}")
+
+    print(f"UPDATED: {len(fetched_list)}")
+    print(f"NOT UPDATED: {len(skipped_list)}")
 
     return 0

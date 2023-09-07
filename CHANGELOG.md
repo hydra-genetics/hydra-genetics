@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.8.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.8.0...v1.8.1) (2023-09-07)
+
+
+### Bug Fixes
+
+* handle missing parent directories ([d7d47d6](https://www.github.com/hydra-genetics/hydra-genetics/commit/d7d47d669b5ad2feb767303290f7a8261a243b10))
+* remove code ([4b1752b](https://www.github.com/hydra-genetics/hydra-genetics/commit/4b1752b384b023cdfdd4fd352d24b12d152a5906))
+
 ## [1.8.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.7.0...v1.8.0) (2023-09-06)
 
 

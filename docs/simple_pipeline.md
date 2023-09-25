@@ -22,7 +22,7 @@ This tutorial will guide you through making a pipeline that trim and then align 
 
 ## Setup environment
 ```bash
-python3 -m venv hackaton_venv
+python3.8 -m venv hackaton_venv
 source hackaton_venv/bin/activate
 pip install hydra-genetics==1.3.0
 ```

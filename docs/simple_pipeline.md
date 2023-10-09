@@ -24,7 +24,7 @@ This tutorial will guide you through making a pipeline that trim and then align 
 ```bash
 python3.8 -m venv hackaton_venv
 source hackaton_venv/bin/activate
-pip install hydra-genetics==1.3.0
+pip install hydra-genetics==1.8.0
 ```
 
 <hr />

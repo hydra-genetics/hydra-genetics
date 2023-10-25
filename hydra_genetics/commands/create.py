@@ -682,5 +682,5 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
             if last_lane != lane:
                 logging.warning("First read and last read have different lane numbers {} vs {}, lane will be set to 0!".
                                 format(last_lane, lane))
-            return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads, warning_threshold))
-        return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads, warning_threshold))
+            return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads - counter, warning_threshold))
+        return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads - counter, warning_threshold))

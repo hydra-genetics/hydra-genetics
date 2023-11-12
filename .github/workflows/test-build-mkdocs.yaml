@@ -23,7 +23,7 @@ jobs:
           python-version: 3.8
       - name: Install requirements.txt
         run: |
-          pip install -r requirements.txt
+          pip install -e .
       - name: Install requirements.test.txt
         run: |
           pip install -r requirements.test.txt

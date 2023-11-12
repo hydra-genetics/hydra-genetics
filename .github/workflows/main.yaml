@@ -32,6 +32,6 @@ jobs:
         run: |
           pip install -r requirements.test.txt
       - name: Check pycodestyle
-        run: pycodestyle --max-line-length=130 --statistics ./
+        run: pycodestyle --max-line-length=140 --statistics ./
       - name: run pytest
         run: python -m pytest

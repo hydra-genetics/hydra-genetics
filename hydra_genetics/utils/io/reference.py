@@ -188,15 +188,22 @@ def validate_reference_data(validation_data, path_to_ref_data,
         if path in found:
             pass
         else:
-            file_found = ""
+            file_found = []
             for f in file_list:
                 if f.endswith(path) or f == path:
-                    file_found = f
+                    file_found.append(f)
                     break
+                elif path in f:
+                    file_found.append(f)
+                    
             if file_found:
-                file_list.remove(f)
+                for f in file_found:
+                    file_list.remove(f)
                 found.append(path)
             else:
+                for f in found:
+                    if f.endswith(f) or f in path:
+                        return file_list, not_found_in_config, found
                 if path not in found:
                     not_found_in_config.append(path)
         return file_list, not_found_in_config, found

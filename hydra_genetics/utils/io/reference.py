@@ -195,7 +195,6 @@ def validate_reference_data(validation_data, path_to_ref_data,
                     break
                 elif path in f:
                     file_found.append(f)
-                    
             if file_found:
                 for f in file_found:
                     file_list.remove(f)

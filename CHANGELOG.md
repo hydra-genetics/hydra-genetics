@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.9.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.8.1...v1.9.0) (2023-11-13)
+
+
+### Features
+
+* add test build mkdocs to template ([e08b1ad](https://www.github.com/hydra-genetics/hydra-genetics/commit/e08b1ad377ca78fc0174de0b64b5033f9351f5b6))
+
+
+### Bug Fixes
+
+* handle case one requested number of reads couldn't be selected ([088f0b1](https://www.github.com/hydra-genetics/hydra-genetics/commit/088f0b130728d728922af6dbb61762046db86475))
+* handle events when a file is listed multiple times in the config ([812c8e8](https://www.github.com/hydra-genetics/hydra-genetics/commit/812c8e843265bc5508f69f8b1acea3fb060f128a))
+
+
+### Documentation
+
+* update  mkdocs plugin yaml and rule versions ([816ddbb](https://www.github.com/hydra-genetics/hydra-genetics/commit/816ddbb7d8e09776718dfcd75ea5de230fd3fd65))
+* update hydra-genetics version in docs and templates ([8a91779](https://www.github.com/hydra-genetics/hydra-genetics/commit/8a9177938a44038cfbb70cbf3468e56eb01d0af1))
+
 ### [1.8.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.8.0...v1.8.1) (2023-09-07)
 
 

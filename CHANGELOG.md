@@ -10,7 +10,7 @@
 
 ### Bug Fixes
 
-* handle case one requested number of reads couldn't be selected ([088f0b1](https://www.github.com/hydra-genetics/hydra-genetics/commit/088f0b130728d728922af6dbb61762046db86475))
+* handle case when requested number of reads couldn't be selected ([088f0b1](https://www.github.com/hydra-genetics/hydra-genetics/commit/088f0b130728d728922af6dbb61762046db86475))
 * handle events when a file is listed multiple times in the config ([812c8e8](https://www.github.com/hydra-genetics/hydra-genetics/commit/812c8e843265bc5508f69f8b1acea3fb060f128a))
 
 

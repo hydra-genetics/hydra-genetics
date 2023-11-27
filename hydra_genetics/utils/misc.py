@@ -61,5 +61,11 @@ def replace_dict_variables(config):
                 match = re.findall(r'\{\{([A-Za-z0-9_]+)\}\}', temp_config[k])
                 for m in match:
                     temp_config[k] = temp_config[k].replace("{{" + m + "}}", config[m])
+            elif type(temp_config[k]) is list:
+                for i in range(len(temp_config[k])):
+                    if type(temp_config[k][i]) is str:
+                        match = re.findall(r'\{\{([A-Za-z0-9_]+)\}\}', temp_config[k][i])
+                        for m in match:
+                            temp_config[k][i] = temp_config[k][i].replace("{{" + m + "}}", config[m])
         return temp_config
     return update_dict(config)

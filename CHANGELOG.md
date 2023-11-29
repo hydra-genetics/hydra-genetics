@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.9.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.9.0...v1.9.1) (2023-11-29)
+
+
+### Bug Fixes
+
+* handle list of str when replacing config variables ([30223f4](https://www.github.com/hydra-genetics/hydra-genetics/commit/30223f404a05517dce0187adb39de4679848a23f))
+
 ## [1.9.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.8.1...v1.9.0) (2023-11-13)
 
 

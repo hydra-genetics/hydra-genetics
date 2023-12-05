@@ -22,6 +22,7 @@ def generate_hotspot_report(sample,
                             vcf_file,
                             gvcf_file,
                             chr_mapping,
+                            vcf_file_pick=None,
                             column_yaml_file=None):
     reports = OrderedDict(((ReportClass.hotspot, []),
                           (ReportClass.region_all, []),
@@ -39,6 +40,24 @@ def generate_hotspot_report(sample,
     variants = VariantFile(vcf_file)
     other = []
 
+    transcript_dict = {}
+    log.info("Processing vep transcripts")
+    for record in variants.header.records:
+        if record.type == "INFO":
+            if record['ID'] == "CSQ":
+                vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
+
+    if not vcf_file_pick == None:
+        variants_pick = VariantFile(vcf_file_pick)
+        for variant in variants_pick:
+            if variant is None:
+                raise Exception("Empty allele found: " + str(variant))
+            if not len(variant.alts) == 1:
+                raise Exception("Multiple allele found: " + str(variant.alts))
+            variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
+            transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
+            transcript_dict[variant_key] = transcript
+
     log.info("Processing variants")
     for variant in variants:
         # ToDo make sure that empty variants are handled better!!!
@@ -50,6 +69,11 @@ def generate_hotspot_report(sample,
         for report in reports:
             for hotspot in reports[report]:
                 if hotspot.add_variant(variant, chr_translater):
+                    variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
+                    hotspot_transcript = hotspot.ACCESSION_NUMBER
+                    print(variant_key, hotspot_transcript)
+                    if not hotspot_transcript == "-":
+                        transcript_dict[variant_key] = hotspot_transcript
                     log.debug("Adding variant {}:{}-{} {} {} to hotspot: {}".format(variant.chrom,
                                                                                     variant.start,
                                                                                     variant.stop,
@@ -127,9 +151,9 @@ def generate_hotspot_report(sample,
                     value2 = int(info[2]) if len(info[2]) > 0 else None
                     return lambda data: data[value0:value1:value2]
                 else:
-                    raise SyntaxError(f"Invalid syntax: {info}, invalid number of elemens inside '[]'")
+                    raise SyntaxError(f"Invalid syntax: {info}, invalid number of elements inside '[]'")
             else:
-                raise SyntaxError(f"Invalid syntax: {info}, missing brackat '[]'")
+                raise SyntaxError(f"Invalid syntax: {info}, missing bracket '[]'")
 
         def condition(items, empty):
             items = convert_list_slice(items)
@@ -180,7 +204,7 @@ def generate_hotspot_report(sample,
                 log.info(" -- found vep information: {}".format(vcf_file))
                 log.debug(" -- -- {}".format(record['Description'].split("Format: ")[1].split("|")))
                 vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
-                annotation_extractor = utils.get_annotation_data_vep(vep_fields)
+                annotation_extractor = utils.get_annotation_data_vep(vep_fields, transcript_dict)
 
     log.info("open output file: {}".format(output))
     with open(output, "w") as writer:
@@ -333,7 +357,7 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
         elif column[c]['from'] == "vep":
             try:
                 data[c] = annotation_extractor(var,  column[c]['field'])
-                if data[c] is None:
+                if data[c] is None or data[c] is "":
                     data[c] = '-'
             except AttributeError:
                 data[c] = '-'

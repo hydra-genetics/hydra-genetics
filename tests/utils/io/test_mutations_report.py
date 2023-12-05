@@ -301,6 +301,106 @@ class TestWp1Reports(unittest.TestCase):
 
         tabix_index(self.vcf_vep, preset="vcf")
 
+        self.vcf_vep_wo_pick = os.path.join(self.tempdir, "vcf_vep_wo_pick.vcf")
+        with open(self.vcf_vep_wo_pick, "w", encoding="ascii") as vcf:
+            vcf.write("##fileformat=VCFv4.2\n")
+            vcf.write("##reference=/data/ref_genomes/hg19/bwa/BWA_0.7.10_refseq/hg19.with.mt.fast\n")
+            vcf.write("##contig=<ID=chr1,length=249250621>\n")
+            vcf.write("##contig=<ID=chr2,length=243199373>\n")
+            vcf.write("##contig=<ID=chr3,length=198022430>\n")
+            vcf.write("##contig=<ID=chr4,length=191154276>\n")
+            vcf.write("##contig=<ID=chr5,length=180915260>\n")
+            vcf.write("##contig=<ID=chr6,length=171115067>\n")
+            vcf.write("##contig=<ID=chr7,length=159138663>\n")
+            vcf.write("##contig=<ID=chr8,length=146364022>\n")
+            vcf.write("##contig=<ID=chr9,length=141213431>\n")
+            vcf.write("##contig=<ID=chr10,length=135534747>\n")
+            vcf.write("##contig=<ID=chr11,length=135006516>\n")
+            vcf.write("##contig=<ID=chr12,length=133851895>\n")
+            vcf.write("##contig=<ID=chr13,length=115169878>\n")
+            vcf.write("##contig=<ID=chr14,length=107349540>\n")
+            vcf.write("##contig=<ID=chr15,length=102531392>\n")
+            vcf.write("##contig=<ID=chr16,length=90354753>\n")
+            vcf.write("##contig=<ID=chr17,length=81195210>\n")
+            vcf.write("##contig=<ID=chr18,length=78077248>\n")
+            vcf.write("##contig=<ID=chr19,length=59128983>\n")
+            vcf.write("##contig=<ID=chr20,length=63025520>\n")
+            vcf.write("##contig=<ID=chr21,length=48129895>\n")
+            vcf.write("##contig=<ID=chr22,length=51304566>\n")
+            vcf.write("##contig=<ID=chrX,length=155270560>\n")
+            vcf.write("##contig=<ID=chrY,length=59373566>\n")
+            vcf.write('##contig=<ID=chrM,length=16571>\n')
+            vcf.write('##INFO=<ID=CALLERS,Number=.,Type=String,Description="Individual caller support">\n')
+            vcf.write('##INFO=<ID=MQ,Number=1,Type=Float,Description="Mean Mapping Quality">\n')
+            vcf.write('##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">\n')
+            vcf.write('##INFO=<ID=ADJAF,Number=1,Type=Float,Description="Adjusted AF for indels due to local realignment">\n')
+            vcf.write('##INFO=<ID=BIAS,Number=1,Type=String,Description="Strand Bias Info">\n')
+            vcf.write('##INFO=<ID=BIAS,Number=1,Type=String,Description="Strand Bias Info">\n')
+            vcf.write('##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">\n')
+            vcf.write('##INFO=<ID=DUPRATE,Number=1,Type=Float,Description="Duplication rate in fraction">\n')
+            vcf.write('##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">\n')
+            vcf.write('##INFO=<ID=HIAF,Number=1,Type=Float,Description="Allele frequency using only high quality bases">\n')
+            vcf.write('##INFO=<ID=HICNT,Number=1,Type=Integer,Description="High quality variant reads">\n')
+            vcf.write('##INFO=<ID=HICOV,Number=1,Type=Integer,Description="High quality total reads">\n')
+            vcf.write('##INFO=<ID=LSEQ,Number=1,Type=String,Description="5\' flanking seq">\n')
+            vcf.write('##INFO=<ID=MMQ,Number=R,Type=Integer,Description="median mapping quality">\n')
+            vcf.write('##INFO=<ID=MSI,Number=1,Type=Float,Description="MicroSatellite. > 1 indicates MSI">\n')
+            vcf.write('##INFO=<ID=MSILEN,Number=1,Type=Float,Description="MicroSatellite unit length in bp">\n')
+            vcf.write('##INFO=<ID=NM,Number=1,Type=Float,Description="Mean mismatches in reads">\n')
+            vcf.write('##INFO=<ID=ODDRATIO,Number=1,Type=Float,Description="Strand Bias Odds ratio">\n')
+            vcf.write('##INFO=<ID=PMEAN,Number=1,Type=Float,Description="Mean position in reads">\n')
+            vcf.write('##INFO=<ID=PSTD,Number=1,Type=Float,Description="Position STD in reads">\n')
+            vcf.write('##INFO=<ID=QSTD,Number=1,Type=Float,Description="Quality score STD in reads">\n')
+            vcf.write('##INFO=<ID=QUAL,Number=1,Type=Float,Description="Mean quality score in reads">\n')
+            vcf.write('##INFO=<ID=REFBIAS,Number=1,Type=String,Description="Reference depth by strand">\n')
+            vcf.write('##INFO=<ID=RSEQ,Number=1,Type=String,Description="3\' flanking seq">\n')
+            vcf.write('##INFO=<ID=SAMPLE,Number=1,Type=String,Description="Sample name (with whitespace translated to underscores)">\n')  # noqa
+            vcf.write('##INFO=<ID=SBF,Number=1,Type=Float,Description="Strand Bias Fisher p-value">\n')
+            vcf.write('##INFO=<ID=SHIFT3,Number=1,Type=Integer,Description="No. of bases to be shifted to 3 prime for deletions due to alternative alignment">\n')  # noqa
+            vcf.write('##INFO=<ID=SN,Number=1,Type=Float,Description="Signal to noise">\n')
+            vcf.write('##INFO=<ID=SPANPAIR,Number=1,Type=Integer,Description="No. of pairs supporting SV">\n')
+            vcf.write('##INFO=<ID=SPLITREAD,Number=1,Type=Integer,Description="No. of split reads supporting SV">\n')
+            vcf.write('##INFO=<ID=TYPE,Number=1,Type=String,Description="Variant Type: SNV Insertion Deletion Complex">\n')
+            vcf.write('##INFO=<ID=VARBIAS,Number=1,Type=String,Description="Variant depth by strand">\n')
+            vcf.write('##INFO=<ID=VD,Number=1,Type=Integer,Description="Variant Depth">\n')
+            vcf.write('##INFO=<ID=AS_SB_TABLE,Number=1,Type=String,Description="Allele-specific forward/reverse read counts for strand bias tests. Includes the reference and alleles separated by |.">\n')  # noqa
+            vcf.write('##INFO=<ID=ECNT,Number=1,Type=Integer,Description="Number of events in this haplotype">\n')
+            vcf.write('##INFO=<ID=MBQ,Number=R,Type=Integer,Description="median base quality">\n')
+            vcf.write('##INFO=<ID=MFRL,Number=R,Type=Integer,Description="median fragment length">\n')
+            vcf.write('##INFO=<ID=MPOS,Number=A,Type=Integer,Description="median distance from end of read">\n')
+            vcf.write('##INFO=<ID=OLD_MULTIALLELIC,Number=1,Type=String,Description="Original chr:pos:ref:alt encoding">\n')
+            vcf.write('##INFO=<ID=OLD_VARIANT,Number=.,Type=String,Description="Original chr:pos:ref:alt encoding">\n')
+            vcf.write('##INFO=<ID=POPAF,Number=A,Type=Float,Description="negative log 10 population allele frequencies of alt alleles">\n')  # noqa
+            vcf.write('##INFO=<ID=TLOD,Number=A,Type=Float,Description="Log 10 likelihood ratio score of variant existing versus not existing">\n')  # noqa
+            vcf.write('##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">\n')  # noqa
+            vcf.write('##FORMAT=<ID=ALD,Number=2,Type=Integer,Description="Variant forward, reverse reads">\n')
+            vcf.write('##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">\n')
+            vcf.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
+            vcf.write('##FORMAT=<ID=SB,Number=4,Type=Integer,Description="Per-sample component statistics which comprise the Fisher\'s Exact Test to detect strand bias.">\n')  # noqa
+            vcf.write('##FORMAT=<ID=RD,Number=2,Type=Integer,Description="Reference forward, reverse reads">\n')
+            vcf.write('##FORMAT=<ID=VD,Number=1,Type=Integer,Description="Variant Depth">\n')
+            vcf.write('##FORMAT=<ID=F1R2,Number=R,Type=Integer,Description="Count of reads in F1R2 pair orientation supporting each allele">\n')  # noqa
+            vcf.write('##FORMAT=<ID=F2R1,Number=R,Type=Integer,Description="Count of reads in F2R1 pair orientation supporting each allele">\n')  # noqa
+            vcf.write("##VEP=\"v99\" time=\"2021-10-28 13:27:59\" cache=\"/data/ref_genomes/VEP/homo_sapiens_refseq/99_GRCh37\" ensembl=99.d3e7d31 ensembl-variation=99.642e1cd ensembl-funcgen=99.0832337 ensembl-io=99.441b05b 1000genomes=\"phase3\" COSMIC=\"86\" ClinVar=\"201810\" ESP=\"20141103\" HGMD-PUBLIC=\"20174\" assembly=\"GRCh37.p13\" dbSNP=\"151\" gencode=\"GENCODE 19\" genebuild=\"2011-04\" gnomAD=\"r2.1\" polyphen=\"2.2.2\" refseq=\"01_2015\" regbuild=\"1.0\" sift=\"sift5.2.2\"\n")  # noqa
+            vcf.write("##INFO=<ID=CSQ,Number=.,Type=String,Description=\"Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|VARIANT_CLASS|SYMBOL_SOURCE|HGNC_ID|CANONICAL|TSL|APPRIS|CCDS|ENSP|SWISSPROT|TREMBL|UNIPARC|REFSEQ_MATCH|GIVEN_REF|USED_REF|BAM_EDIT|GENE_PHENO|SIFT|PolyPhen|DOMAINS|HGVS_OFFSET|AF|AFR_AF|AMR_AF|EAS_AF|EUR_AF|SAS_AF|gnomAD_AF|gnomAD_AFR_AF|gnomAD_AMR_AF|gnomAD_ASJ_AF|gnomAD_EAS_AF|gnomAD_FIN_AF|gnomAD_NFE_AF|gnomAD_OTH_AF|gnomAD_SAS_AF|MAX_AF|MAX_AF_POPS|CLIN_SIG|SOMATIC|PHENO|PUBMED|MOTIF_NAME|MOTIF_POS|HIGH_INF_POS|MOTIF_SCORE_CHANGE\">\n")  # noqa
+            vcf.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample1\n")
+            vcf.write(r"chr2	29445271	.	G	A	72	PASS	ADJAF=0;AF=0.011;BIAS=2:2;CALLERS=vardict;DP=363;DUPRATE=0;HIAF=0.0117;HICNT=4;HICOV=342;LSEQ=TTCAGAGCACACTTCAGGCA;MQ=60;MSI=1;MSILEN=1;NM=1;ODDRATIO=1.31511;PMEAN=14.5;PSTD=1;QSTD=0;QUAL=36;REFBIAS=204:155;RSEQ=CGTCTGGGCAGAGAAGGGGA;SAMPLE=UP-VAL-78_T;SBF=1;SHIFT3=2;SN=8;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=2:2;VD=4;CSQ=A|synonymous_variant|LOW|ALK|238|Transcript|NM_004304.4|protein_coding|22/29||NM_004304.4:c.3454C>T|NP_004295.2:p.Leu1152%3D|4406|3454|1152|L|Ctg/Ttg|||-1||SNV|EntrezGene||YES||||NP_004295.2|||||G|G|OK||||||||||||||||||||||||||||||,A|synonymous_variant|LOW|ALK|238|Transcript|NM_004305.4|protein_coding|22/29||NM_004305.4:c.3454C>T|NP_004295.2:p.Leu1152%3D|4406|3454|1152|L|Ctg/Ttg|||-1||SNV|EntrezGene||YES||||NP_004295.2|||||G|G|OK||||||||||||||||||||||||||||||	GT:DP:VD:AD:AF:RD:ALD	0/1:363:4:359,4:0.011:204,155:2,2")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr2	29445282	.	G	A	45	PASS	ADJAF=0;AF=0.0104;BIAS=2:2;CALLERS=vardict;DP=288;DUPRATE=0;HIAF=0.0085;HICNT=2;HICOV=236;LSEQ=CTTCAGGCAGCGTCTGGGCA;MQ=60;MSI=2;MSILEN=2;NM=1.3;ODDRATIO=1.42001;PMEAN=9;PSTD=1;QSTD=1;QUAL=28.7;REFBIAS=166:118;RSEQ=AGAAGGGGAGGGTGGGGAGG;SAMPLE=UP-VAL-78_T;SBF=1;SHIFT3=0;SN=2;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=2:1;VD=3;CSQ=A|splice_region_variant&intron_variant|LOW|ALK|238|Transcript|NM_004305.4|protein_coding||21/28|NM_004305.4:c.3451-8C>T|||||||rs1305183150||-1||SNV|EntrezGene||YES||||NP_004295.2|||||G|G|OK||||||||||||3.979e-06|0|2.892e-05|0|0|0|0|0|0|2.892e-05|gnomAD_AMR||||||||,A|splice_region_variant&intron_variant|LOW|ALK|238|Transcript|NM_004304.4|protein_coding||21/28|NM_004304.4:c.3451-8C>T|||||||rs1305183150||-1||SNV|EntrezGene||YES||||NP_004295.2|||||G|G|OK||||||||||||3.979e-06|0|2.892e-05|0|0|0|0|0|0|2.892e-05|gnomAD_AMR||||||||	GT:DP:VD:AD:AF:RD:ALD	0/1:288:3:284,3:0.0104:166,118:2,1")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr7	140498359	.	CTTT	C	.	PASS	AF=0.095;AS_SB_TABLE=7,20|0,4|4,8|0,2;CALLERS=mutect2;DP=72;ECNT=1;MBQ=20,24;MFRL=233,291;MMQ=60,60;MPOS=17;OLD_MULTIALLELIC=chr7:140498359:CTTT/C/CTT/CGTTTTTTTT;POPAF=7.3;TLOD=3.69;CSQ=-|intron_variant|MODIFIER|BRAF|673|Transcript|XM_005250045.1|protein_coding||7/18|XM_005250045.1:c.980+1800_980+1802del|||||||rs1274460177||-1||deletion|EntrezGene||YES||||XP_005250102.1|||||TTT|TTT|||||||||||||||||||||||||||||||,-|intron_variant|MODIFIER|BRAF|673|Transcript|XM_005250046.1|protein_coding||7/18|XM_005250046.1:c.980+1800_980+1802del|||||||rs1274460177||-1||deletion|EntrezGene||YES||||XP_005250102.1|||||TTT|TTT|||||||||||||||||||||||||||||||	GT:AD:AF:DP:F1R2:F2R1:SB	0/1/./.:27,4:0.095:45:7,0:10,3:7,20,4,14")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr8	145738768	.	G	C	154	PASS	ADJAF=0;AF=0.0333;BIAS=2:2;CALLERS=vardict;DP=812;DUPRATE=0;HIAF=0.033;HICNT=26;HICOV=788;LSEQ=CACCGTGGCCACCACCACCC;MQ=60;MSI=2;MSILEN=1;NM=2.6;ODDRATIO=1.94917;PMEAN=33.4;PSTD=1;QSTD=1;QUAL=32.4;REFBIAS=4:1;RSEQ=GCAACTGGCCCTGCATGAAG;SAMPLE=UP-VAL-79_T;SBF=0.51196;SHIFT3=0;SN=26;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=24:3;VD=27;CSQ=C|upstream_gene_variant|MODIFIER|LRRC14|9684|Transcript|NM_001272036.1|protein_coding||||||||||rs113488022&CM112509&COSV56056643&COSV56065204&COSV56080151|4581|1||SNV|EntrezGene||YES||||NP_001258965.1|||||G|G|OK||||||||||||1.672e-05|0|0|0|0|0|2.76e-05|0|3.281e-05|3.281e-05|gnomAD_SAS||||||||,C|upstream_gene_variant|MODIFIER|LRRC14|9684|Transcript|NM_001272037.1|protein_coding||||||||||rs113488022&CM112509&COSV56056643&COSV56065204&COSV56080151|4581|1||SNV|EntrezGene||YES||||NP_001258965.1|||||G|G|OK||||||||||||1.672e-05|0|0|0|0|0|2.76e-05|0|3.281e-05|3.281e-05|gnomAD_SAS||||||||	GT:DP:VD:AD:AF:RD:ALD	0/1:812:27:5,27:0.0333:4,1:24,3")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr8	145742514	.	A	G	335	PASS	ADJAF=0.0166;AF=0.9941;BIAS=0:2;CALLERS=vardict,mutect2;DP=844;DUPRATE=0;HIAF=0.9976;HICNT=817;HICOV=819;LSEQ=GCGGCTCCGCCCTGGCGTAG;MQ=60;MSI=1;MSILEN=1;NM=1.6;ODDRATIO=0;PMEAN=35.9;PSTD=1;QSTD=1;QUAL=34.5;REFBIAS=0:0;RSEQ=CTGTGGACTCTTGGTCGCAG;SAMPLE=UP-VAL-79_T;SBF=1;SHIFT3=0;SN=37.136;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=410:429;VD=839;CSQ=G|synonymous_variant|LOW|RECQL4|9401|Transcript|NM_004260.3|protein_coding|4/21||NM_004260.3:c.274T>C|NP_004251.3:p.Pro92%3D|316|274|92|P|Cct/Cct|rs2721190||-1||SNV|EntrezGene||YES||||NP_004251.3|||||A|G|OK||||||0.9433|0.9781|0.9222|0.8065|0.998|0.9959|0.9697|0.9819|0.9021|1|0.803|0.9968|0.9994|0.9809|0.9985|1|gnomAD_ASJ|||1|24728327||||,G|synonymous_variant|LOW|RECQL4|9401|Transcript|NM_004261.3|protein_coding|4/21||NM_004261.3:c.274T>C|NP_004251.3:p.Pro92%3D|316|274|92|P|Cct/Cct|rs2721190||-1||SNV|EntrezGene||YES||||NP_004251.3|||||A|G|OK||||||0.9433|0.9781|0.9222|0.8065|0.998|0.9959|0.9697|0.9819|0.9021|1|0.803|0.9968|0.9994|0.9809|0.9985|1|gnomAD_ASJ|||1|24728327||||	GT:DP:VD:AD:AF:RD:ALD	1/1:844:839:0,839:0.9941:0,0:410,429")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr16	81954789	.	C	GT	165	PASS	ADJAF=0;AF=0.024;BIAS=2:2;CALLERS=vardict;DP=1207;DUPRATE=0;HIAF=0.0254;HICNT=29;HICOV=1140;LSEQ=ATTATTCCATTTCTTTCTTT;MQ=60;MSI=0;MSILEN=0;NM=0.5;ODDRATIO=1.04315;PMEAN=45;PSTD=1;QSTD=1;QUAL=34.1;REFBIAS=699:473;RSEQ=TTTTTTTTTCCAGGAAAGAG;SAMPLE=UP-VAL-74_T;SBF=1;SHIFT3=0;SN=58;SPANPAIR=0;SPLITREAD=0;TYPE=Complex;VARBIAS=17:12;VD=29;CSQ=GT|intron_variant|MODIFIER|PLCG2|5336|Transcript|NM_002661.3|protein_coding||20/32|NM_002661.3:c.2236-14delinsGT|||||||||1||indel|EntrezGene||YES||||NP_002652.2|||||C|C|||||||||||||||||||||||||||||||,GT|intron_variant|MODIFIER|PLCG2|5336|Transcript|NM_002662.3|protein_coding||20/32|NM_002662.3:c.2236-14delinsGT|||||||||1||indel|EntrezGene||YES||||NP_002652.2|||||C|C|||||||||||||||||||||||||||||||	GT:DP:VD:AD:AF:RD:ALD	0/1:1207:29:1172,29:0.024:699,473:17,12")  # noqa
+            vcf.write("\n")
+            vcf.write(r"chr16	81954789	.	C	G	292	PASS	ADJAF=0;AF=0.4044;BIAS=2:2;CALLERS=vardict,mutect2;DP=863;DUPRATE=0;HIAF=0.448;HICNT=340;HICOV=759;LSEQ=ATTATTCCATTTCTTTCTTT;MQ=60;MSI=9;MSILEN=1;NM=1.4;ODDRATIO=1.03992;PMEAN=39.9;PSTD=1;QSTD=1;QUAL=34.6;REFBIAS=255:187;RSEQ=TTTTTTTTTCCAGGAAAGAG;SAMPLE=UP-VAL-77_T;SBF=0.82815;SHIFT3=0;SN=37.778;SPANPAIR=0;SPLITREAD=0;TYPE=SNV;VARBIAS=198:151;VD=349;CSQ=G|intron_variant|MODIFIER|SEPT|5336|Transcript|NM_002661.3|protein_coding||20/32|NM_002661.3:c.2236-14C>G|||||||rs12446127||1||SNV|EntrezGene||YES||||NP_002652.2|||||C|C||||||||0.171|0.7032|0.7788|0.5567|0.5562|0.5946|0.2338|0.7249|0.6063|0.7799|0.5725|0.5863|0.606|0.5575|0.7799|gnomAD_EAS|benign|||24033266||||,G|intron_variant|MODIFIER|SEPT|5336|Transcript|NM_002662.3|protein_coding||20/32|NM_002662.3:c.2236-14C>G|||||||rs12446127||1||SNV|EntrezGene||YES||||NP_002652.2|||||C|C||||||||0.171|0.7032|0.7788|0.5567|0.5562|0.5946|0.2338|0.7249|0.6063|0.7799|0.5725|0.5863|0.606|0.5575|0.7799|gnomAD_EAS|benign|||24033266||||	GT:DP:VD:AD:AF:RD:ALD	0/1:863:349:442,349:0.4044:255,187:198,151")  # noqa
+
+        tabix_index(self.vcf_vep_wo_pick, preset="vcf")
+
+
         self.reference = os.path.join(self.tempdir, "reference_info")
         with open(self.reference, 'w') as reference:
             reference.write("#Chr name\tNC\tID\tLength\n")
@@ -344,7 +444,8 @@ class TestWp1Reports(unittest.TestCase):
                                 self.hotspot,
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
-                                self.reference)
+                                self.reference,
+                                self.vcf_vep_wo_pick + ".gz")
         self.maxDiff = 10000
 
         # Variants
@@ -393,6 +494,7 @@ class TestWp1Reports(unittest.TestCase):
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
                                 self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
                                 "tests/utils/files/report_columns_vep.yaml")
         with open(report, 'r') as report_result:
             head = report_result.readline()
@@ -426,6 +528,7 @@ class TestWp1Reports(unittest.TestCase):
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
                                 self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
                                 "tests/utils/files/report_columns_vep_order_output.yaml")
         with open(report, 'r') as report_result:
             head = report_result.readline()
@@ -459,6 +562,7 @@ class TestWp1Reports(unittest.TestCase):
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
                                 self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
                                 "tests/utils/files/report_columns_vep_hide_column.yaml")
         with open(report, 'r') as report_result:
             head = report_result.readline()
@@ -492,6 +596,7 @@ class TestWp1Reports(unittest.TestCase):
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
                                 self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
                                 "tests/utils/files/report_columns_vep_regex_extract.yaml")
         with open(report, 'r') as report_result:
             head = report_result.readline()
@@ -525,7 +630,8 @@ class TestWp1Reports(unittest.TestCase):
                                 self.hotspot,
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
-                                self.reference)
+                                self.reference,
+                                self.vcf_vep_wo_pick + ".gz")
         self.maxDiff = 10000
 
         # Variants
@@ -555,6 +661,7 @@ class TestWp1Reports(unittest.TestCase):
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
                                 self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
                                 "tests/utils/files/report_columns_combine_columns.yaml")
         with open(report, 'r') as report_result:
             head = report_result.readline()
@@ -583,6 +690,7 @@ class TestWp1Reports(unittest.TestCase):
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
                                 self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
                                 "tests/utils/files/report_columns_combine_columns_multi_level.yaml")
         with open(report, 'r') as report_result:
             head = report_result.readline()
@@ -617,6 +725,7 @@ class TestWp1Reports(unittest.TestCase):
                                 self.vcf_vep + ".gz",
                                 self.gvcf + ".gz",
                                 self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
                                 "tests/utils/files/report_columns_select_column.yaml")
         with open(report, 'r') as report_result:
             head = report_result.readline()
@@ -636,6 +745,41 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	protein_coding	intron_variant	vardict	-	-	-")  # noqa
             self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	protein_coding	splice_region_variant&intron_variant	vardict	-	-	-")  # noqa
             self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT	protein_coding	intron_variant	vardict,mutect2	-	-	-")  # noqa
+
+    def test_vep_wo_pick_chose_transcript(self):
+        from hydra_genetics.utils.io.hotspot_report import generate_hotspot_report
+        levels = [(300, "ok", "yes"), (30, "low", "yes"), (0, "low", "not analyzable")]
+
+        self.maxDiff = 10000
+
+        report = os.path.join(self.tempdir, "filtered.report")
+        generate_hotspot_report("sample1",
+                                report,
+                                levels,
+                                self.hotspot,
+                                self.vcf_vep + ".gz",
+                                self.gvcf + ".gz",
+                                self.reference,
+                                self.vcf_vep_wo_pick + ".gz",
+                                "tests/utils/files/report_columns_select_column2.yaml")
+        with open(report, 'r') as report_result:
+            head = report_result.readline()
+            self.assertEqual(head.rstrip(), "\t".join(["sample", "chr", "start", "stop", "ref", "alt", "report", 'gvcf_depth', "ref_depth", "alt_depth", 'Analyzable', 'Min_read_depth300', 'Gene', "Transcript", 'Amino_acid_change', 'Variant_type', 'Consequence', 'Callers', 'Comment', 'Not_Empty', 'Empty']))  # noqa
+            result = report_result.readlines()
+            self.assertEqual(len(result), 13)
+            self.assertEqual(result[0].rstrip(), "sample1	NC_000002.11	29445271	29445271	G	A	1-hotspot	620	359	4	yes	ok	ALK	NM_004304.4	Leu1152	protein_coding	synonymous_variant	vardict	resistance_mutation	ALK	-")  # noqa
+            self.assertEqual(result[1].rstrip(), "sample1	NC_000007.13	140498359	140498362	CTTT	C	2-indel	100.5	27	4	yes	low	BRAF	XM_005250045.1	-	protein_coding	intron_variant	mutect2	-	EGFR	-")  # noqa
+            self.assertEqual(result[2].rstrip(), "sample1	NC_000007.13	140498361	140498361	-	-	1-hotspot	89	-	-	yes	low	EGFR	-	-	-	-	-	-	-	EGFR")   # noqa
+            self.assertEqual(result[3].rstrip(), "sample1	NC_000007.13	140453136	140453136	-	-	1-hotspot	0	-	-	not analyzable	low	BRAF	-	-	-	-	-	-	-	BRAF")  # noqa
+            self.assertEqual(result[4].rstrip(), "sample1	NC_000007.13	116412043	116412043	-	-	1-hotspot	0	-	-	not analyzable	low	MET	-	-	-	-	-	-	-	MET")  # noqa
+            self.assertEqual(result[5].rstrip(), "sample1	NC_000002.11	29445272	29445272	-	-	3-check	221	-	-	yes	low	ALK	-	-	-	-	-	-	-	ALK")  # noqa
+            self.assertEqual(result[6].rstrip(), "sample1	NC_000002.11	29445277	29445277	-	-	3-check	182	-	-	yes	low	ALK	-	-	-	-	-	-	-	ALK")  # noqa
+            self.assertEqual(result[7].rstrip(), "sample1	NC_000008.11	145738768	145738768	G	C	3-check	1571	5	27	yes	ok	LRRC14	NM_001272036.1	-	protein_coding	upstream_gene_variant	vardict	-	-	-")  # noqa
+            self.assertEqual(result[8].rstrip(), "sample1	NC_000008.11	145738776	145738776	-	-	3-check	0	-	-	not analyzable	low	-	-	-	-	-	-	-	-	-")  # noqa
+            self.assertEqual(result[9].rstrip(), "sample1	NC_000008.11	145742514	145742514	A	G	3-check	0	0	839	not analyzable	low	RECQL4	NM_004260.3	Pro92	protein_coding	synonymous_variant	vardict,mutect2	-	-	-")  # noqa
+            self.assertEqual(result[10].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	NM_002661.3	-	protein_coding	intron_variant	vardict	-	-	-")  # noqa
+            self.assertEqual(result[11].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	NM_004304.4	-	protein_coding	splice_region_variant&intron_variant	vardict	-	-	-")  # noqa
+            self.assertEqual(result[12].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT	NM_002661.3	-	protein_coding	intron_variant	vardict,mutect2	-	-	-")  # noqa
 
 
 if __name__ == '__main__':

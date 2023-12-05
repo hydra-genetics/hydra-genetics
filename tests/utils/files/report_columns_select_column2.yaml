@@ -1,0 +1,74 @@
+columns:
+    Analyzable:
+        from: 'function'
+        name: "get_read_level"
+        variables:
+         - levels
+         - depth
+        column: 1
+    Min_read_depth300:
+        from: 'function'
+        name: "get_read_level"
+        variables:
+         - levels
+         - depth
+        column: 0
+    Gene:
+        from: 'select'
+        items: '[0]'
+        else: '[1:]'
+        elements:
+            vep:
+                from: 'vep'
+                field: 'SYMBOL'
+            hotspot:
+                from: 'hotspot'
+                field: 'GENE'
+    Transcript:
+        from: 'vep'
+        field: 'Feature'
+    Amino_acid_change:
+        from: 'vep'
+        field: 'HGVSp'
+        extract_regex: ':p.([A-Za-z0-9]+)'
+    Variant_type:
+        from: 'vep'
+        field: 'BIOTYPE'
+    Consequence:
+        from: 'vep'
+        field: 'Consequence'
+    Callers:
+        from: 'function'
+        name: 'get_annotation_data_info'
+        variables:
+         - var
+         - 'CALLERS'
+    Comment:
+        from: 'hotspot'
+        field: "COMMENT"
+    Not_Empty:
+        from: 'select'
+        items: '[1:]'
+        condition:
+          items: '[0]'
+          empty: False
+        elements:
+            vep:
+                from: 'vep'
+                field: 'SYMBOL'
+            hotspot:
+                from: 'hotspot'
+                field: 'GENE'
+    Empty:
+        from: 'select'
+        items: '[1:]'
+        condition:
+          items: '[0]'
+          empty: True
+        elements:
+            vep:
+                from: 'vep'
+                field: 'SYMBOL'
+            hotspot:
+                from: 'hotspot'
+                field: 'GENE'

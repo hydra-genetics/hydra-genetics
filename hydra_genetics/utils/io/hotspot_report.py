@@ -22,7 +22,7 @@ def generate_hotspot_report(sample,
                             vcf_file,
                             gvcf_file,
                             chr_mapping,
-                            vcf_file_pick=None,
+                            vcf_file_wo_pick=None,
                             column_yaml_file=None):
     reports = OrderedDict(((ReportClass.hotspot, []),
                           (ReportClass.region_all, []),
@@ -47,17 +47,19 @@ def generate_hotspot_report(sample,
             if record['ID'] == "CSQ":
                 vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
 
-    if not vcf_file_pick == None:
-        variants_pick = VariantFile(vcf_file_pick)
-        for variant in variants_pick:
-            if variant is None:
-                raise Exception("Empty allele found: " + str(variant))
-            if not len(variant.alts) == 1:
-                raise Exception("Multiple allele found: " + str(variant.alts))
-            variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
-            transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
-            transcript_dict[variant_key] = transcript
+    for variant in variants:
+        if variant is None:
+            raise Exception("Empty allele found: " + str(variant))
+        if not len(variant.alts) == 1:
+            raise Exception("Multiple allele found: " + str(variant.alts))
+        variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
+        transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
+        transcript_dict[variant_key] = transcript
 
+    if not vcf_file_wo_pick is None:
+        variants = VariantFile(vcf_file_wo_pick)    
+    else:
+        variants = VariantFile(vcf_file)
     log.info("Processing variants")
     for variant in variants:
         # ToDo make sure that empty variants are handled better!!!
@@ -71,7 +73,6 @@ def generate_hotspot_report(sample,
                 if hotspot.add_variant(variant, chr_translater):
                     variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
                     hotspot_transcript = hotspot.ACCESSION_NUMBER
-                    print(variant_key, hotspot_transcript)
                     if not hotspot_transcript == "-":
                         transcript_dict[variant_key] = hotspot_transcript
                     log.debug("Adding variant {}:{}-{} {} {} to hotspot: {}".format(variant.chrom,
@@ -357,7 +358,7 @@ def add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels
         elif column[c]['from'] == "vep":
             try:
                 data[c] = annotation_extractor(var,  column[c]['field'])
-                if data[c] is None or data[c] is "":
+                if data[c] is None or data[c] == "":
                     data[c] = '-'
             except AttributeError:
                 data[c] = '-'

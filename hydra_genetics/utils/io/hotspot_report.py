@@ -56,8 +56,8 @@ def generate_hotspot_report(sample,
         transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
         transcript_dict[variant_key] = transcript
 
-    if not vcf_file_wo_pick is None:
-        variants = VariantFile(vcf_file_wo_pick)    
+    if vcf_file_wo_pick is not None:
+        variants = VariantFile(vcf_file_wo_pick)
     else:
         variants = VariantFile(vcf_file)
     log.info("Processing variants")

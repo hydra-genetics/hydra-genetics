@@ -1,4 +1,13 @@
 on:
+  push:
+    branches:
+     - develop
+     - master
+  pull_request:
+    branches:
+     - develop
+     - master
+     
   workflow_dispatch:
 
 name: test-build-pip-package

@@ -32,11 +32,18 @@ def get_annotation_data(data_extracter, mapper):
     return lambda variant, field: data_extracter(variant, mapper[field])
 
 
-def get_annotation_data_vep(field_dict):
+def get_annotation_data_vep(field_dict, transcript_dict=None):
     def extractor(variant, info_name):
-        data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+        data = []
+        if not transcript_dict:
+            data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+        else:
+            variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
+            for transcript_data in variant.info['CSQ']:
+                if transcript_data.split("|")[field_dict['Feature']].startswith(transcript_dict[variant_key]):
+                    data = transcript_data.split("|")[field_dict[info_name]]
         if len(data) == 0:
-            return None
+            data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
         return data
     return extractor
 
@@ -56,7 +63,7 @@ def regex_extract(value, regex):
     if search_result is None:
         return "-"
     else:
-        return search_result[0]
+        return search_result[1]
 
 
 def get_info_field(variant, info_name):

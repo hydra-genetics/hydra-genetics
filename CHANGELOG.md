@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.9.1...v1.10.0) (2023-12-08)
+
+
+### Features
+
+* added handling and selection between multiple transcripts in hotspot report ([5aeb2c6](https://www.github.com/hydra-genetics/hydra-genetics/commit/5aeb2c693fa3d60b799e6983c50701c606107d55))
+
+
+### Bug Fixes
+
+* pycodestyle ([2fa0e64](https://www.github.com/hydra-genetics/hydra-genetics/commit/2fa0e64e6b96f4b4693d6e9d6e8da495fe188bd7))
+* wrong vcf files used ([d3dbbe1](https://www.github.com/hydra-genetics/hydra-genetics/commit/d3dbbe1568b76a20ef3eb37a1088aa37f4c2606b))
+
 ### [1.9.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.9.0...v1.9.1) (2023-11-29)
 
 

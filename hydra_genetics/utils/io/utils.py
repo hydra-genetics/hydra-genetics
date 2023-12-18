@@ -43,7 +43,7 @@ def get_annotation_data_vep(field_dict, transcript_dict=None):
                 if transcript_data.split("|")[field_dict['Feature']].startswith(transcript_dict[variant_key]):
                     data = transcript_data.split("|")[field_dict[info_name]]
         if len(data) == 0:
-            data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+            return None
         return data
     return extractor
 

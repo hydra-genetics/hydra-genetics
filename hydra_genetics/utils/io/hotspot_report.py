@@ -67,26 +67,27 @@ def generate_hotspot_report(sample,
             raise Exception("Empty allele found: " + str(variant))
         if not len(variant.alts) == 1:
             raise Exception("Multiple allele found: " + str(variant.alts))
-        added = False
-        for report in reports:
-            for hotspot in reports[report]:
-                if hotspot.add_variant(variant, chr_translater):
-                    variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
-                    hotspot_transcript = hotspot.ACCESSION_NUMBER
-                    if not hotspot_transcript == "-":
-                        transcript_dict[variant_key] = hotspot_transcript
-                    log.debug("Adding variant {}:{}-{} {} {} to hotspot: {}".format(variant.chrom,
-                                                                                    variant.start,
-                                                                                    variant.stop,
-                                                                                    variant.ref,
-                                                                                    ",".join(variant.alts),
-                                                                                    hotspot))
-                    added = True
+        variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
+        if variant_key in transcript_dict:
+            added = False
+            for report in reports:
+                for hotspot in reports[report]:
+                    if hotspot.add_variant(variant, chr_translater):
+                        hotspot_transcript = hotspot.ACCESSION_NUMBER
+                        if not hotspot_transcript == "-":
+                            transcript_dict[variant_key] = hotspot_transcript
+                        log.debug("Adding variant {}:{}-{} {} {} to hotspot: {}".format(variant.chrom,
+                                                                                        variant.start,
+                                                                                        variant.stop,
+                                                                                        variant.ref,
+                                                                                        ",".join(variant.alts),
+                                                                                        hotspot))
+                        added = True
+                        break
+                if added:
                     break
-            if added:
-                break
-        if not added:
-            other.append(variant)
+            if not added:
+                other.append(variant)
     log.info("Open genomic vcf")
     g_variants = VariantFile(gvcf_file)
 

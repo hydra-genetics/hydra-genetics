@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.10.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.10.0...v1.10.1) (2023-12-19)
+
+
+### Bug Fixes
+
+* bug in vep annotation handling ([60dce4e](https://www.github.com/hydra-genetics/hydra-genetics/commit/60dce4e7c8c80ab1fc72af8f413a1a6de7c71f53))
+* handle missing transcipt in annotation by using pick ([f72af94](https://www.github.com/hydra-genetics/hydra-genetics/commit/f72af9494d526867a554eded059e056bfef816c7))
+
 ## [1.10.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.9.1...v1.10.0) (2023-12-08)
 
 

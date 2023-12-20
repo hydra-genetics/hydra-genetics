@@ -45,7 +45,8 @@ def get_annotation_data_vep(field_dict, transcript_dict=None):
                     data = transcript_data.split("|")[field_dict[info_name]]
             if data is None:
                 data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
-        return data
+        if data == "":
+            return None
         return data
     return extractor
 

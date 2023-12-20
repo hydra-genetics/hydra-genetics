@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.10.2](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.10.1...v1.10.2) (2023-12-20)
+
+
+### Bug Fixes
+
+* return None when empty string in vep annotation ([636a53a](https://www.github.com/hydra-genetics/hydra-genetics/commit/636a53ab35b5fa4b0810f5b8e9caa2acc1fde4ea))
+
 ### [1.10.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.10.0...v1.10.1) (2023-12-19)
 
 

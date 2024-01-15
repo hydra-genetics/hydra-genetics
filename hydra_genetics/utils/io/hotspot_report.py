@@ -1,5 +1,6 @@
 import builtins
 import logging
+import statistics
 from collections import OrderedDict
 
 from hydra_genetics.utils.io.chr import ChrTranslater
@@ -24,19 +25,27 @@ def generate_hotspot_report(sample,
                             chr_mapping,
                             vcf_file_wo_pick=None,
                             column_yaml_file=None):
-    reports = OrderedDict(((ReportClass.hotspot, []),
-                          (ReportClass.region_all, []),
-                          (ReportClass.region, []),
-                          (ReportClass.indel, [])))
+    reports = OrderedDict(((ReportClass.hotspot, {}),
+                          (ReportClass.region_all, {}),
+                          (ReportClass.region, {}),
+                          (ReportClass.indel, {'indel': []})))
+    chr_translater = ChrTranslater(chr_mapping)
+
+    chromosomes_to_look_at = set()
     if not hotspot_file == "-":
         try:
             hotspot_reader = HotspotReader(hotspot_file)
             for hotspot in iter(hotspot_reader):
-                reports[hotspot.REPORT].append(hotspot)
+                chromosomes_to_look_at.add(chr_translater.get_chr_value(hotspot.CHROMOSOME))
+                if hotspot.REPORT == ReportClass.indel:
+                    reports[hotspot.REPORT]['indel'].append(hotspot)
+                else:
+                    key = f"{hotspot.CHROMOSOME}-{hotspot.START // 1000000}"
+                    reports[hotspot.REPORT][key] = reports[hotspot.REPORT].get(key, []) + [hotspot]
         except ValueError as e:
             logging.error(e)
             exit(1)
-    chr_translater = ChrTranslater(chr_mapping)
+
     variants = VariantFile(vcf_file)
     other = []
 
@@ -52,6 +61,7 @@ def generate_hotspot_report(sample,
             raise Exception("Empty allele found: " + str(variant))
         if not len(variant.alts) == 1:
             raise Exception("Multiple allele found: " + str(variant.alts))
+        chromosomes_to_look_at.add(variant.chrom)
         variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
         transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
         transcript_dict[variant_key] = transcript
@@ -61,6 +71,8 @@ def generate_hotspot_report(sample,
     else:
         variants = VariantFile(vcf_file)
     log.info("Processing variants")
+    sub_report_keys = list(reports.keys())[0:-1]
+    indel_report_key = list(reports.keys())[-1]
     for variant in variants:
         # ToDo make sure that empty variants are handled better!!!
         if variant is None:
@@ -68,10 +80,11 @@ def generate_hotspot_report(sample,
         if not len(variant.alts) == 1:
             raise Exception("Multiple allele found: " + str(variant.alts))
         variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
+        variant_key_hotspot = f"{chr_translater.get_nc_value(variant.chrom)}-{variant.start // 1000000}"
         if variant_key in transcript_dict:
             added = False
-            for report in reports:
-                for hotspot in reports[report]:
+            for report in sub_report_keys:
+                for hotspot in reports[report].get(variant_key_hotspot, []):
                     if hotspot.add_variant(variant, chr_translater):
                         hotspot_transcript = hotspot.ACCESSION_NUMBER
                         if not hotspot_transcript == "-":
@@ -87,6 +100,21 @@ def generate_hotspot_report(sample,
                 if added:
                     break
             if not added:
+                for hotspot in reports[indel_report_key]['indel']:
+                    if hotspot.add_variant(variant, chr_translater):
+                        hotspot_transcript = hotspot.ACCESSION_NUMBER
+                        if not hotspot_transcript == "-":
+                            transcript_dict[variant_key] = hotspot_transcript
+                        log.debug("Adding variant {}:{}-{} {} {} to hotspot: {}".format(variant.chrom,
+                                                                                        variant.start,
+                                                                                        variant.stop,
+                                                                                        variant.ref,
+                                                                                        ",".join(variant.alts),
+                                                                                        hotspot))
+                        added = True
+                        break
+            if not added:
+                chromosomes_to_look_at.add(variant.chrom)
                 other.append(variant)
     log.info("Open genomic vcf")
     g_variants = VariantFile(gvcf_file)
@@ -134,6 +162,12 @@ def generate_hotspot_report(sample,
     for key in hotspot_columns:
         if key in columns['columns']:
             del columns['columns'][key]
+
+    depth_data = dict(map(lambda x: (x, {}), chromosomes_to_look_at))
+
+    for chr in depth_data:
+        for variant in g_variants.fetch(chr):
+            depth_data[chr][variant.start] = variant.samples[sample][gcvf_depth_field]
 
     def handle_select(data):
         def convert_list_slice(info):
@@ -208,6 +242,15 @@ def generate_hotspot_report(sample,
                 vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
                 annotation_extractor = utils.get_annotation_data_vep(vep_fields, transcript_dict)
 
+    def get_depth(data, chr, start, stop):
+        depth = [data[chr].get(pos, 0) for pos in range(start, stop)]
+        if len(depth) > 1:
+            return statistics.mean(depth)
+        elif len(depth) == 1:
+            return depth[0]
+        else:
+            return 0
+
     log.info("open output file: {}".format(output))
     with open(output, "w") as writer:
         writer.write("\t".join([name[1] for name in report_header]))
@@ -215,57 +258,62 @@ def generate_hotspot_report(sample,
         log.info("Printing hotspot information: {}".format(output))
         counter = 0
         for report in reports:
-            for hotspot in reports[report]:
-                for index, variant in enumerate(hotspot.VARIANTS):
-                    # even though no variants were found print hotspot and region all entries
-                    if not variant['variants'] and not variant['extended']:
-                        depth = utils.get_depth(g_variants,
-                                                sample,
-                                                chr_translater.get_chr_value(hotspot.CHROMOSOME),
-                                                hotspot.EXTENDED_START + index - 1,
-                                                hotspot.EXTENDED_START + index,
-                                                gcvf_depth_field)
-                        if hotspot.REPORT == ReportClass.region_all and depth > 299:  # ToDo remove harcoded value
-                            continue
-                        elif hotspot.ALWAYS_PRINT:
-                            data = {'sample': sample,
-                                    'chr': hotspot.CHROMOSOME,
-                                    'start': hotspot.EXTENDED_START + index,
-                                    'stop': hotspot.EXTENDED_START + index,
-                                    'ref': '-',
-                                    'alt': '-',
-                                    'report':  utils.format_report_type(hotspot),
-                                    'gvcf_depth': depth,
-                                    'ref_depth': '-',
-                                    'alt_depth': '-'}
-                            format_hotspot(data, columns, hotspot_columns)
-                            add_columns(data, None, hotspot, columns, annotation_extractor, depth, levels)
-                            writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))
-                            counter += 1
-                    else:
-                        # print found variants that overlap with hotspot positions
-                        for var in variant['variants']:
-                            depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop, gcvf_depth_field)
-                            data = {'sample': sample,
-                                    'chr': chr_translater.get_nc_value(var.chrom),
-                                    'start': var.start + 1,
-                                    'stop': var.stop,
-                                    'ref': var.ref,
-                                    'alt': ",".join(var.alts),
-                                    'report': utils.get_report_type(var, hotspot),
-                                    'gvcf_depth': depth,
-                                    'ref_depth': var.samples[sample]['AD'][0],
-                                    'alt_depth': ",".join(map(str, var.samples[sample]['AD'][1:]))}
-                            format_hotspot(data, columns, hotspot_columns)
-                            add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels)
-                            writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))
-                            counter += 1
+            for index_data in reports[report]:
+                for hotspot in reports[report][index_data]:
+                    for index, variant in enumerate(hotspot.VARIANTS):
+                        # even though no variants were found print hotspot and region all entries
+                        if not variant['variants'] and not variant['extended']:
+                            depth = get_depth(depth_data,
+                                              chr_translater.get_chr_value(hotspot.CHROMOSOME),
+                                              hotspot.EXTENDED_START + index-1,
+                                              hotspot.EXTENDED_START + index)
+                            if hotspot.REPORT == ReportClass.region_all and depth > 299:  # ToDo remove harcoded value
+                                continue
+                            elif hotspot.ALWAYS_PRINT:
+                                data = {'sample': sample,
+                                        'chr': hotspot.CHROMOSOME,
+                                        'start': hotspot.EXTENDED_START + index,
+                                        'stop': hotspot.EXTENDED_START + index,
+                                        'ref': '-',
+                                        'alt': '-',
+                                        'report':  utils.format_report_type(hotspot),
+                                        'gvcf_depth': depth,
+                                        'ref_depth': '-',
+                                        'alt_depth': '-'}
+                                format_hotspot(data, columns, hotspot_columns)
+                                add_columns(data, None, hotspot, columns, annotation_extractor, depth, levels)
+                                writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))
+                                counter += 1
+                        else:
+                            # print found variants that overlap with hotspot positions
+                            for var in variant['variants']:
+                                depth = get_depth(depth_data,
+                                                  var.chrom,
+                                                  var.start,
+                                                  var.stop)
+                                data = {'sample': sample,
+                                        'chr': chr_translater.get_nc_value(var.chrom),
+                                        'start': var.start + 1,
+                                        'stop': var.stop,
+                                        'ref': var.ref,
+                                        'alt': ",".join(var.alts),
+                                        'report': utils.get_report_type(var, hotspot),
+                                        'gvcf_depth': depth,
+                                        'ref_depth': var.samples[sample]['AD'][0],
+                                        'alt_depth': ",".join(map(str, var.samples[sample]['AD'][1:]))}
+                                format_hotspot(data, columns, hotspot_columns)
+                                add_columns(data, var, hotspot, columns, annotation_extractor, depth, levels)
+                                writer.write("\n" + "\t".join([str(data[c[1]]) for c in output_order]))
+                                counter += 1
         log.info("-- hotspot entries: {}".format(counter))
         log.info("Printing variants that aren't hotspot: {}".format(output))
         counter = 0
         for var in other:
             # print variants that doesn't overlap with a hotspot
-            depth = utils.get_depth(g_variants, sample, var.chrom, var.start, var.stop, gcvf_depth_field)
+            depth = get_depth(depth_data,
+                              var.chrom,
+                              var.start,
+                              var.stop)
             data = {'sample': sample,
                     'chr': chr_translater.get_nc_value(var.chrom),
                     'start': var.start + 1,

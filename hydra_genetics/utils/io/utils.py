@@ -39,7 +39,6 @@ def get_annotation_data_vep(field_dict, transcript_dict=None):
             data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
         else:
             variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
-            print(variant_key)
             for transcript_data in variant.info['CSQ']:
                 if transcript_data.split("|")[field_dict['Feature']].startswith(transcript_dict[variant_key]):
                     data = transcript_data.split("|")[field_dict[info_name]]

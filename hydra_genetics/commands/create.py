@@ -440,20 +440,20 @@ class CreateInputFiles(object):
                                         result_dict[sample][flowcell][barcode][lane_id]['barcode'] = barcode
                                 else:
                                     result_dict[sample][flowcell][barcode][lane_id] = {'reads': {read_number: f},
-                                                                              'machine': machine_id,
-                                                                              'barcode': barcode}
+                                                                                       'machine': machine_id,
+                                                                                       'barcode': barcode}
                             else:
                                 result_dict[sample][flowcell][barcode] = {lane_id: {'reads': {read_number: f},
-                                                                           'machine': machine_id,
-                                                                           'barcode': barcode}}
+                                                                                    'machine': machine_id,
+                                                                                    'barcode': barcode}}
                         else:
                             result_dict[sample][flowcell] = {barcode: {lane_id: {'reads': {read_number: f},
-                                                                           'machine': machine_id,
-                                                                           'barcode': barcode}}}
+                                                                                 'machine': machine_id,
+                                                                                 'barcode': barcode}}}
                     else:
                         result_dict[sample] = {flowcell: {barcode: {lane_id: {'reads': {read_number: f},
-                                                                    'machine': machine_id,
-                                                                    'barcode': barcode}}}}
+                                                                              'machine': machine_id,
+                                                                              'barcode': barcode}}}}
         samples_file_name = "samples.tsv"
         if self.post_file_modifier is not None:
             samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
@@ -482,7 +482,6 @@ class CreateInputFiles(object):
             for sample in sorted(result_dict):
                 for flowcell in sorted(result_dict[sample]):
                     for barcode in sorted(result_dict[sample][flowcell]):
-                    
                         for lane, data in sorted(result_dict[sample][flowcell][barcode].items()):
                             if len(data['reads'].keys()) != 2:
                                 raise ValueError("Incorrect number of fastq-files: {}:\n - {}".format(

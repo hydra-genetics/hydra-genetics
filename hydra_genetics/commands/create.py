@@ -418,36 +418,42 @@ class CreateInputFiles(object):
                     no_index_counter = 0
                     if sample in result_dict:
                         if flowcell in result_dict[sample]:
-                            if lane_id in result_dict[sample][flowcell]:
-                                if 'reads' in result_dict[sample][flowcell][lane_id]:
-                                    if read_number in result_dict[sample][flowcell][lane_id]['reads']:
-                                        dup_file = result_dict[sample][flowcell][lane_id]['reads'][read_number]
-                                        raise ValueError("sample, flowcell, lane and read number combination "
-                                                         "found multiple times: sample {}"
-                                                         " flowcell {} lane {} read {}:\n - {}".
-                                                         format(sample,
-                                                                flowcell,
-                                                                lane_id,
-                                                                read_number,
-                                                                "\n - ".join([f, dup_file])))
+                            if barcode in result_dict[sample][flowcell]:
+                                if lane_id in result_dict[sample][flowcell][barcode]:
+                                    if 'reads' in result_dict[sample][flowcell][barcode][lane_id]:
+                                        if read_number in result_dict[sample][flowcell][barcode][lane_id]['reads']:
+                                            dup_file = result_dict[sample][flowcell][barcode][lane_id]['reads'][read_number]
+                                            raise ValueError("sample, flowcell, lane and read number combination "
+                                                             "found multiple times: sample {}"
+                                                             " flowcell {} barcode {} lane {} read {}:\n - {}".
+                                                             format(sample,
+                                                                    flowcell,
+                                                                    barcode,
+                                                                    lane_id,
+                                                                    read_number,
+                                                                    "\n - ".join([f, dup_file])))
+                                        else:
+                                            result_dict[sample][flowcell][barcode][lane_id]['reads'][read_number] = f
                                     else:
-                                        result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
+                                        result_dict[sample][flowcell][barcode][lane_id]['reads'] = {read_number: f}
+                                        result_dict[sample][flowcell][barcode][lane_id]['machine'] = machine_id
+                                        result_dict[sample][flowcell][barcode][lane_id]['barcode'] = barcode
                                 else:
-                                    result_dict[sample][flowcell][lane_id]['reads'] = {read_number: f}
-                                    result_dict[sample][flowcell][lane_id]['machine'] = machine_id
-                                    result_dict[sample][flowcell][lane_id]['barcode'] = barcode
+                                    result_dict[sample][flowcell][barcode][lane_id] = {'reads': {read_number: f},
+                                                                                       'machine': machine_id,
+                                                                                       'barcode': barcode}
                             else:
-                                result_dict[sample][flowcell][lane_id] = {'reads': {read_number: f},
-                                                                          'machine': machine_id,
-                                                                          'barcode': barcode}
+                                result_dict[sample][flowcell][barcode] = {lane_id: {'reads': {read_number: f},
+                                                                                    'machine': machine_id,
+                                                                                    'barcode': barcode}}
                         else:
-                            result_dict[sample][flowcell] = {lane_id: {'reads': {read_number: f},
-                                                                       'machine': machine_id,
-                                                                       'barcode': barcode}}
+                            result_dict[sample][flowcell] = {barcode: {lane_id: {'reads': {read_number: f},
+                                                                                 'machine': machine_id,
+                                                                                 'barcode': barcode}}}
                     else:
-                        result_dict[sample] = {flowcell: {lane_id: {'reads': {read_number: f},
-                                                                    'machine': machine_id,
-                                                                    'barcode': barcode}}}
+                        result_dict[sample] = {flowcell: {barcode: {lane_id: {'reads': {read_number: f},
+                                                                              'machine': machine_id,
+                                                                              'barcode': barcode}}}}
         samples_file_name = "samples.tsv"
         if self.post_file_modifier is not None:
             samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
@@ -475,22 +481,23 @@ class CreateInputFiles(object):
                                     "flowcell", "lane", "fastq1", "fastq2", "adapter"]))
             for sample in sorted(result_dict):
                 for flowcell in sorted(result_dict[sample]):
-                    for lane, data in sorted(result_dict[sample][flowcell].items()):
-                        if len(data['reads'].keys()) != 2:
-                            raise ValueError("Incorrect number of fastq-files: {}:\n - {}".format(
-                                len(data['reads'].keys()), "\n - ".join(
-                                    "{}: {}".format(k, data['reads'][k]) for k in data['reads'])))
+                    for barcode in sorted(result_dict[sample][flowcell]):
+                        for lane, data in sorted(result_dict[sample][flowcell][barcode].items()):
+                            if len(data['reads'].keys()) != 2:
+                                raise ValueError("Incorrect number of fastq-files: {}:\n - {}".format(
+                                    len(data['reads'].keys()), "\n - ".join(
+                                        "{}: {}".format(k, data['reads'][k]) for k in data['reads'])))
 
-                        output.write("\n"+"\t".join([sample,
-                                                     self.sample_type,
-                                                     self.platform,
-                                                     data['barcode'],
-                                                     data['machine'],
-                                                     flowcell,
-                                                     "L" + lane.rjust(3, '0'),
-                                                     str(data['reads']["1"]),
-                                                     str(data['reads']["2"]),
-                                                     self.adapters]))
+                            output.write("\n"+"\t".join([sample,
+                                                         self.sample_type,
+                                                         self.platform,
+                                                         data['barcode'],
+                                                         data['machine'],
+                                                         flowcell,
+                                                         "L" + lane.rjust(3, '0'),
+                                                         str(data['reads']["1"]),
+                                                         str(data['reads']["2"]),
+                                                         self.adapters]))
 
 
 def extract_run_information(file_path, default_barcode=None, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,

@@ -97,7 +97,7 @@ def validate_rule_name_prompt(ctx, opts, value):
     return value
 
 
-@cli.command(short_help="create bare bone project, pipeline or module")
+@cli.command(short_help="create bare bone project, pipeline or module", context_settings={'show_default': True})
 @click.option(
     "-n",
     "--name",
@@ -121,7 +121,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     pipeline.init_pipeline()
 
 
-@cli.command(short_help="add rule to project")
+@cli.command(short_help="add rule to project", context_settings={'show_default': True})
 @click.option(
     "-c",
     "--command",
@@ -174,7 +174,7 @@ def create_rule(command, tool, module, author, email, outdir):
     rule.init_rule()
 
 
-@cli.command(short_help="create input-files, samples.tsv and units.tsv")
+@cli.command(short_help="create input-files, samples.tsv and units.tsv", context_settings={'show_default': True})
 @click.option(
     "-d",
     "--directory",

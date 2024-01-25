@@ -1,0 +1,12 @@
+{
+  "samples": [
+    "samples.{SAMPLE}.settings.tumor_content:1.0",
+    "samples.{SAMPLE}.settings.Mother:"
+  ],
+  "units": [
+    "samples.{SAMPLE}.settings.type:T",
+    "samples.{SAMPLE}.analysis_name:",
+    "samples.{SAMPLE}.settings.platform:NextSeq"
+  ]
+
+}

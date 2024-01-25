@@ -1,0 +1,10 @@
+{
+    "samples": {
+        "HD827sonic_testing1": {"analysis_name": "HD-RUN-V1", "analysis": "gms560", "workpackage": "wp1", "settings": "{\"tumor_content\": 0.5, \"type\": \"T\", \"Mother\": \"256\"}"},
+        "HD827sonic_testing2": {"analysis_name": "HD-RUN-V1", "analysis": "gms560", "workpackage": "wp1", "settings": "{\"type\": \"R\", \"platform\": \"MySeq\"}"},
+        "HD827sonic_testing3": {"analysis_name": "HD-RUN-V1", "analysis": "gms560", "workpackage": "wp1", "settings": "{\"type\": \"N\", \"Mother\": \"356\"}"}
+    },
+    "analysis_name": "HD-RUN-V1",
+    "analysis": "gms560",
+    "workpackage": "wp1"
+}

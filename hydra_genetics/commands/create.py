@@ -9,6 +9,7 @@ import glob
 import gzip
 import logging
 import jinja2
+import json
 import pathlib
 import os
 import re
@@ -332,6 +333,8 @@ class CreateInputFiles(object):
                  sample_regex=r"^([A-Za-z0-9-]+)_.*\.fastq.gz",
                  read_number_regex="_(R[12]{1})[_.]{1}",
                  adapters="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
+                 data_json=None,
+                 data_columns=None,
                  tc=1.0,
                  force=False,
                  default_barcode=None,
@@ -348,6 +351,8 @@ class CreateInputFiles(object):
         self.sample_regex = sample_regex
         self.read_number_regex = read_number_regex
         self.adapters = adapters
+        self.data_json = data_json
+        self.data_columns = data_columns
         self.tc = tc
         self.force = force
         self.default_barcode = default_barcode
@@ -361,11 +366,27 @@ class CreateInputFiles(object):
             self.outdir = os.getcwd()
 
     def init(self):
-        """Creates the hydra_genetics rule."""
+        """Creates the hydra_genetics pipeline input files."""
         log.info(f"Searching for fastq-files:")
         file_dict = {}
-        platform = self.platform
-        sample_type = self.sample_type
+        data_json = {}
+        data_columns = {}
+        if self.data_json and self.data_columns:
+            data_json = json.load(open(self.data_json))
+            for sample in data_json['samples']:
+                if 'settings' in data_json['samples'][sample]:
+                    data_json['samples'][sample]['settings'] = json.loads(data_json["samples"][sample]["settings"])
+            data_columns = json.load(open(self.data_columns))
+            if 'units' in data_columns:
+                data_columns['units'] = dict(map(lambda v: (v.split(":")[0].split(".")[-1],
+                                                            (v.split(":")[1], v.split(":")[0].split("."))),
+                                                 data_columns['units']))
+            if 'samples' in data_columns:
+                data_columns['samples'] = dict(map(lambda v: (v.split(":")[0].split(".")[-1],
+                                                              (v.split(":")[1], v.split(":")[0].split('.'))),
+                                                   data_columns['samples']))
+        elif self.data_json or self.data_columns:
+            log.error("Both --data-json and --data-columns need to be specified at the same time, not only one of them.")
         for d in self.directory:
             dir_files_found = 0
             log.info(f"Dir: %s" % d)
@@ -418,36 +439,52 @@ class CreateInputFiles(object):
                     no_index_counter = 0
                     if sample in result_dict:
                         if flowcell in result_dict[sample]:
-                            if lane_id in result_dict[sample][flowcell]:
-                                if 'reads' in result_dict[sample][flowcell][lane_id]:
-                                    if read_number in result_dict[sample][flowcell][lane_id]['reads']:
-                                        dup_file = result_dict[sample][flowcell][lane_id]['reads'][read_number]
-                                        raise ValueError("sample, flowcell, lane and read number combination "
-                                                         "found multiple times: sample {}"
-                                                         " flowcell {} lane {} read {}:\n - {}".
-                                                         format(sample,
-                                                                flowcell,
-                                                                lane_id,
-                                                                read_number,
-                                                                "\n - ".join([f, dup_file])))
+                            if barcode in result_dict[sample][flowcell]:
+                                if lane_id in result_dict[sample][flowcell][barcode]:
+                                    if 'reads' in result_dict[sample][flowcell][barcode][lane_id]:
+                                        if read_number in result_dict[sample][flowcell][barcode][lane_id]['reads']:
+                                            dup_file = result_dict[sample][flowcell][barcode][lane_id]['reads'][read_number]
+                                            raise ValueError("sample, flowcell, lane and read number combination "
+                                                             "found multiple times: sample {}"
+                                                             " flowcell {} barcode {} lane {} read {}:\n - {}".
+                                                             format(sample,
+                                                                    flowcell,
+                                                                    barcode,
+                                                                    lane_id,
+                                                                    read_number,
+                                                                    "\n - ".join([f, dup_file])))
+                                        else:
+                                            result_dict[sample][flowcell][barcode][lane_id]['reads'][read_number] = f
                                     else:
-                                        result_dict[sample][flowcell][lane_id]['reads'][read_number] = f
+                                        result_dict[sample][flowcell][barcode][lane_id]['reads'] = {read_number: f}
+                                        result_dict[sample][flowcell][barcode][lane_id]['machine'] = machine_id
+                                        result_dict[sample][flowcell][barcode][lane_id]['barcode'] = barcode
                                 else:
-                                    result_dict[sample][flowcell][lane_id]['reads'] = {read_number: f}
-                                    result_dict[sample][flowcell][lane_id]['machine'] = machine_id
-                                    result_dict[sample][flowcell][lane_id]['barcode'] = barcode
+                                    result_dict[sample][flowcell][barcode][lane_id] = {'reads': {read_number: f},
+                                                                                       'machine': machine_id,
+                                                                                       'barcode': barcode}
                             else:
-                                result_dict[sample][flowcell][lane_id] = {'reads': {read_number: f},
-                                                                          'machine': machine_id,
-                                                                          'barcode': barcode}
+                                result_dict[sample][flowcell][barcode] = {lane_id: {'reads': {read_number: f},
+                                                                                    'machine': machine_id,
+                                                                                    'barcode': barcode}}
                         else:
-                            result_dict[sample][flowcell] = {lane_id: {'reads': {read_number: f},
-                                                                       'machine': machine_id,
-                                                                       'barcode': barcode}}
+                            result_dict[sample][flowcell] = {barcode: {lane_id: {'reads': {read_number: f},
+                                                                                 'machine': machine_id,
+                                                                                 'barcode': barcode}}}
                     else:
-                        result_dict[sample] = {flowcell: {lane_id: {'reads': {read_number: f},
-                                                                    'machine': machine_id,
-                                                                    'barcode': barcode}}}
+                        result_dict[sample] = {flowcell: {barcode: {lane_id: {'reads': {read_number: f},
+                                                                              'machine': machine_id,
+                                                                              'barcode': barcode}}}}
+
+        def extract_value(field, default, data):
+            head, *tail = field
+            if head not in data:
+                return default
+            if tail:
+                return extract_value(tail, default, data[head])
+            else:
+                return data[head]
+
         samples_file_name = "samples.tsv"
         if self.post_file_modifier is not None:
             samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
@@ -458,9 +495,20 @@ class CreateInputFiles(object):
             else:
                 log.warn("File exists {} overwriting!!!".format(samples_file_name))
         with open(samples_file_name, "w") as output:
-            output.write("\t".join(["sample", 'tumor_content']))
+            header = ["sample"]
+            if data_columns and "samples" in data_columns:
+                header += data_columns["samples"].keys()
+            elif self.tc:
+                header.append('tumor_content')
+            output.write("\t".join(header))
             for sample, data in sorted(file_dict.items()):
-                output.write("\n{}".format("\t".join([sample, str(self.tc)])))
+                row_data = [sample]
+                if data_columns and "samples" in data_columns:
+                    for _, value in data_columns['samples'].items():
+                        row_data.append(extract_value(value[1][2:], value[0], data_json['samples'][sample]))
+                elif self.tc:
+                    row_data.append(self.tc)
+                output.write("\n{}".format("\t".join(map(lambda x: str(x), row_data))))
         units_file_name = "units.tsv"
         if self.post_file_modifier is not None:
             units_file_name = "units_{}.tsv".format(self.post_file_modifier)
@@ -470,27 +518,62 @@ class CreateInputFiles(object):
                 exit(1)
             else:
                 log.warn("File exists {} overwriting!!!".format(units_file_name))
+
         with open(units_file_name, "w") as output:
+            extra_header_columns = []
+            if 'units' in data_columns:
+                extra_header_columns = list(data_columns['units'].keys())
+                if 'type' in extra_header_columns:
+                    extra_header_columns.remove("type")
+                if 'platform' in extra_header_columns:
+                    extra_header_columns.remove("platform")
+                if 'adapter' in extra_header_columns:
+                    extra_header_columns.remove("adapter")
             output.write("\t".join(["sample", "type", "platform", "barcode", "machine",
-                                    "flowcell", "lane", "fastq1", "fastq2", "adapter"]))
+                                    "flowcell", "lane", "fastq1", "fastq2", "adapter"] + extra_header_columns))
             for sample in sorted(result_dict):
                 for flowcell in sorted(result_dict[sample]):
-                    for lane, data in sorted(result_dict[sample][flowcell].items()):
-                        if len(data['reads'].keys()) != 2:
-                            raise ValueError("Incorrect number of fastq-files: {}:\n - {}".format(
-                                len(data['reads'].keys()), "\n - ".join(
-                                    "{}: {}".format(k, data['reads'][k]) for k in data['reads'])))
+                    for barcode in sorted(result_dict[sample][flowcell]):
+                        for lane, data in sorted(result_dict[sample][flowcell][barcode].items()):
+                            if len(data['reads'].keys()) != 2:
+                                raise ValueError("Incorrect number of fastq-files: {}:\n - {}".format(
+                                    len(data['reads'].keys()), "\n - ".join(
+                                        "{}: {}".format(k, data['reads'][k]) for k in data['reads'])))
+                            sample_type = self.sample_type
+                            s_type = sample_type
+                            s_platform = self.platform
+                            s_adapters = self.adapters
+                            extra_data = []
+                            if data_json and 'units' in data_columns:
+                                extra_columns = list(data_columns['units'].keys())
+                                if 'type' in extra_columns:
+                                    value = data_columns['units']['type']
+                                    s_type = extract_value(value[1][2:], value[0], data_json['samples'][sample])
+                                    extra_columns.remove('type')
+                                if 'platform' in extra_columns:
+                                    value = data_columns['units']['platform']
+                                    s_platform = extract_value(value[1][2:], value[0], data_json['samples'][sample])
+                                    extra_columns.remove('platform')
+                                if 'adapter' in extra_columns:
+                                    value = data_columns['units']['adapter']
+                                    extra_columns.remove('adapter')
+                                    s_adapters = extract_value(value[1][2:], value[0], data_json['samples'][sample])
+                                for column in extra_columns:
+                                    value = data_columns['units'][column]
+                                    extra_data.append(extract_value(value[1][2:], value[0], data_json['samples'][sample]))
+                            elif self.tc:
+                                header.append('tumor_content')
 
-                        output.write("\n"+"\t".join([sample,
-                                                     self.sample_type,
-                                                     self.platform,
-                                                     data['barcode'],
-                                                     data['machine'],
-                                                     flowcell,
-                                                     "L" + lane.rjust(3, '0'),
-                                                     str(data['reads']["1"]),
-                                                     str(data['reads']["2"]),
-                                                     self.adapters]))
+                            output.write("\n"+"\t".join([sample,
+                                                         s_type,
+                                                         s_platform,
+                                                         data['barcode'],
+                                                         data['machine'],
+                                                         flowcell,
+                                                         "L" + lane.rjust(3, '0'),
+                                                         str(data['reads']["1"]),
+                                                         str(data['reads']["2"]),
+                                                         s_adapters] + extra_data))
 
 
 def extract_run_information(file_path, default_barcode=None, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,

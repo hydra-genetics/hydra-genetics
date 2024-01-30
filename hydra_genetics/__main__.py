@@ -97,7 +97,7 @@ def validate_rule_name_prompt(ctx, opts, value):
     return value
 
 
-@cli.command(short_help="create bare bone project, pipeline or module")
+@cli.command(short_help="create bare bone project, pipeline or module", context_settings={'show_default': True})
 @click.option(
     "-n",
     "--name",
@@ -121,7 +121,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     pipeline.init_pipeline()
 
 
-@cli.command(short_help="add rule to project")
+@cli.command(short_help="add rule to project", context_settings={'show_default': True})
 @click.option(
     "-c",
     "--command",
@@ -174,7 +174,7 @@ def create_rule(command, tool, module, author, email, outdir):
     rule.init_rule()
 
 
-@cli.command(short_help="create input-files, samples.tsv and units.tsv")
+@cli.command(short_help="create input-files, samples.tsv and units.tsv", context_settings={'show_default': True})
 @click.option(
     "-d",
     "--directory",
@@ -239,7 +239,17 @@ def create_rule(command, tool, module, author, email, outdir):
         "--tc",
         help="tumor contet",
         type=float,
-        default=1.0)
+        default=None)
+@click.option(
+        "--data-json",
+        help="json file with data that should be added to samples/units tsv files",
+        type=str,
+        default=None)
+@click.option(
+        "--data-columns",
+        help="json file specifying which data should be added as columns to samples/units tsv files",
+        type=str,
+        default=None)
 @click.option(
         "--validate",
         help="see if fastq contain multipl runs/lanes by comparing first and last "
@@ -265,9 +275,11 @@ def create_rule(command, tool, module, author, email, outdir):
         type=int,
         default=1000)
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
-                       sample_regex, read_number_regex, adapters, tc, force, default_barcode, validate, ask, th, nreads, every):
+                       sample_regex, read_number_regex, adapters, data_json, data_columns,
+                       tc, force, default_barcode, validate, ask, th, nreads, every):
     input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
-                                   sample_regex, read_number_regex, adapters, tc, force, default_barcode, validate, ask, th,
+                                   sample_regex, read_number_regex, adapters, data_json, data_columns,
+                                   tc, force, default_barcode, validate, ask, th,
                                    nreads, every)
     input_files.init()
 

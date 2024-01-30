@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.11.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.10.2...v1.11.0) (2024-01-30)
+
+
+### Features
+
+* lock pulp version in pipeline template ([7f7fe41](https://www.github.com/hydra-genetics/hydra-genetics/commit/7f7fe41376714f298385b08387903beca096ab08))
+* make it possible to populate samples and units with data from json file ([e5ec03b](https://www.github.com/hydra-genetics/hydra-genetics/commit/e5ec03b1f1ddab8fd6708c0106cf6297f423ebbc))
+* update snakefmt linter version for pipeline template ([05c39a4](https://www.github.com/hydra-genetics/hydra-genetics/commit/05c39a48afada7a583ba79c22519858884e398f2))
+
+
+### Performance Improvements
+
+* improve performance and fix minor issue ([a109221](https://www.github.com/hydra-genetics/hydra-genetics/commit/a109221868f5a30f73364e57ad25f9e1d20d5b05))
+
 ### [1.10.2](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.10.1...v1.10.2) (2023-12-20)
 
 

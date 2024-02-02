@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.11.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.11.0...v1.11.1) (2024-02-02)
+
+
+### Bug Fixes
+
+* match latest settings format ([1727c12](https://www.github.com/hydra-genetics/hydra-genetics/commit/1727c12475ff1d1ccd63cef92f7bc5a1f2157c9d))
+
 ## [1.11.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.10.2...v1.11.0) (2024-01-30)
 
 

@@ -373,9 +373,6 @@ class CreateInputFiles(object):
         data_columns = {}
         if self.data_json and self.data_columns:
             data_json = json.load(open(self.data_json))
-            for sample in data_json['samples']:
-                if 'settings' in data_json['samples'][sample]:
-                    data_json['samples'][sample]['settings'] = json.loads(data_json["samples"][sample]["settings"])
             data_columns = json.load(open(self.data_columns))
             if 'units' in data_columns:
                 data_columns['units'] = dict(map(lambda v: (v.split(":")[0].split(".")[-1],

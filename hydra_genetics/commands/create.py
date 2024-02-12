@@ -495,7 +495,7 @@ class CreateInputFiles(object):
             header = ["sample"]
             if data_columns and "samples" in data_columns:
                 header += data_columns["samples"].keys()
-            elif self.tc:
+            elif self.tc is not None:
                 header.append('tumor_content')
             output.write("\t".join(header))
             for sample, data in sorted(file_dict.items()):
@@ -503,7 +503,7 @@ class CreateInputFiles(object):
                 if data_columns and "samples" in data_columns:
                     for _, value in data_columns['samples'].items():
                         row_data.append(extract_value(value[1][2:], value[0], data_json['samples'][sample]))
-                elif self.tc:
+                elif self.tc is not None:
                     row_data.append(self.tc)
                 output.write("\n{}".format("\t".join(map(lambda x: str(x), row_data))))
         units_file_name = "units.tsv"

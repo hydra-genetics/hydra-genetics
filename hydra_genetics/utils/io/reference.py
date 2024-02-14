@@ -76,10 +76,15 @@ def fetch_reference_data(validation_data, output_dir,
                     if not checksum_validate_file(temp_content_holder, checksum_value, content_path):
                         failed.append(content_path)
                     else:
-                        if 'folder' in content_type and os.path.isdir(content_path):
-                            shutil.rmtree(content_path)
+                        compressed_folder = None
+                        if 'folder' in content_type:
+                            if 'compressed_checksum' in value:
+                                parts = list(value['content_checksum'].keys())[0].split(os.sep)
+                                if len(parts) > 1:
+                                    compressed_folder = parts[0]
+
                         if 'compressed_checksum' in value:
-                            if extract_compressed_data(value, content_type, content_path, temp_content_holder, force):
+                            if extract_compressed_data(value, content_type, content_path, temp_content_holder, compressed_folder, force):
                                 logging.info(f"folder {content_path} retrieved")
                                 fetched.append(value['path'])
                             else:
@@ -357,7 +362,7 @@ def checksum_validate_file(file, expected_checksum, print_path_name=None) -> boo
         return False
 
 
-def extract_compressed_data(item, content_type, content_path, temp_content_holder, force=False) -> bool:
+def extract_compressed_data(item, content_type, content_path, temp_content_holder, compressed_folder=None, force=False) -> bool:
     """
         Function used to extract compressed content, both files and folders.
 
@@ -365,6 +370,7 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
             item (dict): a dict with checksum or content_checksum (a dict with path:md5sum values)
             content_path (string): path to where the file or folder will be saved
             temp_content_folder (string): path to where content can be temporary stored
+            compress_folder (string): name of folder that should be moved.
 
         Returns:
             bool: if extraction was succefull
@@ -385,8 +391,9 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
             tar.extractall(extracted_content_path)
         if 'content_checksum' in item:
             if checksum_validate_content(item['content_checksum'], extracted_content_path, content_path):
-                if force and os.path.isdir(content_path):
-                    shutil.rmtree(content_path)
+                if compressed_folder is not None:
+                    extracted_content_path = os.path.join(extracted_content_path, compressed_folder)
+                    content_path = os.path.join(content_path, compressed_folder)
                 move_content(extracted_content_path, content_path)
                 return True
             else:
@@ -408,4 +415,7 @@ def move_content(old_path, new_path):
     parent_dir = os.path.dirname(new_path)
     if not os.path.isdir(parent_dir):
         os.makedirs(parent_dir)
-    shutil.move(old_path, new_path)
+    if os.path.isdir(old_path):
+        shutil.copytree(old_path, new_path, dirs_exist_ok=True)
+    else:
+        shutil.move(old_path, new_path)

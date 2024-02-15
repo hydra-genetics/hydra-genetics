@@ -78,7 +78,7 @@ def fetch_reference_data(validation_data, output_dir,
                     else:
                         compressed_folder = None
                         if 'folder' in content_type:
-                            if 'compressed_checksum' in value:
+                            if 'compressed_checksum' in value and 'content_checksum' in valie:
                                 parts = list(value['content_checksum'].keys())[0].split(os.sep)
                                 if len(parts) > 1:
                                     compressed_folder = parts[0]

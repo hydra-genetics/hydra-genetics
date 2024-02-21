@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.12.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.11.1...v1.12.0) (2024-02-21)
+
+
+### Features
+
+* update handling of reference files ([70ba91f](https://www.github.com/hydra-genetics/hydra-genetics/commit/70ba91fd082fc31b7a26bafea21b2331ef8f6e1c))
+
+
+### Bug Fixes
+
+* handle tumour content set to 0 when creating sample.tsv ([cb96b5d](https://www.github.com/hydra-genetics/hydra-genetics/commit/cb96b5d570bd5cddb531c614b5704edbab9240e4))
+
 ### [1.11.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.11.0...v1.11.1) (2024-02-02)
 
 

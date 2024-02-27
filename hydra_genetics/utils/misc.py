@@ -2,9 +2,12 @@
 
 from collections.abc import Mapping
 from copy import deepcopy
+from datetime import datetime
+from snakemake.sourcecache import GithubFile, LocalGitFile
+
 import os
 import re
-from snakemake.sourcecache import GithubFile, LocalGitFile
+import yaml
 
 
 def get_module_snakefile(config, repo, path, tag):
@@ -69,3 +72,12 @@ def replace_dict_variables(config):
                             temp_config[k][i] = temp_config[k][i].replace("{{" + m + "}}", config[m])
         return temp_config
     return update_dict(config)
+
+
+def export_config_as_file(config, output_file="config", output_directory=None):
+    if output_file is not None:
+        output_file = f"{output_file}_{datetime.now().strftime('%Y%m%d--%H-%M-%S')}.yaml"
+    if output_directory is not None:
+        output_file = os.path.join(output_directory, output_file)
+    with open(output_file, 'w') as writer:
+        writer.write(yaml.dump(config))

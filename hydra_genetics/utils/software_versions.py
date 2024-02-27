@@ -152,13 +152,13 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
 
         logger = logging.getLogger(__name__)
         version_found = []
+        software_version_key = 'software_versions'
         for key, value in config.items():
-            software_version_key = 'software_versions'
             if isinstance(value, dict):
                 config[key], version_dict = _add_software_version(value, version_dict)
             elif key in ["container", "default_container"]:
                 if key == "default_container":
-                    software_version_key = f""default_container_"{software_version_key}"
+                    software_version_key = f"default_container_software_versions"
                 image_path = get_image_path(value, container_cache)
                 if os.path.isfile(image_path):
                     version_found += get_software_version_from_labels(image_path)
@@ -169,9 +169,9 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
 
                     if not version_found:
                         if fail_missing_versions:
-                            raise Exception("could not extract software versions from {image_path}")
+                            raise Exception(f"could not extract software versions from {image_path}, {value}")
                         else:
-                            logger.warning(f"could not extract software versions from {image_path}")
+                            logger.warning(f"could not extract software versions from {image_path}, {value}")
                             version_found = [name_and_version.split("__"), ('NOTE', 'version extract from image name and not labels')]
                 else:
                     if fail_missing_versions:
@@ -180,7 +180,9 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
                         logger.warning(f"could not locate local file {image_path} for {value}")
         if version_found:
             config[software_version_key] = {s: v for s, v in version_found}
-            version_dict[name_and_version] = config['software_versions']
+            if 'version' in config[software_version_key]:
+                del config[software_version_key]['version']
+            version_dict[name_and_version] = config[software_version_key]
         return config, version_dict
     return _add_software_version(config, {})
 

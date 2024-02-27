@@ -196,7 +196,7 @@ def export_software_version_as_files(software_dict, directory="software_versions
     file_name_ending: str
        a string that will be combined with the software name version key
     """
-    directory = f"{directory}_{datetime.now().strftime('%Y%m%d--%H-%M-%S')}.yaml"
+    directory = f"{directory}_{datetime.now().strftime('%Y%m%d--%H-%M-%S')}"
     if not os.path.isdir(directory):
         os.mkdir(directory)
     for name in software_dict:

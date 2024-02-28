@@ -1,7 +1,7 @@
-In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline. These functions include version checking of Hydra-Genetics, helper functions for module importation, and more
+In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline. These functions include version checking of Hydra-Genetics, helper functions for module importation, and more.
 
 # Version handling
-## version checking
+## Version checking
 To make sure that a hydra-genetics library of a suitable version is installed one can use min_version and
 max_version.
 
@@ -12,15 +12,15 @@ from hydra_genetics import min_version as hydra_min_version
 hydra_min_version("1.10.0")
 
 from hydra_genetics import max_version as hydra_max_version
-# Make sure that installed version of hydra-genetics is 1.10.0 or older
+# Make sure that installed version of hydra-genetics is 1.12.0 or older
 hydra_max_version("1.12.0")
 ```
-## version logging
+## Version logging
 
 ### Pipeline version
-To log the used version of the pipeline, one can utilize `get_pipeline_version` which will 
-locate the path of the Snakefile and uses git to fetch the checkout tag/branch and commit ID.
-`export_pipeline_version_as_file` can later be used to print the information as a file.
+To log the version used by the pipeline, one can utilize the function `get_pipeline_version` which will 
+locate the path of the Snakefile as well as git to fetch the checked out tag/branch and commit ID.
+The function `export_pipeline_version_as_file` can later be used to print the information as a file.
 
 **Code**
 ```python
@@ -39,13 +39,13 @@ pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
 }
 
 # Additional variables that can be set
-# - directory, defualt value software_versions
-# - file_name_ending, default value mqv_versions.yaml
+# - directory, default value: software_versions
+# - file_name_ending, default value: mqv_versions.yaml
 # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
 export_pipeline_version_as_file(pipeline_version, date_string=date_string)
 ```
 
-**Folder/file structure**
+**Folder and file structure**
 
 Example:
 
@@ -56,7 +56,7 @@ software_versions__20210403--14-00-21/
 ```
 
 
-### Tool version
+### Tool versions
 To log the versions of the software used during the analysis of the samples, multiple functions exist to help with this task.
 
 **Code**
@@ -70,21 +70,21 @@ from hydra_genetics.utils.software_versions import export_software_version_as_fi
 # Use onstart to make sure that containers have been downloaded
 # before extracting versions
 onstart:
-    # Make sure that the user have requested containers to be used
+    # Make sure that the user have the requested containers to be used
     if use_container(workflow):
         date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
         # From the config retrieve all dockers used and parse labels for software versions. Add
         # this information to config dict.
         update_config, software_info = add_software_version_to_config(config, workflow, False)
         # Print all softwares used as files. Additional parameters that can be set
-        # - directory, defualt value software_versions
-        # - file_name_ending, default value mqv_versions.yaml
+        # - directory, default value: software_versions
+        # - file_name_ending, default value: mqv_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
         export_software_version_as_files(software_info, date_string=date_string)
         
         # print config dict as a file. Additional parameters that can be set
         # output_file, default config
-        # output_directory, default =None, i.e no folder
+        # output_directory, default = None, i.e no folder
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
         export_config_as_file(update_config, date_string=date_string)
 ```
@@ -98,7 +98,7 @@ Example output
 # Config file
 config__20210403--14-00-21.yaml
 # Softwares
-software_versions__20210403--14-00-21
+software_versions__20210403--14-00-21/
 |--bwa_mem__0.7.17_mqv_versions.yaml
 |--CONTAINERNAME__VERSION_mqv_versions.yaml
 ```
@@ -131,7 +131,7 @@ The function will look for `{{VARIABLE_NAME}}` and modify the config dict, examp
 {
     'PROJECT_REF_DATA': '/data/cluster',
     'reference': {
-        'fasta': '{{PROJECT_REF_DATA}}/ref_data//hg19.with.mt.fasta',
+        'fasta': '{{PROJECT_REF_DATA}}/ref_data/hg19.with.mt.fasta',
     },
 }
 ```
@@ -140,13 +140,14 @@ to
 {
     'PROJECT_REF_DATA': '/data/cluster',
     'reference': {
-        'fasta': '/data/cluster/ref_data//hg19.with.mt.fasta',
+        'fasta': '/data/cluster/ref_data/hg19.with.mt.fasta',
     },
 }
 ```
 
 # Load resources
 For Hydra-Genetics modules and pipelines, resource definitions are stored in a YAML file (`resource.yaml`). These settings need to be added to the config dictionary, and this can be achieved using the `load_resources` function.
+
 **Code**
 ```python
 from hydra_genetics.utils.resources import load_resources
@@ -156,9 +157,9 @@ config = load_resources(config, config["resources"])
 ```
 
 # Import modules
-Snakemake supports the import of modules stored both locally and remotely. The existence of `get_module_snakefile` simplifies this process, making it easy to switch between locally and remotely stored modules. By default, the behavior is set to fetch modules from https://github.com. This default behavior can be changed by setting the variable `hydra_local_path` in the configuration file or adding it as a key to the configuration dictionary.
+Snakemake supports the import of modules stored both locally and remotely. The function `get_module_snakefile` simplifies this process, making it easy to switch between locally and remotely stored modules. By default, the behavior is set to fetch modules from https://github.com. This default behavior can be changed by setting the variable `hydra_local_path` in the configuration file or adding it as a key to the configuration dictionary.
 
-**Folder structure**
+**Folder and file structure**
 ```bash
 LOCAL_PATH_WHERE_MODULES_HAVE_BEEN_STORED
 |--prealignment

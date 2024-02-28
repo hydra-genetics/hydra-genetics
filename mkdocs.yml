@@ -2,20 +2,22 @@ site_name: Hydra-genetics
 nav:
   - Introduction: index.md
   - Modules: modules.md
-  - Snakemake rules: rules.md
-  - Code standards: standards.md
-  - Code testing: testing.md
   - How-to make a pipeline:
-    - Create a pipeline skeleton: create.md
-    - Import modules and rules: import.md
-    - Pipeline configuration: config.md
-    - Result files: results.md
+    - Create a pipeline skeleton: make_pipeline/create.md
+    - Import modules and rules: make_pipeline/import.md
+    - Pipeline configuration: make_pipeline/config.md
+    - Result files: make_pipeline/results.md
   - How-to run a pipeline:
-    - Cluster profile: profile.md
-    - Create sample files: create_sample_files.md
-    - Make a python environment: environment.md
+    - Cluster profile: run_pipeline/profile.md
+    - Create sample files: run_pipeline/create_sample_files.md
+    - Make a python environment: run_pipeline/environment.md
+  - Development:
+    - Snakemake rules: development/rules.md
+    - Code standards: development/standards.md
+    - Code testing: development/testing.md
+    - Help code: development/help_code.md
   - Tutorials:
-    - Make a simple pipeline: simple_pipeline.md
+    - Make a simple pipeline: tutorials/simple_pipeline.md
 
 
 theme: readthedocs

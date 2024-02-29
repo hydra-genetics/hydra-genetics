@@ -1,4 +1,4 @@
-In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline. These functions include version checking of Hydra-Genetics, helper functions for module importation, and more.
+In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline, which should be put in `workflow/rules/common.smk`. These functions include version checking of Hydra-Genetics, helper functions for module importation, and more.
 
 # Version handling
 ## Version checking

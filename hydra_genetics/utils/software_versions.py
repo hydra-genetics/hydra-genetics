@@ -255,12 +255,16 @@ def export_software_version_as_files(software_dict, directory="versions/software
     directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
+    output_file_list = []
     for name in software_dict:
-        with open(os.path.join(directory, f"{name}_{file_name_ending}"), 'w') as writer:
+        output_file = os.path.join(directory, f"{name}_{file_name_ending}"
+        output_file_list.append(output_file)
+        with open(output_file), 'w') as writer:
             notification = software_dict[name].pop('NOTE', None)
             writer.write(yaml.dump(software_dict[name]))
             if notification is not None:
                 writer.write(f"# {notification}")
+    return output_file_list
 
 
 def get_pipeline_version(workflow, pipeline_name='pipeline'):
@@ -333,7 +337,11 @@ def export_pipeline_version_as_file(pipeline_version_dict,
     directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
+    output_file_list = []
     for pipeline_name in pipeline_version_dict:
-        with open(os.path.join(directory,
-                               f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"), 'w') as writer:
+        output_file = os.path.join(directory,
+                                   f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}")
+        output_file_list.append(output_file)
+        with open(output_file, 'w') as writer:
             writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]['version']}))
+    return output_file_list

@@ -252,7 +252,7 @@ def export_software_version_as_files(software_dict, directory="software_versions
         date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
     directory = f"{directory}_{date_string}"
     if not os.path.isdir(directory):
-        os.mkdir(directory)
+        os.makedirs(directory)
     for name in software_dict:
         with open(os.path.join(directory, f"{name}_{file_name_ending}"), 'w') as writer:
             notification = software_dict[name].pop('NOTE', None)
@@ -328,7 +328,8 @@ def export_pipeline_version_as_file(pipeline_version_dict,
         date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
     directory = f"{directory}_{date_string}"
     if not os.path.isdir(directory):
-        os.mkdir(directory)
+        os.makedirs(directory)
     for pipeline_name in pipeline_version_dict:
-        with open(os.path.join(directory, f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"), 'w') as writer:
+        with open(os.path.join(directory, 
+                               f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"), 'w') as writer:
             writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]['version']}))

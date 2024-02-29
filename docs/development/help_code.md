@@ -38,12 +38,15 @@ pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
     }
 }
 
-# Additional variables that can be set
-# - directory, default value: software_versions
-# - file_name_ending, default value: mqv_versions.yaml
-# date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
-export_pipeline_version_as_file(pipeline_version, date_string=date_string)
+# onstart will also prevent the functions from
+# running twice.
+onstart:
+    # Additional variables that can be set
+    # - directory, default value: versions/software
+    # - file_name_ending, default value: mqv_versions.yaml
+    # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
+    date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+    export_pipeline_version_as_file(pipeline_version, date_string=date_string)
 ```
 
 **Folder and file structure**
@@ -69,7 +72,8 @@ from hydra_genetics.utils.software_versions import add_software_version_to_confi
 from hydra_genetics.utils.software_versions import export_software_version_as_files
 
 # Use onstart to make sure that containers have been downloaded
-# before extracting versions
+# before extracting versions. This will also prevent the functions from
+# running twice.
 onstart:
     # Make sure that the user have the requested containers to be used
     if use_container(workflow):
@@ -78,14 +82,14 @@ onstart:
         # this information to config dict.
         update_config, software_info = add_software_version_to_config(config, workflow, False)
         # Print all softwares used as files. Additional parameters that can be set
-        # - directory, default value: software_versions
+        # - directory, default value: versions/software
         # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
         export_software_version_as_files(software_info, date_string=date_string)
         
         # print config dict as a file. Additional parameters that can be set
         # output_file, default config
-        # output_directory, default = None, i.e no folder
+        # output_directory, default = versions
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
         export_config_as_file(update_config, date_string=date_string)
 ```

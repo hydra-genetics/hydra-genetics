@@ -10,22 +10,6 @@ from datetime import datetime
 from snakemake.common import is_local_file
 
 
-def add_version_files_to_multiqc(config, file_list):
-    """
-    Function that will add a list of files to qc_files that will be parsed by mutliqc
-
-    Parameters
-    ----------
-    config: dict
-        with the following format 
-        {'multiqc': {'reports': {'NAME1': {'qc_files': []}}, {'NAME1': {'qc_files': []}}}}
-    file_list: list
-        list of paths
-    """
-    for report in config['multiqc']['reports']:
-        config['multiqc']['reports'][report]['qc_files'] += file_list
-
-
 def get_container_prefix(workflow):
     '''
     Function used to fetch singularity cache location

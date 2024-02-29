@@ -250,8 +250,10 @@ def export_software_version_as_files(software_dict, directory="software_versions
     """
     if date_string is None:
         date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
-    directory = f"{directory}_{date_string}"
-    if not os.path.isdir(directory):
+        if directory is not None and len(directory) > 0:
+            date_string = f"_{date_string}"
+    directory = f"{directory}{date_string}"
+    if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
     for name in software_dict:
         with open(os.path.join(directory, f"{name}_{file_name_ending}"), 'w') as writer:
@@ -306,7 +308,7 @@ def get_pipeline_version(workflow, pipeline_name='pipeline'):
 
 
 def export_pipeline_version_as_file(pipeline_version_dict,
-                                    directory="software_versions",
+                                    directory=None,
                                     file_name_ending="mqv_versions.yaml",
                                     date_string=None):
     """
@@ -325,11 +327,13 @@ def export_pipeline_version_as_file(pipeline_version_dict,
        a string that will be added to the folder name to make it unique
     """
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
-    directory = f"{directory}_{date_string}"
-    if not os.path.isdir(directory):
+        date_string = datetime.now().strftime('_%Y%m%d--%H-%M-%S')
+        if directory is not None and len(directory) > 0:
+            date_string = f"_{date_string}"
+    directory = f"{directory}{date_string}"
+    if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
     for pipeline_name in pipeline_version_dict:
-        with open(os.path.join(directory, 
+        with open(os.path.join(directory,
                                f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"), 'w') as writer:
             writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]['version']}))

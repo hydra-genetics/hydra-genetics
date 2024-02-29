@@ -42,6 +42,7 @@ pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
 # - directory, default value: software_versions
 # - file_name_ending, default value: mqv_versions.yaml
 # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
+date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
 export_pipeline_version_as_file(pipeline_version, date_string=date_string)
 ```
 

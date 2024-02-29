@@ -232,7 +232,7 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
     return _add_software_version(config, {})
 
 
-def export_software_version_as_files(software_dict, directory="software_versions", file_name_ending="mqv_versions.yaml", date_string=None):
+def export_software_version_as_files(software_dict, directory="versions/software", file_name_ending="mqc_versions.yaml", date_string=None):
     """
     Print software version to files. Requires a dict with key software_info which
     should contain a dict with software names and versions.
@@ -308,8 +308,8 @@ def get_pipeline_version(workflow, pipeline_name='pipeline'):
 
 
 def export_pipeline_version_as_file(pipeline_version_dict,
-                                    directory=None,
-                                    file_name_ending="mqv_versions.yaml",
+                                    directory="versions/software",
+                                    file_name_ending="mqc_versions.yaml",
                                     date_string=None):
     """
     Print pipeline version to a file. Requires a dict with key pipeline_info which

@@ -82,5 +82,7 @@ def export_config_as_file(config, output_file="config", directory="versions", da
         output_file = f"{output_file}{date_string}.yaml"
     if directory is not None:
         output_file = os.path.join(directory, output_file)
+    if len(directory) > 0 and not os.path.isdir(directory):
+        os.makedirs(directory)
     with open(output_file, 'w') as writer:
         writer.write(yaml.dump(config))

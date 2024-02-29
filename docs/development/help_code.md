@@ -79,7 +79,7 @@ onstart:
         update_config, software_info = add_software_version_to_config(config, workflow, False)
         # Print all softwares used as files. Additional parameters that can be set
         # - directory, default value: software_versions
-        # - file_name_ending, default value: mqv_versions.yaml
+        # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
         export_software_version_as_files(software_info, date_string=date_string)
         
@@ -100,8 +100,8 @@ Example output
 config__20210403--14-00-21.yaml
 # Softwares
 software_versions__20210403--14-00-21/
-|--bwa_mem__0.7.17_mqv_versions.yaml
-|--CONTAINERNAME__VERSION_mqv_versions.yaml
+|--bwa_mem__0.7.17_mqc_versions.yaml
+|--CONTAINERNAME__VERSION_mqc_versions.yaml
 ```
 
 # Variable usage in config

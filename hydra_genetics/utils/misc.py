@@ -76,8 +76,8 @@ def replace_dict_variables(config):
 def export_config_as_file(config, output_file="config", directory="versions", date_string=None):
     if date_string is None:
         date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
-        if directory is not None and len(directory) > 0:
-            date_string = f"_{date_string}"
+    if directory is not None and len(directory) > 0:
+        date_string = f"_{date_string}"
     if output_file is not None:
         output_file = f"{output_file}{date_string}.yaml"
     if directory is not None:

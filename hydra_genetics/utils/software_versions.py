@@ -257,9 +257,9 @@ def export_software_version_as_files(software_dict, directory="versions/software
         os.makedirs(directory)
     output_file_list = []
     for name in software_dict:
-        output_file = os.path.join(directory, f"{name}_{file_name_ending}"
+        output_file = os.path.join(directory, f"{name}_{file_name_ending}")
         output_file_list.append(output_file)
-        with open(output_file), 'w') as writer:
+        with open(output_file, 'w') as writer:
             notification = software_dict[name].pop('NOTE', None)
             writer.write(yaml.dump(software_dict[name]))
             if notification is not None:

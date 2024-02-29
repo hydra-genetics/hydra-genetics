@@ -330,5 +330,5 @@ def export_pipeline_version_as_file(pipeline_version_dict,
     if not os.path.isdir(directory):
         os.mkdir(directory)
     for pipeline_name in pipeline_version_dict:
-        with open(os.path.join(directory, f"{pipeline_name}_{file_name_ending}"), 'w') as writer:
+        with open(os.path.join(directory, f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"), 'w') as writer:
             writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]['version']}))

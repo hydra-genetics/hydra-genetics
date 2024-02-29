@@ -250,8 +250,8 @@ def export_software_version_as_files(software_dict, directory="versions/software
     """
     if date_string is None:
         date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
-        if directory is not None and len(directory) > 0:
-            date_string = f"_{date_string}"
+    if directory is not None and len(directory) > 0:
+        date_string = f"_{date_string}"
     directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
@@ -328,8 +328,8 @@ def export_pipeline_version_as_file(pipeline_version_dict,
     """
     if date_string is None:
         date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
-        if directory is not None and len(directory) > 0:
-            date_string = f"_{date_string}"
+    if directory is not None and len(directory) > 0:
+        date_string = f"_{date_string}"
     directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)

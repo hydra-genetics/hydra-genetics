@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.13.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.12.0...v1.13.0) (2024-02-29)
+
+
+### Features
+
+* add functions used to annotate config with software versions ([f541a2b](https://www.github.com/hydra-genetics/hydra-genetics/commit/f541a2bca4c630a2ff7a83ffcb3f96ef16d2ea4f))
+* add max_version function and update documentation. ([4e532e3](https://www.github.com/hydra-genetics/hydra-genetics/commit/4e532e3424408ad197101c29a051b35fc4d31356))
+* function used to print pipeline version ([83b4e96](https://www.github.com/hydra-genetics/hydra-genetics/commit/83b4e96c716dc58b63a695443bb5973a991d0dcc))
+
+
+### Documentation
+
+* small correction in documentation ([984263f](https://www.github.com/hydra-genetics/hydra-genetics/commit/984263f0b35c48513f5a3537a83fbe261e09938b))
+
 ## [1.12.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.11.1...v1.12.0) (2024-02-21)
 
 

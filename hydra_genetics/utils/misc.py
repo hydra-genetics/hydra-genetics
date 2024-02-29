@@ -2,12 +2,11 @@
 
 from collections.abc import Mapping
 from copy import deepcopy
+import os
+import yaml
+import re
 from datetime import datetime
 from snakemake.sourcecache import GithubFile, LocalGitFile
-
-import os
-import re
-import yaml
 
 
 def get_module_snakefile(config, repo, path, tag):
@@ -74,9 +73,11 @@ def replace_dict_variables(config):
     return update_dict(config)
 
 
-def export_config_as_file(config, output_file="config", output_directory=None):
+def export_config_as_file(config, output_file="config", output_directory=None, date_string=None):
+    if date_string is None:
+        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
     if output_file is not None:
-        output_file = f"{output_file}_{datetime.now().strftime('%Y%m%d--%H-%M-%S')}.yaml"
+        output_file = f"{output_file}_{date_string}.yaml"
     if output_directory is not None:
         output_file = os.path.join(output_directory, output_file)
     with open(output_file, 'w') as writer:

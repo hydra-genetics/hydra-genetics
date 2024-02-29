@@ -1,3 +1,4 @@
+import git
 import hashlib
 import logging
 import os
@@ -28,6 +29,50 @@ def get_container_prefix(workflow):
         else:
             return workflow.deployment_settings.apptainer_prefix
     return None
+
+
+def get_pipeline_version(workflow):
+    """
+    Will return the pipelines tag name and commit hex.
+
+    Parameters:
+    -----------
+    workflow: object
+        workflow object from snakemake that contain a basedir attribute
+
+    Return
+    ------
+    dict with pipeline version and commit, ex {'pipeline_version': 'v1', 'pipeline_commit': 'achgk2...kacaa'}
+    """
+    def _find_root_repo(path):
+        if path is None:
+            return None
+        elif os.path.isdir(str(os.path.join(str(path), ".git"))):
+            return path
+        else:
+            return _find_root_repo(os.path.dirname(path))
+    repo_path = _find_root_repo(getattr(workflow, 'basedir'))
+
+    # Initialize a Git repo object
+    repo = git.Repo(repo_path)
+
+    # Get the currently checked out commit
+    head_commit = repo.head.commit
+
+    # Iterate through all tags and find the one pointing to the HEAD commit
+    pipeline_version = None
+    for tag in repo.tags:
+        if tag.commit == head_commit:
+            pipeline_version = tag.name
+            break
+    if pipeline_version is None:
+        try:
+            pipeline_version = repo.active_branch
+        except TypeError as e:
+            logger = logging.getLogger(__name__)
+            logger.warning("Unable to get version (from tags) or an active_branch")
+
+    return {'pipeline_version': str(pipeline_version), 'pipeline_commit': str(head_commit)}
 
 
 def get_software_version_from_labels(image_path):
@@ -187,21 +232,25 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
     return _add_software_version(config, {})
 
 
-def export_software_version_as_files(software_dict, directory="software_versions", file_name_ending="mqv_versions.yaml"):
+def export_software_version_as_files(software_dict, directory="software_versions", file_name_ending="mqv_versions.yaml", date_string=None):
     """
     Print software version to files. Requires a dict with key software_info which
     should contain a dict with software names and versions.
 
     Parameters:
     -----------
-    config: dict
+    software_dict: dict
        dict with key software_info, ex {software_info: {'common_1.3': {'samtools': '1.3', 'picard': '1.6'}}}
     directory: str
        path where files will be written
     file_name_ending: str
        a string that will be combined with the software name version key
+    date_string: str
+       a string that will be added to the folder name to make it unique
     """
-    directory = f"{directory}_{datetime.now().strftime('%Y%m%d--%H-%M-%S')}"
+    if date_string is None:
+        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+    directory = f"{directory}_{date_string}"
     if not os.path.isdir(directory):
         os.mkdir(directory)
     for name in software_dict:
@@ -210,3 +259,76 @@ def export_software_version_as_files(software_dict, directory="software_versions
             writer.write(yaml.dump(software_dict[name]))
             if notification is not None:
                 writer.write(f"# {notification}")
+
+
+def get_pipeline_version(workflow, pipeline_name='pipeline'):
+    """
+    Will return the pipelines tag name and commit hex.
+
+    Parameters:
+    -----------
+    workflow: object
+        workflow object from snakemake that contain a basedir attribute
+
+    Return
+    ------
+    dict with pipeline version and commit, ex {'pipeline_name': {'version': 'v1', 'pipeline_commit': 'achgk2...kacaa'}}
+    """
+    def _find_root_repo(path):
+        if path is None:
+            return None
+        elif os.path.isdir(str(os.path.join(str(path), ".git"))):
+            return path
+        else:
+            return _find_root_repo(os.path.dirname(path))
+    repo_path = _find_root_repo(getattr(workflow, 'basedir'))
+
+    # Initialize a Git repo object
+    repo = git.Repo(repo_path)
+
+    # Get the currently checked out commit
+    head_commit = repo.head.commit
+
+    # Iterate through all tags and find the one pointing to the HEAD commit
+    pipeline_version = None
+    for tag in repo.tags:
+        if tag.commit == head_commit:
+            pipeline_version = tag.name
+            break
+    if pipeline_version is None:
+        try:
+            pipeline_version = repo.active_branch
+        except TypeError as e:
+            logger = logging.getLogger(__name__)
+            logger.warning("Unable to get version (from tags) or an active_branch")
+
+    return {pipeline_name: {'version': str(pipeline_version), 'commit_id': str(head_commit)}}
+
+
+def export_pipeline_version_as_file(pipeline_version_dict,
+                                    directory="software_versions",
+                                    file_name_ending="mqv_versions.yaml",
+                                    date_string=None):
+    """
+    Print pipeline version to a file. Requires a dict with key pipeline_info which
+    should contain a dict with software names and versions.
+
+    Parameters:
+    -----------
+    pipeline_version_dict: dict
+       dict with key pipeline_version_dict, ex {pipeline_name: {'version': '1.3', 'commit_id': 'ac8ac8t73'}}
+    directory: str
+       path where files will be written
+    file_name_ending: str
+       a string that will be combined with the software name version key
+    date_string: str
+       a string that will be added to the folder name to make it unique
+    """
+    if date_string is None:
+        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+    directory = f"{directory}_{date_string}"
+    if not os.path.isdir(directory):
+        os.mkdir(directory)
+    for pipeline_name in pipeline_version_dict:
+        with open(os.path.join(directory, f"{pipeline_name}_{file_name_ending}"), 'w') as writer:
+            writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]['version']}))

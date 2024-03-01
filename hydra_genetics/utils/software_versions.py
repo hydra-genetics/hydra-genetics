@@ -351,11 +351,11 @@ def touch_software_version_files(config, directory="versions/software", file_nam
         directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
-        output_file_list = []
+    output_file_list = []
     for name in _create_name_list(config, []):
         output_file = os.path.join(directory, f"{name}_{file_name_ending}")
         output_file_list.append(output_file)
-    _touch(output_file)
+        _touch(output_file)
     return output_file_list
 
 
@@ -475,5 +475,5 @@ def touch_pipeline_verion_file_name(pipeline_version_dict,
         output_file = os.path.join(directory,
                                    f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}")
         output_file_list.append(output_file)
-    _touch(output_file)
+        _touch(output_file)
     return output_file_list

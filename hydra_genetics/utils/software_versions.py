@@ -256,7 +256,7 @@ def touch_software_version_files(config, directory="versions/software", file_nam
         return name_list
   
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+        date_string = datetime.now().strftime('%Y%m%d')
         if directory is not None and len(directory) > 0:
             date_string = f"_{date_string}"
             directory = f"{directory}{date_string}"
@@ -287,7 +287,7 @@ def export_software_version_as_files(software_dict, directory="versions/software
        a string that will be added to the folder name to make it unique
     """
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+        date_string = datetime.now().strftime('%Y%m%d')
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
     directory = f"{directory}{date_string}"
@@ -340,7 +340,7 @@ def touch_software_version_files(config, directory="versions/software", file_nam
         return name_list
 
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+        date_string = datetime.now().strftime('%Y%m%d')
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
         directory = f"{directory}{date_string}"
@@ -418,7 +418,7 @@ def export_pipeline_version_as_file(pipeline_version_dict,
        a string that will be added to the folder name to make it unique
     """
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+        date_string = datetime.now().strftime('%Y%m%d')
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
     directory = f"{directory}{date_string}"

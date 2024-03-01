@@ -75,10 +75,10 @@ To log the versions of the software used during the analysis of the samples, mul
 from datetime import datetime
 from hydra_genetics.utils.misc import export_config_as_file
 from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
-from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
-from hydra_genetics.utils.software_versions import get_pipeline_version
 from hydra_genetics.utils.software_versions import add_software_version_to_config
+from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
 from hydra_genetics.utils.software_versions import export_software_version_as_files
+from hydra_genetics.utils.software_versions import get_pipeline_version
 
 
 date_string = datetime.now().strftime('%Y%m%d')
@@ -122,8 +122,14 @@ dict has been made, i.e after resources have been added and after software versi
 **Code**
 ```python
 from hydra_genetics.utils.misc import export_config_as_file
+from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 
 date_string = datetime.now().strftime('%Y%m%d')
+
+if use_container(workflow):
+    version_files = touch_software_version_files(config, date_string=date_string, directory="results/versions/software_version")
+    add_version_files_to_multiqc(config, version_files)
+
 # print config dict as a file. Additional parameters that can be set
 # output_file, default config
 # output_directory, default = None, i.e no folder

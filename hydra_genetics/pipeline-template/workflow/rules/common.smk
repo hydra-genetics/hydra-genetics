@@ -17,6 +17,7 @@ from hydra_genetics.utils.samples import *
 from hydra_genetics.utils.units import *
 
 from hydra_genetics.utils.misc import export_config_as_file
+from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import add_software_version_to_config
 from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
 from hydra_genetics.utils.software_versions import export_software_version_as_files
@@ -49,15 +50,14 @@ except WorkflowError as we:
         schema_section = ".".join(re.findall(r"\['([^']+)'\]", schema_hiearachy)[1::2])
         sys.exit(f"{error_msg} in {schema_section}")
 
+date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+pipeline_version = get_pipeline_version(workflow, pipeline_name="{{ short_name }}")
 version_files = touch_pipeline_verion_file_name(pipeline_version, date_string=date_string, directory="results/versions/software_version")
 if use_container(workflow):
     version_files += touch_software_version_files(config, date_string=date_string, directory="results/versions/software_version")
-
-add_version_files_to_multiqc(config, version_files)
+    add_version_files_to_multiqc(config, version_files)
 
 onstart:
-    date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
-    pipeline_version = get_pipeline_version(workflow, pipeline_name="{{ short_name }}")
     export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/software_version")
     # Make sure that the user have the requested containers to be used
     if use_container(workflow):
@@ -69,11 +69,11 @@ onstart:
         # - file_name_ending, default value: mqv_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
         export_software_version_as_files(software_info, date_string=date_string, directory="results/versions/software_version")
-        # print config dict as a file. Additional parameters that can be set
-        # output_file, default config
-        # output_directory, default = None, i.e no folder
-        # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_config_as_file(update_config, date_string=date_string, directory="results/versions")
+    # print config dict as a file. Additional parameters that can be set
+    # output_file, default config
+    # output_directory, default = None, i.e no folder
+    # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
+    export_config_as_file(update_config, date_string=date_string, directory="results/versions")
 
 ### Read and validate resources file
 

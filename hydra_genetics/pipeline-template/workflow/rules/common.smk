@@ -66,7 +66,7 @@ onstart:
         update_config, software_info = add_software_version_to_config(config, workflow, False)
         # Print all softwares used as files. Additional parameters that can be set
         # - directory, default value: software_versions
-        # - file_name_ending, default value: mqv_versions.yaml
+        # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
         export_software_version_as_files(software_info, date_string=date_string, directory="results/versions/software_version")
     # print config dict as a file. Additional parameters that can be set

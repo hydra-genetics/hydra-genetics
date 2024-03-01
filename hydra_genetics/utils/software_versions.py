@@ -10,6 +10,11 @@ from datetime import datetime
 from snakemake.common import is_local_file
 
 
+def add_version_files_to_multiqc(config, file_list):
+    for report in config['multiqc']['reports']:
+        config['multiqc']['reports'][report]['qc_files'] += file_list
+
+
 def _touch(fname):
     if os.path.exists(fname):
         os.utime(fname, None)

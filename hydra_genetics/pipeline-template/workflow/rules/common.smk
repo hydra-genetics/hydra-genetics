@@ -8,12 +8,23 @@ import numpy as np
 import pathlib
 import pandas as pd
 import yaml
+from datetime import datetime
 from snakemake.utils import validate
 from snakemake.utils import min_version
 
 from hydra_genetics.utils.resources import load_resources
 from hydra_genetics.utils.samples import *
 from hydra_genetics.utils.units import *
+
+from hydra_genetics.utils.misc import export_config_as_file
+from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
+from hydra_genetics.utils.software_versions import add_software_version_to_config
+from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
+from hydra_genetics.utils.software_versions import export_software_version_as_files
+from hydra_genetics.utils.software_versions import get_pipeline_version
+from hydra_genetics.utils.software_versions import touch_pipeline_verion_file_name
+from hydra_genetics.utils.software_versions import touch_software_version_files
+from hydra_genetics.utils.software_versions import use_container
 
 min_version("{{ min_snakemake_version }}")
 
@@ -38,6 +49,31 @@ except WorkflowError as we:
         schema_hiearachy = parent_rule_.split()[-1]
         schema_section = ".".join(re.findall(r"\['([^']+)'\]", schema_hiearachy)[1::2])
         sys.exit(f"{error_msg} in {schema_section}")
+
+date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+pipeline_version = get_pipeline_version(workflow, pipeline_name="{{ short_name }}")
+version_files = touch_pipeline_verion_file_name(pipeline_version, date_string=date_string, directory="results/versions/software_version")
+if use_container(workflow):
+    version_files += touch_software_version_files(config, date_string=date_string, directory="results/versions/software_version")
+    add_version_files_to_multiqc(config, version_files)
+
+onstart:
+    export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/software_version")
+    # Make sure that the user have the requested containers to be used
+    if use_container(workflow):
+        # From the config retrieve all dockers used and parse labels for software versions. Add
+        # this information to config dict.
+        update_config, software_info = add_software_version_to_config(config, workflow, False)
+        # Print all softwares used as files. Additional parameters that can be set
+        # - directory, default value: software_versions
+        # - file_name_ending, default value: mqv_versions.yaml
+        # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
+        export_software_version_as_files(software_info, date_string=date_string, directory="results/versions/software_version")
+    # print config dict as a file. Additional parameters that can be set
+    # output_file, default config
+    # output_directory, default = None, i.e no folder
+    # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
+    export_config_as_file(update_config, date_string=date_string, directory="results/versions")
 
 ### Read and validate resources file
 

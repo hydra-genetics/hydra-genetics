@@ -1,4 +1,4 @@
-In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline. These functions include version checking of Hydra-Genetics, helper functions for module importation, and more.
+In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline, which should be put in `workflow/rules/common.smk`. These functions include version checking of Hydra-Genetics, helper functions for module importation, and more.
 
 # Version handling
 ## Version checking
@@ -24,8 +24,11 @@ The function `export_pipeline_version_as_file` can later be used to print the in
 
 **Code**
 ```python
+from datetime import datetime
+from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
 from hydra_genetics.utils.software_versions import get_pipeline_version
+from hydra_genetics.utils.software_versions import touch_pipeline_verion_file_name
 
 # default value for pipeline_name is 'pipeline'
 pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
@@ -38,11 +41,20 @@ pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
     }
 }
 
-# Additional variables that can be set
-# - directory, default value: software_versions
-# - file_name_ending, default value: mqv_versions.yaml
-# date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-export_pipeline_version_as_file(pipeline_version, date_string=date_string)
+date_string = datetime.now().strftime('%Y%m%d')
+# This will create a (empty) version file that can be defined as input to
+# multiqc, will be populated with version during onstart (before the pipeline starts)
+version_files = touch_pipeline_verion_file_name(pipeline_version, date_string=date_string)
+add_version_files_to_multiqc(config, version_files)
+
+# onstart will also prevent the functions from
+# running twice.
+onstart:
+    # Additional variables that can be set
+    # - directory, default value: versions/software
+    # - file_name_ending, default value: mqv_versions.yaml
+    # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
+    export_pipeline_version_as_file(pipeline_version, date_string=date_string)
 ```
 
 **Folder and file structure**
@@ -50,45 +62,81 @@ export_pipeline_version_as_file(pipeline_version, date_string=date_string)
 Example:
 
 ```bash
-software_versions__20210403--14-00-21/
-|--Twist_Solid_mqv_versions.yaml
+versions/softwares__20210403/
+|--Twist_Solid_mqc_versions.yaml
 
 ```
-
 
 ### Tool versions
 To log the versions of the software used during the analysis of the samples, multiple functions exist to help with this task.
 
 **Code**
 ```python
+from datetime import datetime
 from hydra_genetics.utils.misc import export_config_as_file
-from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
-from hydra_genetics.utils.software_versions import get_pipeline_version
+from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import add_software_version_to_config
+from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
 from hydra_genetics.utils.software_versions import export_software_version_as_files
+from hydra_genetics.utils.software_versions import get_pipeline_version
+
+
+date_string = datetime.now().strftime('%Y%m%d')
+# This will create a (empty) version files that can be defined as input to
+# multiqc, will be populated with version during onstart (before the pipeline starts)
+if use_container(workflow):
+    version_files = touch_software_version_files(config, date_string=date_string, directory="results/versions/software_version")
+    add_version_files_to_multiqc(config, version_files)
 
 # Use onstart to make sure that containers have been downloaded
-# before extracting versions
-onstart:
+# before extracting versions. This will also prevent the functions from
+# running twice.
+onstart:   
     # Make sure that the user have the requested containers to be used
     if use_container(workflow):
-        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
         # From the config retrieve all dockers used and parse labels for software versions. Add
         # this information to config dict.
         update_config, software_info = add_software_version_to_config(config, workflow, False)
         # Print all softwares used as files. Additional parameters that can be set
-        # - directory, default value: software_versions
-        # - file_name_ending, default value: mqv_versions.yaml
+        # - directory, default value: versions/software
+        # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_software_version_as_files(software_info, date_string=date_string)
-        
-        # print config dict as a file. Additional parameters that can be set
-        # output_file, default config
-        # output_directory, default = None, i.e no folder
-        # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_config_as_file(update_config, date_string=date_string)
+        export_software_version_as_files(software_info, date_string=date_string)       
 ```
 
+**Folder and file structure**
+
+Example output
+
+```bash
+# Softwares
+versions/software__20210403/
+|--bwa_mem__0.7.17_mqc_versions.yaml
+|--CONTAINERNAME__VERSION_mqc_versions.yaml
+```
+
+### Config versions
+Print whole config used during analysis. NOTE: use the function when all modifications to the config
+dict has been made, i.e after resources have been added and after software version have been added.
+
+**Code**
+```python
+from hydra_genetics.utils.misc import export_config_as_file
+from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
+
+date_string = datetime.now().strftime('%Y%m%d')
+
+if use_container(workflow):
+    version_files = touch_software_version_files(config, date_string=date_string, directory="results/versions/software_version")
+    add_version_files_to_multiqc(config, version_files)
+
+# print config dict as a file. Additional parameters that can be set
+# output_file, default config
+# output_directory, default = None, i.e no folder
+# date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
+export_config_as_file(update_config, date_string=date_string)
+
+```
 
 **Folder and file structure**
 
@@ -96,11 +144,7 @@ Example output
 
 ```bash
 # Config file
-config__20210403--14-00-21.yaml
-# Softwares
-software_versions__20210403--14-00-21/
-|--bwa_mem__0.7.17_mqv_versions.yaml
-|--CONTAINERNAME__VERSION_mqv_versions.yaml
+versions/config__20210403.yaml
 ```
 
 # Variable usage in config

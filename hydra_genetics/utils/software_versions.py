@@ -259,7 +259,7 @@ def touch_software_version_files(config, directory="versions/software", file_nam
             elif key in ["container", "default_container"]:
                 name_list.append(_create_container_name_version_string(value))
         return name_list
-  
+
     if date_string is None:
         date_string = datetime.now().strftime('%Y%m%d')
         if directory is not None and len(directory) > 0:
@@ -317,7 +317,7 @@ def touch_software_version_files(config, directory="versions/software", file_nam
     and therefor we can not use export_software_version_as_files to directly create the actual version files.
     This function will create all files (empty) that export_software_version_as_files will create.
     NOTE: you need to have the same parameter as with export_software_version_as_files
-    
+
     Parameters:
     -----------
     software_dict: dict
@@ -446,9 +446,9 @@ def touch_pipeline_verion_file_name(pipeline_version_dict,
     """
     Function used to create empty version file for pipeline version. This
     function is a bit redundant and export_pipeline_version_as_file could be used,
-    since this function isn't dependent on singularity images which 
+    since this function isn't dependent on singularity images which
     export_software_version_as_files is. But the function exist to have a similar workflow
-    for both pipeline and software. NOTE: you need to have same parameters into 
+    for both pipeline and software. NOTE: you need to have same parameters into
     touch_pipeline_verion_file_name as to export_pipeline_version_as_file.
 
     Parameters:
@@ -469,7 +469,7 @@ def touch_pipeline_verion_file_name(pipeline_version_dict,
     directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
-  
+
     output_file_list = []
     for pipeline_name in pipeline_version_dict:
         output_file = os.path.join(directory,

@@ -62,7 +62,7 @@ Example:
 
 ```bash
 versions/softwares__20210403/
-|--Twist_Solid_mqv_versions.yaml
+|--Twist_Solid_mqc_versions.yaml
 
 ```
 

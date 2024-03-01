@@ -24,6 +24,7 @@ The function `export_pipeline_version_as_file` can later be used to print the in
 
 **Code**
 ```python
+from datetime import datetime
 from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
 from hydra_genetics.utils.software_versions import get_pipeline_version
@@ -71,6 +72,7 @@ To log the versions of the software used during the analysis of the samples, mul
 
 **Code**
 ```python
+from datetime import datetime
 from hydra_genetics.utils.misc import export_config_as_file
 from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import export_pipeline_version_as_file

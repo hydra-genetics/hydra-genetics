@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.14.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.13.0...v1.14.0) (2024-03-01)
+
+
+### Features
+
+* add touch functions for version files ([07e190b](https://www.github.com/hydra-genetics/hydra-genetics/commit/07e190bc78aeefc2d99284a872c445c9918ead78))
+
+
+### Bug Fixes
+
+* change mkdir to makedirs  ([d252b76](https://www.github.com/hydra-genetics/hydra-genetics/commit/d252b7610d0517275b59c46a4a6ddee77b7d17cd))
+* minor update to output filename for pipeline version ([a4d3475](https://www.github.com/hydra-genetics/hydra-genetics/commit/a4d347598865e2139d70155eb65c8326c9a014d9))
+
+
+### Documentation
+
+* add missing variable to example ([5762058](https://www.github.com/hydra-genetics/hydra-genetics/commit/57620587e8701676373f90c63cdec2f555d3476a))
+* change filename ([f3a28a1](https://www.github.com/hydra-genetics/hydra-genetics/commit/f3a28a1a89f43dbf9bc5020de2c093b94a855543))
+
 ## [1.13.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.12.0...v1.13.0) (2024-02-29)
 
 

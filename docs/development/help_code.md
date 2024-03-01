@@ -73,12 +73,11 @@ To log the versions of the software used during the analysis of the samples, mul
 **Code**
 ```python
 from datetime import datetime
-from hydra_genetics.utils.misc import export_config_as_file
 from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import add_software_version_to_config
-from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
 from hydra_genetics.utils.software_versions import export_software_version_as_files
-from hydra_genetics.utils.software_versions import get_pipeline_version
+from hydra_genetics.utils.software_versions import use_container
+from hydra_genetics.utils.software_versions import touch_software_version_files
 
 
 date_string = datetime.now().strftime('%Y%m%d')

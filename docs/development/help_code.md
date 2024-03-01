@@ -52,7 +52,7 @@ add_version_files_to_multiqc(config, version_files)
 onstart:
     # Additional variables that can be set
     # - directory, default value: versions/software
-    # - file_name_ending, default value: mqv_versions.yaml
+    # - file_name_ending, default value: mqc_versions.yaml
     # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
     export_pipeline_version_as_file(pipeline_version, date_string=date_string)
 ```

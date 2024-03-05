@@ -13,6 +13,8 @@ import json
 import pathlib
 import os
 import re
+import pandas as pd
+import pysam
 import shutil
 import sys
 import hydra_genetics
@@ -473,15 +475,6 @@ class CreateInputFiles(object):
                                                                               'machine': machine_id,
                                                                               'barcode': barcode}}}}
 
-        def extract_value(field, default, data):
-            head, *tail = field
-            if head not in data:
-                return default
-            if tail:
-                return extract_value(tail, default, data[head])
-            else:
-                return data[head]
-
         samples_file_name = "samples.tsv"
         if self.post_file_modifier is not None:
             samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
@@ -571,6 +564,322 @@ class CreateInputFiles(object):
                                                          str(data['reads']["1"]),
                                                          str(data['reads']["2"]),
                                                          s_adapters] + extra_data))
+
+
+class CreateLongReadInputFiles(object):
+    """Creates a hydra-genetics input files samples.tsv and units.tsv from
+    unmapped BAM files containing long read sequence data.
+    Args:
+        directories (str): Path to dir that should be search.
+        outdir (str): Path to the local output directory.
+    """
+    def __init__(self,
+                 directory,
+                 outdir=None,
+                 post_file_modifier=None,
+                 platform="ONT",
+                 sample_type="N",
+                 adapters=None,
+                 data_json=None,
+                 data_columns=None,
+                 tc=None,
+                 force=False,
+                 default_barcode=None):
+        self.directory = directory
+        self.outdir = outdir
+        self.post_file_modifier = post_file_modifier
+        self.platform = platform
+        self.sample_type = sample_type
+        self.adapters = adapters
+        self.data_json = data_json
+        self.data_columns = data_columns
+        self.tc = tc
+        self.force = force
+        self.default_barcode = default_barcode
+
+        if not self.outdir:
+            self.outdir = os.getcwd()
+
+    def init(self):
+        """Creates the hydra_genetics input files."""
+        log.info("Searching for BAM-files:")
+        data_json = {}
+        data_columns = {}
+        if self.data_json and self.data_columns:
+            data_json = json.load(open(self.data_json))
+            data_columns = json.load(open(self.data_columns))
+            if 'units' in data_columns:
+                data_columns['units'] = dict(map(lambda v: (v.split(":")[0].split(".")[-1],
+                                                            (v.split(":")[1], v.split(":")[0].split("."))),
+                                                 data_columns['units']))
+            if 'samples' in data_columns:
+                data_columns['samples'] = dict(map(lambda v: (v.split(":")[0].split(".")[-1],
+                                                              (v.split(":")[1], v.split(":")[0].split('.'))),
+                                                   data_columns['samples']))
+        elif self.data_json or self.data_columns:
+            log.error("Both --data-json and --data-columns need to be "
+                      "specified at the same time, not only one of them.")
+
+        sample_type = self.sample_type
+        platform = self.platform
+        adapters = self.adapters
+        units_dict = {"sample": [], "type": [], "platform": [], "machine": [],
+                      "flowcell": [], "barcode": [], "methylation": [],
+                      "bam": []}
+        
+        if adapters is not None:
+            units_dict["adapter"] = []
+
+        file_list = []
+        for d in self.directory:
+            dir_files_found = 0
+            log.info(f"Dir: {d}")
+            for f in glob.glob(f"{d}/**/*.bam", recursive=True):
+                file_list.append(f)
+                dir_files_found += 1
+                log.info(f"    found: {f}")
+            if dir_files_found == 0:
+                log.warning(f"No BAM files found in '{d}' ")
+                exit(1)
+            else:
+                log.info(f"{dir_files_found} BAM files found")
+
+        log.info("Processing found BAM files, extracting run information:")
+        for bam_file in file_list:
+            log.info(f"\t - {bam_file} for run information")
+            rg_dict = extract_bam_information(bam_file, self.default_barcode,
+                                              platform)
+            sample = rg_dict["sample"]
+            units_dict["sample"].append(sample)
+            if data_json and 'units' in data_columns:
+                extra_columns = list(data_columns['units'].keys())
+                if "platform" in extra_columns:
+                    value = data_columns['units']['platform']
+                    platform = extract_value(value[1][2:], value[0],
+                                             data_json['samples'][sample])
+                    units_dict["platform"].append(platform)
+                else:
+                    units_dict["platform"].append(platform)
+                if "type" in extra_columns:
+                    value = data_columns['units']['type']
+                    units_dict["type"] = extract_value(
+                        value[1][2:], value[0], data_json['samples'][sample])
+                else:
+                    units_dict["type"].append(sample_type)
+                if "adapters" in extra_columns:
+                    value = data_columns['units']['adapter']
+                    units_dict["adapter"] = extract_value(
+                        value[1][2:], value[0], data_json['samples'][sample])
+                else:
+                    if adapters is not None:
+                        units_dict["adapter"].append(adapters)
+            else:
+                units_dict["type"].append(sample_type)
+                units_dict["platform"].append(platform)
+                if adapters is not None:
+                    units_dict["adapter"].append(adapters)
+
+            units_dict["machine"].append(rg_dict["machine"])
+            units_dict["flowcell"].append(rg_dict["flowcell"])
+            units_dict["barcode"].append(rg_dict["barcode"])
+            units_dict["bam"].append(bam_file)
+            units_dict["methylation"].append(rg_dict["methylation"])
+
+            if adapters is not None:
+                units_dict["adapter"].append(self.adapters)
+            elif data_json and 'units' in data_columns:
+                extra_columns = list(data_columns['units'].keys())
+
+            if platform == 'ONT':
+                if "basecalling_model" not in units_dict.keys():
+                    units_dict["basecalling_model"] = []
+                    units_dict["run_id"] = []
+
+                units_dict["basecalling_model"].append(rg_dict["basecalling_model"])
+                units_dict["run_id"].append(rg_dict["run_id"])
+
+        units_df = pd.DataFrame(units_dict)
+
+        # Check for duplicated rows which indicate bam files with the same read group info
+        # This triggers a warning that these bam files with the same could be merged
+        if platform == 'ONT':
+            cols_to_check = ["sample", "type", "run_id", "platform", "machine",
+                             "flowcell", "barcode"]
+        else:
+            cols_to_check = ["sample", "type", "platform", "machine",
+                             "flowcell", "barcode"]
+        if units_df[cols_to_check].duplicated().sum() > 1:
+            log.warning("The RG information is the same in multiple BAM files."
+                        "Consider merging bam files with the same read groups")
+
+        samples_file_name = "samples.tsv"
+        if self.post_file_modifier is not None:
+            samples_file_name = "samples_{}.tsv".format(
+                self.post_file_modifier)
+        if os.path.isfile(samples_file_name):
+            if not self.force:
+                log.warning("File exists {} and force wasn't used".format(
+                    samples_file_name))
+                exit(1)
+            else:
+                log.warning("File exists {} overwriting!!!".format(
+                    samples_file_name))
+        samples_series = units_df["sample"].drop_duplicates()
+        samples_df = pd.DataFrame(samples_series)
+
+        if data_columns and "samples" in data_columns:
+            extra_cols_header = ["sample"] + \
+                list(data_columns["samples"].keys())
+        elif self.tc is not None:
+            samples_df.insert(1, "tumor_content",
+                              [self.tc] * samples_df.shape[0])
+
+        all_rows = []
+        for sample in samples_series:
+            row_data = [sample]
+            for _, value in data_columns['samples'].items():
+                row_data.append(extract_value(value[1][2:], value[0],
+                                              data_json['samples'][sample]))
+            all_rows.append(row_data)
+
+        extra_cols_df = pd.DataFrame(all_rows, columns=extra_cols_header)
+        samples_df = pd.merge(samples_df, extra_cols_df, on="sample",
+                              validate="one_to_one")
+        samples_df.sort_values(by="sample", inplace=True)
+        samples_df.to_csv(samples_file_name, index=False, sep='\t')
+
+        units_file_name = "units.tsv"
+        if self.post_file_modifier is not None:
+            units_file_name = "units_{}.tsv".format(self.post_file_modifier)
+        if os.path.isfile(units_file_name):
+            if not self.force:
+                log.warning("File exists {} and force wasn't used".format(units_file_name))
+                exit(1)
+            else:
+                log.warning("File exists {} overwriting!!!".format(units_file_name))
+
+        if platform == "ONT":
+            col_order = ["sample", "type", "platform", "machine", "flowcell",
+                         "run_id", "barcode", "methylation", 
+                         "basecalling_model", "bam"]
+            units_df = units_df[col_order]
+
+        extra_header_columns = []
+        if data_columns and 'units' in data_columns:
+            extra_header_columns = list(data_columns['units'].keys())
+            if 'type' in extra_header_columns:
+                extra_header_columns.remove("type")
+            if 'platform' in extra_header_columns:
+                extra_header_columns.remove("platform")
+            if 'adapter' in extra_header_columns:
+                extra_header_columns.remove("adapter")
+
+        if len(extra_header_columns) > 0:
+            extra_units_cols_header = ["sample"] + extra_header_columns
+            extra_cols = []
+            extra_columns = list(data_columns['units'].keys())
+            for sample in samples_series:
+                extra_data = []
+                for column in extra_columns:
+                    value = data_columns['units'][column]
+                    extra_data.append(extract_value(value[1][2:], value[0], data_json['samples'][sample]))
+                extra_cols.append(extra_data)
+
+            extra_unit_cols_df = pd.DataFrame(extra_cols, columns=extra_units_cols_header)
+            units_df = pd.merge(units_df, extra_unit_cols_df, on="sample", validate="one_to_one")
+
+        units_df.sort_values(by="sample", inplace=True)
+        units_df.to_csv(units_file_name, index=False, sep='\t')
+
+
+def extract_value(field, default, data):
+    head, *tail = field
+    if head not in data:
+        return default
+    if tail:
+        return extract_value(tail, default, data[head])
+    else:
+        return data[head]
+
+
+def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
+
+    """
+    extract read group information and check for methylation tags
+    in the provided BAM file.
+
+    :param file_path: path to BAM file
+    :type file_path: string
+    :param default_barcode: barcode string used when a barcode can not 
+    be extracted
+    :type default_barcode: string
+    :param: platform: specifies which sequencing platform this is
+    :type platform: string
+
+    :return: dictionary with keys sample_id, machine_id, flowcell_id barcode 
+    Additional basecalling_model and run_id when platform is ONT
+    :rtype: dict
+    """
+
+    bam = pysam.AlignmentFile(file_path, "rb", check_sq=False)
+    header_dict = bam.header.to_dict()
+    read_group = header_dict["RG"]
+    read_group_num = len(read_group)  # check for for more than one read group in the bam header
+    if read_group_num > 1: 
+        log.warning(f"{read_group_num} read groups found in uBAM {file_path}."
+                    "Choosing the first read group for the units.tsv file")
+
+    read_group_dict = read_group[0]
+
+    bam_platform = read_group_dict["PL"]
+    if bam_platform != platform:
+        log.error(f"The platform specified in the BAM file is not {platform}!")
+        exit(1)
+
+    flowcell = read_group_dict["PU"]
+
+    try:  # PM tag not in some older pacbio BAM files
+        machine_id = read_group_dict["PM"]
+    except KeyError:
+        machine_id = "NA"
+
+    read_group_description = {}
+    for desc in read_group_dict['DS'].split(' '):
+        desc_fields = desc.split("=")
+        read_group_description[desc_fields[0]] = desc_fields[1]
+
+    if platform == "ONT":
+        basecall_model = read_group_description["basecall_model"]
+        run_id = read_group_description["runid"]
+
+    try:
+        barcode = read_group_dict["BC"]
+    except KeyError:
+        barcode = default_barcode
+
+    # some ONT bam have only LB and it is the sample id.
+    try:
+        sample_id = read_group_dict["SM"]
+    except KeyError:
+        sample_id = read_group_dict["LB"]
+
+    # check first read for methylation tags
+    first_read = bam.head(1)
+    for read in first_read:
+        if read.has_tag('MM') and read.has_tag('ML'):
+            methylation_tags = 'Yes'
+        else:
+            methylation_tags = 'No'
+
+    rg_dict = {"sample": sample_id, "machine": machine_id,
+               "flowcell": flowcell, "barcode": barcode,
+               "methylation": methylation_tags}
+
+    if platform == "ONT":
+        rg_dict["basecalling_model"] = basecall_model
+        rg_dict["run_id"] = run_id
+
+    return rg_dict
 
 
 def extract_run_information(file_path, default_barcode=None, number_of_reads=200, every_n_reads=1000, warning_threshold=0.9,

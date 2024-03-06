@@ -174,6 +174,13 @@ def create_rule(command, tool, module, author, email, outdir):
     rule.init_rule()
 
 
+def default_adapter(platform):
+    if platform not in ['PACBIO', 'ONT']:
+        return "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+    else:
+        return None
+
+
 @cli.command(short_help="create input-files, samples.tsv and units.tsv", context_settings={'show_default': True})
 @click.option(
     "-d",
@@ -182,7 +189,8 @@ def create_rule(command, tool, module, author, email, outdir):
     prompt="directory/directories",
     required=True,
     type=str,
-    help="path to dir where fastq-files should be looked for.")
+    help="path to dir where fastq-files should be looked for when platform is Illumina."
+    "Path to unmapped BAM files when platform is ONT or PACBIO")
 @click.option(
         "-o",
         "--outdir",
@@ -192,7 +200,7 @@ def create_rule(command, tool, module, author, email, outdir):
         "-p",
         "--platform",
         type=str,
-        help="Sequence platform that the data originate from, ex nextseq, miseq. Default Illumina",
+        help="Sequence platform that the data originate from, ex nextseq, miseq, PACBIO, ONT. Default Illumina",
         default="Illumina")
 @click.option(
         "-t",
@@ -217,7 +225,7 @@ def create_rule(command, tool, module, author, email, outdir):
         "--adapters",
         type=str,
         help="adapter sequence, comma sepearated",
-        default="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT")
+        default=lambda: default_adapter(click.get_current_context().params.get("platform", 'Illumina')))
 @click.option(
         "--post-file-modifier",
         type=str,
@@ -237,7 +245,7 @@ def create_rule(command, tool, module, author, email, outdir):
         default=None)
 @click.option(
         "--tc",
-        help="tumor contet",
+        help="tumor content",
         type=float,
         default=None)
 @click.option(

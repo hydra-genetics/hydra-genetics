@@ -287,7 +287,7 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
                        sample_regex, read_number_regex, adapters, data_json, data_columns,
                        tc, force, default_barcode, validate, ask, th, nreads, every):
     if platform in ['PACBIO', 'ONT']:
-        input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform,sample_type,
+        input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
                                                adapters, data_json, data_columns, tc, force, default_barcode)
     else:
         input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,

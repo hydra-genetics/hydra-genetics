@@ -199,9 +199,10 @@ def default_adapter(platform):
 @click.option(
         "-p",
         "--platform",
+        required=True,
         type=str,
-        help="Sequence platform that the data originate from, ex nextseq, miseq, PACBIO, ONT. Default Illumina",
-        default="Illumina")
+        help="Sequence platform that the data originate from, e.g., nextseq, miseq, Illumina."
+        "For long read it needs to be PACBIO or ONT.")
 @click.option(
         "-t",
         "--sample-type",
@@ -282,7 +283,6 @@ def default_adapter(platform):
         help="select every N reads for validation.",
         type=int,
         default=1000)
-
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
                        sample_regex, read_number_regex, adapters, data_json, data_columns,
                        tc, force, default_barcode, validate, ask, th, nreads, every):

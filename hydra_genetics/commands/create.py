@@ -788,7 +788,7 @@ class CreateLongReadInputFiles(object):
             units_df = pd.merge(units_df, extra_unit_cols_df, on="sample", validate="one_to_one")
 
         units_df.sort_values(by="sample", inplace=True)
-        units_df.to_csv(units_file_name, index=False, sep='\t')
+        units_df.to_csv(units_file_name, index=False, sep='\t', na_rep='NA')
 
 
 def extract_value(field, default, data):

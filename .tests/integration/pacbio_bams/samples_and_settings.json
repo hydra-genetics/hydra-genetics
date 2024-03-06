@@ -1,0 +1,43 @@
+{
+    "samples": {
+        "HG002": {
+            "analysis_name": "pacbio_trio_example",
+            "analysis": "HG_hifi",
+            "workpackage": "WP3",
+            "settings": {
+                "trio": "Trio1",
+                "trio_member": "proband",
+                "sex": "male",
+                "cgu-project": "NA",
+                "fragestallning": "NA"
+            }
+        },
+        "HG003": {
+            "analysis_name": "pacbio_trio_example",
+            "analysis": "HG_hifi",
+            "workpackage": "WP3",
+            "settings": {
+                "trio": "Trio1",
+                "trio_member": "father",
+                "sex": "male",
+                "cgu-project": "NA",
+                "fragestallning": "NA"
+            }
+        },
+        "HG004": {
+            "analysis_name": "pacbio_trio_example",
+            "analysis": "HG_hifi",
+            "workpackage": "WP3",
+            "settings": {
+                "trio": "Trio1",
+                "trio_member": "mother",
+                "sex": "female",
+                "cgu-project": "NA",
+                "fragestallning": "NA"
+            }
+        }
+    },
+    "analysis_name": "pacbio_trio_example",
+    "analysis": "HG_hifi",
+    "workpackage": "WP3"
+}

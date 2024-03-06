@@ -1,0 +1,12 @@
+{
+  "samples": [
+    "samples.{SAMPLE}.settings.trio:NA",
+    "samples.{SAMPLE}.settings.trio_member:NA",
+    "samples.{SAMPLE}.settings.sex:NA"
+  ],
+  "units": [
+    "samples.{SAMPLE}.settings.type:N",
+    "samples.{SAMPLE}.settings.platform:PACBIO"
+  ]
+}
+

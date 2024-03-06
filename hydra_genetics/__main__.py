@@ -8,7 +8,7 @@ import sys
 import hydra_genetics.utils
 from hydra_genetics.commands.prep_pipeline_env import environment
 from hydra_genetics.commands.references import references
-from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles
+from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles, CreateLongReadInputFiles
 import rich.console
 import rich.logging
 import rich.traceback
@@ -274,10 +274,15 @@ def create_rule(command, tool, module, author, email, outdir):
         help="select every N reads for validation.",
         type=int,
         default=1000)
+
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
                        sample_regex, read_number_regex, adapters, data_json, data_columns,
                        tc, force, default_barcode, validate, ask, th, nreads, every):
-    input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
+    if platform in ['PACBIO', 'ONT']:
+        input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform,sample_type,
+                                              adapters, data_json, data_columns, tc, force, default_barcode)
+    else:
+        input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
                                    sample_regex, read_number_regex, adapters, data_json, data_columns,
                                    tc, force, default_barcode, validate, ask, th,
                                    nreads, every)

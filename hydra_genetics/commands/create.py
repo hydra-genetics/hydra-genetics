@@ -737,12 +737,12 @@ class CreateLongReadInputFiles(object):
                 row_data = [sample]
                 for _, value in data_columns['samples'].items():
                     row_data.append(extract_value(value[1][2:], value[0],
-                                                data_json['samples'][sample]))
+                                                  data_json['samples'][sample]))
                 all_rows.append(row_data)
 
             extra_cols_df = pd.DataFrame(all_rows, columns=extra_cols_header)
             samples_df = pd.merge(samples_df, extra_cols_df, on="sample",
-                                validate="one_to_one")
+                                  validate="one_to_one")
 
         samples_df.sort_values(by="sample", inplace=True)
         samples_df.to_csv(samples_file_name, index=False, sep='\t')
@@ -759,7 +759,7 @@ class CreateLongReadInputFiles(object):
 
         if platform == "ONT":
             col_order = ["sample", "type", "platform", "machine", "flowcell",
-                         "run_id", "barcode", "methylation", 
+                         "run_id", "barcode", "methylation",
                          "basecalling_model", "bam"]
             units_df = units_df[col_order]
 
@@ -809,13 +809,13 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
 
     :param file_path: path to BAM file
     :type file_path: string
-    :param default_barcode: barcode string used when a barcode can not 
+    :param default_barcode: barcode string used when a barcode can not
     be extracted
     :type default_barcode: string
     :param: platform: specifies which sequencing platform this is
     :type platform: string
 
-    :return: dictionary with keys sample_id, machine_id, flowcell_id barcode 
+    :return: dictionary with keys sample_id, machine_id, flowcell_id barcode
     Additional basecalling_model and run_id when platform is ONT
     :rtype: dict
     """
@@ -824,7 +824,7 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
     header_dict = bam.header.to_dict()
     read_group = header_dict["RG"]
     read_group_num = len(read_group)  # check for for more than one read group in the bam header
-    if read_group_num > 1: 
+    if read_group_num > 1:
         log.warning(f"{read_group_num} read groups found in uBAM {file_path}."
                     "Choosing the first read group for the units.tsv file")
 

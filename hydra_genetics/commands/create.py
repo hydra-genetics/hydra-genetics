@@ -684,10 +684,8 @@ class CreateLongReadInputFiles(object):
             units_dict["bam"].append(bam_file)
             units_dict["methylation"].append(rg_dict["methylation"])
 
-            if adapters is not None:
-                units_dict["adapter"].append(self.adapters)
-            elif data_json and 'units' in data_columns:
-                extra_columns = list(data_columns['units'].keys())
+            # if data_json and 'units' in data_columns:
+            #     extra_columns = list(data_columns['units'].keys())
 
             if platform == 'ONT':
                 if "basecalling_model" not in units_dict.keys():
@@ -733,17 +731,19 @@ class CreateLongReadInputFiles(object):
             samples_df.insert(1, "tumor_content",
                               [self.tc] * samples_df.shape[0])
 
-        all_rows = []
-        for sample in samples_series:
-            row_data = [sample]
-            for _, value in data_columns['samples'].items():
-                row_data.append(extract_value(value[1][2:], value[0],
-                                              data_json['samples'][sample]))
-            all_rows.append(row_data)
+        if data_columns and "samples" in data_columns:
+            all_rows = []
+            for sample in samples_series:
+                row_data = [sample]
+                for _, value in data_columns['samples'].items():
+                    row_data.append(extract_value(value[1][2:], value[0],
+                                                data_json['samples'][sample]))
+                all_rows.append(row_data)
 
-        extra_cols_df = pd.DataFrame(all_rows, columns=extra_cols_header)
-        samples_df = pd.merge(samples_df, extra_cols_df, on="sample",
-                              validate="one_to_one")
+            extra_cols_df = pd.DataFrame(all_rows, columns=extra_cols_header)
+            samples_df = pd.merge(samples_df, extra_cols_df, on="sample",
+                                validate="one_to_one")
+
         samples_df.sort_values(by="sample", inplace=True)
         samples_df.to_csv(samples_file_name, index=False, sep='\t')
 

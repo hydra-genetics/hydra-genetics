@@ -201,7 +201,7 @@ def default_adapter(platform):
         "--platform",
         required=True,
         type=str,
-        help="Sequence platform that the data originate from, e.g., nextseq, miseq, Illumina."
+        help="Sequence platform that the data originate from, e.g., nextseq, miseq, Illumina. "
         "For long read it needs to be PACBIO or ONT.")
 @click.option(
         "-t",

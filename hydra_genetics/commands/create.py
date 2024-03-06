@@ -624,7 +624,7 @@ class CreateLongReadInputFiles(object):
         platform = self.platform
         adapters = self.adapters
         units_dict = {"sample": [], "type": [], "platform": [], "machine": [],
-                      "flowcell": [], "barcode": [], "methylation": [],
+                      "processing_unit": [], "barcode": [], "methylation": [],
                       "bam": []}
         if adapters is not None:
             units_dict["adapter"] = []
@@ -679,13 +679,10 @@ class CreateLongReadInputFiles(object):
                     units_dict["adapter"].append(adapters)
 
             units_dict["machine"].append(rg_dict["machine"])
-            units_dict["flowcell"].append(rg_dict["flowcell"])
+            units_dict["processing_unit"].append(rg_dict["pu"])
             units_dict["barcode"].append(rg_dict["barcode"])
             units_dict["bam"].append(bam_file)
             units_dict["methylation"].append(rg_dict["methylation"])
-
-            # if data_json and 'units' in data_columns:
-            #     extra_columns = list(data_columns['units'].keys())
 
             if platform == 'ONT':
                 if "basecalling_model" not in units_dict.keys():
@@ -701,10 +698,10 @@ class CreateLongReadInputFiles(object):
         # This triggers a warning that these bam files with the same could be merged
         if platform == 'ONT':
             cols_to_check = ["sample", "type", "run_id", "platform", "machine",
-                             "flowcell", "barcode"]
+                             "processing_unit", "barcode"]
         else:
             cols_to_check = ["sample", "type", "platform", "machine",
-                             "flowcell", "barcode"]
+                             "processing_unit", "barcode"]
         if units_df[cols_to_check].duplicated().sum() > 1:
             log.warning("The RG information is the same in multiple BAM files."
                         "Consider merging bam files with the same read groups")
@@ -758,7 +755,7 @@ class CreateLongReadInputFiles(object):
                 log.warning("File exists {} overwriting!!!".format(units_file_name))
 
         if platform == "ONT":
-            col_order = ["sample", "type", "platform", "machine", "flowcell",
+            col_order = ["sample", "type", "platform", "machine", "processing_unit",
                          "run_id", "barcode", "methylation",
                          "basecalling_model", "bam"]
             units_df = units_df[col_order]
@@ -815,7 +812,7 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
     :param: platform: specifies which sequencing platform this is
     :type platform: string
 
-    :return: dictionary with keys sample_id, machine_id, flowcell_id barcode
+    :return: dictionary with keys sample_id, machine_id, processing_unit_id barcode
     Additional basecalling_model and run_id when platform is ONT
     :rtype: dict
     """
@@ -835,7 +832,7 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
         log.error(f"The platform specified in the BAM file is not {platform}!")
         exit(1)
 
-    flowcell = read_group_dict["PU"]
+    pu = read_group_dict["PU"]
 
     try:  # PM tag not in some older pacbio BAM files
         machine_id = read_group_dict["PM"]
@@ -871,7 +868,7 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
             methylation_tags = 'No'
 
     rg_dict = {"sample": sample_id, "machine": machine_id,
-               "flowcell": flowcell, "barcode": barcode,
+               "pu": pu, "barcode": barcode,
                "methylation": methylation_tags}
 
     if platform == "ONT":

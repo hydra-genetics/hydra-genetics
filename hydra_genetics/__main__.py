@@ -8,7 +8,7 @@ import sys
 import hydra_genetics.utils
 from hydra_genetics.commands.prep_pipeline_env import environment
 from hydra_genetics.commands.references import references
-from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles
+from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles, CreateLongReadInputFiles
 import rich.console
 import rich.logging
 import rich.traceback
@@ -174,6 +174,13 @@ def create_rule(command, tool, module, author, email, outdir):
     rule.init_rule()
 
 
+def default_adapter(platform):
+    if platform not in ['PACBIO', 'ONT']:
+        return "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+    else:
+        return None
+
+
 @cli.command(short_help="create input-files, samples.tsv and units.tsv", context_settings={'show_default': True})
 @click.option(
     "-d",
@@ -182,7 +189,8 @@ def create_rule(command, tool, module, author, email, outdir):
     prompt="directory/directories",
     required=True,
     type=str,
-    help="path to dir where fastq-files should be looked for.")
+    help="path to dir where fastq-files should be looked for when platform is Illumina."
+    "Path to unmapped BAM files when platform is ONT or PACBIO")
 @click.option(
         "-o",
         "--outdir",
@@ -191,9 +199,10 @@ def create_rule(command, tool, module, author, email, outdir):
 @click.option(
         "-p",
         "--platform",
+        required=True,
         type=str,
-        help="Sequence platform that the data originate from, ex nextseq, miseq. Default Illumina",
-        default="Illumina")
+        help="Sequence platform that the data originate from, e.g., nextseq, miseq, Illumina. "
+        "For long read it needs to be PACBIO or ONT.")
 @click.option(
         "-t",
         "--sample-type",
@@ -217,7 +226,7 @@ def create_rule(command, tool, module, author, email, outdir):
         "--adapters",
         type=str,
         help="adapter sequence, comma sepearated",
-        default="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT")
+        default=lambda: default_adapter(click.get_current_context().params.get("platform", 'Illumina')))
 @click.option(
         "--post-file-modifier",
         type=str,
@@ -237,7 +246,7 @@ def create_rule(command, tool, module, author, email, outdir):
         default=None)
 @click.option(
         "--tc",
-        help="tumor contet",
+        help="tumor content",
         type=float,
         default=None)
 @click.option(
@@ -277,10 +286,13 @@ def create_rule(command, tool, module, author, email, outdir):
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
                        sample_regex, read_number_regex, adapters, data_json, data_columns,
                        tc, force, default_barcode, validate, ask, th, nreads, every):
-    input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
-                                   sample_regex, read_number_regex, adapters, data_json, data_columns,
-                                   tc, force, default_barcode, validate, ask, th,
-                                   nreads, every)
+    if platform in ['PACBIO', 'ONT']:
+        input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
+                                               adapters, data_json, data_columns, tc, force, default_barcode)
+    else:
+        input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
+                                       sample_regex, read_number_regex, adapters, data_json, data_columns,
+                                       tc, force, default_barcode, validate, ask, th, nreads, every)
     input_files.init()
 
 

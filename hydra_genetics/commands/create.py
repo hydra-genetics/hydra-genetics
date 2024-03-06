@@ -626,7 +626,6 @@ class CreateLongReadInputFiles(object):
         units_dict = {"sample": [], "type": [], "platform": [], "machine": [],
                       "flowcell": [], "barcode": [], "methylation": [],
                       "bam": []}
-
         if adapters is not None:
             units_dict["adapter"] = []
 

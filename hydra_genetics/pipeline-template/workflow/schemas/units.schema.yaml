@@ -40,6 +40,9 @@ properties:
   platform:
     type: string
     description: sequence platform that have been used to generate data
+  processing_unit:
+    type: string
+    description: processing unit from the bam header
   basecalling_model:
         type: string
         description: absolute path to bam file

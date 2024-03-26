@@ -974,7 +974,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
                 raise Exception("Multiple base with same occurences: {}. UNABLE to handle exiting!".format(data[i]))
             max_base_n = data[i][max_base]
             if max_base_n / number_of_reads < warning_threshold:
-                logging.warning('Consesuns base {} occurences {:.1%} at position {} in barcode, file {}'.
+                logging.warning('Consensus base {} occurences {:.1%} at position {} in barcode, file {}'.
                                 format(max_base, max_base_n / number_of_reads, i, file_path))
             barcode += max_base
         return barcode

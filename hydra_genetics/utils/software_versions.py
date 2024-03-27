@@ -205,8 +205,19 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
     def _add_software_version(config, version_dict):
 
         def _create_container_name_version_string(image_informaiton):
-            return "__".join(re.search(".+/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9.-_]+$)", value).groups())
-
+            if image_information.endswith(".sif"):
+                container_name = re.search(".+/([A-Za-z0-9-]+)_([0-9A-Za-z-]+)\.sif", image_information)
+                if containter_name:
+                    return "__".join(container_name.groups())
+                else:
+                    return re.search(".+/([A-Za-z0-9-]+)\.sif", image_information).groups()[0]
+            else:
+                container_name = re.search(".+/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9.-_]+$)", image_information)
+                if container_name:
+                    return "__".join(container_name.groups())
+                else:
+                    return re.search((".+/([A-Za-z0-9-]+)", image_information).groups()[0]
+        
         logger = logging.getLogger(__name__)
         version_found = []
         software_version_key = 'software_versions'

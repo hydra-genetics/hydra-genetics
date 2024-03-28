@@ -10,6 +10,30 @@ from datetime import datetime
 from snakemake.common import is_local_file
 
 
+def _create_container_name_version_string(image_information):
+    if image_information.endswith(".sif"):
+        container_name_and_version = re.search(r"__([A-Za-z0-9-]+)_([A-Za-z0-9.-]+)\.sif$", image_information)
+        print(container_name_and_version)
+        if container_name_and_version:
+            return "_".join(container_name_and_version.groups())
+        else:
+            container_name = re.search(r"([A-Za-z0-9-]+)\.sif$", image_information)
+            if container_name:
+                return "_".join([container_name.groups()[0], 'NoVersion'])
+            else:
+                raise Exception(f"Unable to extract container name from {image_information}")
+    else:
+        container_name_and_version = re.search("/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9.-_]+)$", image_information)
+        if container_name_and_version:
+            return "_".join(container_name_and_version.groups())
+        else:
+            container_name = re.search("/([A-Za-z0-9-]+)$", image_information)
+            if container_name:
+                return "_".join([container_name.groups()[0], 'NoVersion'])
+            else:
+                raise Exception(f"Unable to extract container name from {image_information}")
+
+
 def add_version_files_to_multiqc(config, file_list):
     for report in config['multiqc']['reports']:
         config['multiqc']['reports'][report]['qc_files'] += file_list
@@ -203,21 +227,6 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
     container_cache = get_container_prefix(workflow)
 
     def _add_software_version(config, version_dict):
-
-        def _create_container_name_version_string(image_informaiton):
-            if image_information.endswith(".sif"):
-                container_name = re.search(".+/([A-Za-z0-9-]+)_([0-9A-Za-z-]+)\.sif", image_information)
-                if containter_name:
-                    return "__".join(container_name.groups())
-                else:
-                    return re.search(".+/([A-Za-z0-9-]+)\.sif", image_information).groups()[0]
-            else:
-                container_name = re.search(".+/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9.-_]+$)", image_information)
-                if container_name:
-                    return "__".join(container_name.groups())
-                else:
-                    return re.search((".+/([A-Za-z0-9-]+)", image_information).groups()[0]
-        
         logger = logging.getLogger(__name__)
         version_found = []
         software_version_key = 'software_versions'
@@ -240,7 +249,8 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
                             raise Exception(f"could not extract software versions from {image_path}, {value}")
                         else:
                             logger.warning(f"could not extract software versions from {image_path}, {value}")
-                            version_found = [name_and_version.split("__"), ('NOTE', 'version extract from image name and not labels')]
+                            version_found = [name_and_version.split("__"),
+                                             ('NOTE', 'version extract from image name and not labels')]
                 else:
                     if fail_missing_versions:
                         raise Exception(f"could not locate local file {image_path} for {value}")
@@ -256,12 +266,6 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
 
 
 def touch_software_version_files(config, directory="versions/software", file_name_ending="mqc_versions.yaml", date_string=None):
-    def _create_container_name_version_string(image_informaiton):
-        match = re.search(".+/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9.-_]+$)", image_informaiton)
-        if match:
-            return "__".join(match.groups())
-        else:
-            return "__".join(re.search(".+/([A-Za-z0-9-_.]+$)", image_informaiton).groups())
 
     def _create_name_list(_config, name_list=None):
         for key, value in _config.items():
@@ -340,12 +344,6 @@ def touch_software_version_files(config, directory="versions/software", file_nam
     date_string: str
        a string that will be added to the folder name to make it unique
     """
-    def _create_container_name_version_string(image_informaiton):
-        match = re.search(".+/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9.-_]+$)", image_informaiton)
-        if match:
-            return "__".join(match.groups())
-        else:
-            return "__".join(re.search(".+/([A-Za-z0-9-_.]+$)", image_informaiton).groups())
 
     def _create_name_list(_config, name_list=None):
         for key, value in _config.items():

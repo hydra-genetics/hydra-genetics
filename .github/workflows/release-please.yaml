@@ -12,6 +12,7 @@ jobs:
       - uses: GoogleCloudPlatform/release-please-action@v2
         id: release
         with:
+          token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
           release-type: python
           package-name: hydra-genetics
           default-branch: master

@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.0.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.14.0...v2.0.0) (2024-04-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* make platform required for create-input-files
+
+### Features
+
+* create input files from long read bam files ([b75e37f](https://www.github.com/hydra-genetics/hydra-genetics/commit/b75e37f9693033844fa3c48c326fb2e95d218cf2))
+* create input files from long read bam files ([5a96e9f](https://www.github.com/hydra-genetics/hydra-genetics/commit/5a96e9fa36f21990cf8e951a50019e444eb4b786))
+* make platform required for create-input-files ([0f86f41](https://www.github.com/hydra-genetics/hydra-genetics/commit/0f86f413a425220bf1508b6b1ec8a39406854348))
+* update handling of version extraction and added test ([45212b5](https://www.github.com/hydra-genetics/hydra-genetics/commit/45212b57f6b3441da0bedc9b49727b644ab05e76))
+* Update units.schema.yaml for long read ([aec2708](https://www.github.com/hydra-genetics/hydra-genetics/commit/aec2708607c8f6814337ef293ea548c2d8f1920f))
+
+
+### Bug Fixes
+
+* fix typo in warning message ([d1a77d2](https://www.github.com/hydra-genetics/hydra-genetics/commit/d1a77d2775adf4ebe969c2807958cc3b539898ae))
+* minor updates to pipeline template ([bff9861](https://www.github.com/hydra-genetics/hydra-genetics/commit/bff9861e0fd2b602aacf078b6d574e2e5c55bc06))
+* **utils:** change container re search pattern ([8594a9d](https://www.github.com/hydra-genetics/hydra-genetics/commit/8594a9d8100160aad075902b8db733c2f08f0df8))
+
+
+### Documentation
+
+* add badge for mkdocs ([259eedc](https://www.github.com/hydra-genetics/hydra-genetics/commit/259eedc9b2dd00d59eb30c935e9f36e8d534d2c9))
+* update import from tool versions ([011ea60](https://www.github.com/hydra-genetics/hydra-genetics/commit/011ea60a35a923fac7e18d64f6d667d1094f143e))
+
 ## [1.14.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v1.13.0...v1.14.0) (2024-03-01)
 
 

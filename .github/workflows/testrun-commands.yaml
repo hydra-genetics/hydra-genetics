@@ -38,11 +38,13 @@ jobs:
       - name: Add rule to existing smk file
         run: hydra-genetics create-rule -c test3 -t samtools -m testar -a testare2 -e testare2@mail.com
       - name: Create input files v1
-        run: hydra-genetics create-input-files  -d .tests/ -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1
+        run: hydra-genetics create-input-files  -d .tests/ -p Illumina -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1
       - name: Create input files v2
-        run: hydra-genetics create-input-files -f  -d .tests/ -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1 --tc 1.0
+        run: hydra-genetics create-input-files -f  -d .tests/ -p Illumina -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1 --tc 1.0
       - name: Create input files v3
-        run: hydra-genetics create-input-files -f  -d .tests/ -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1 --data-json .tests/integration/samples_and_settings.json --data-columns .tests/integration/columns_added_to_tsv_files.json 
+        run: hydra-genetics create-input-files -f  -d .tests/ -p Illumina -s "([A-Za-z0-9]+_testing[0-9])_" -n "_R([12])" --nreads 10 --every 1 --data-json .tests/integration/samples_and_settings.json --data-columns .tests/integration/columns_added_to_tsv_files.json 
+      - name: Create input files v4
+        run: hydra-genetics create-input-files -f -d .tests/ -p PACBIO --data-json .tests/integration/pacbio_bams/samples_and_settings.json --data-columns .tests/integration/pacbio_bams/columns_added_to_tsv_files.json
       - name: Create pipeline
         run: hydra-genetics create-pipeline -n test_pipeline -d test -a S -e p -g t
       - name: Add rule

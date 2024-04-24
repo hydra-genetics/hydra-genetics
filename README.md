@@ -8,6 +8,8 @@ Command line interface to create new modules/pipelines or adding a new rule to a
 
 [![Lint and Test](https://github.com/hydra-genetics/tools/actions/workflows/main.yaml/badge.svg?branch=develop)](https://github.com/hydra-genetics/tools/actions/workflows/main.yaml)
 
+[![build mkdocs](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml/badge.svg)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml)
+
 ![python](https://img.shields.io/badge/python-3.8-blue)
 
 ## Functions

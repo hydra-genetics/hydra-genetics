@@ -58,7 +58,7 @@ if use_container(workflow):
 add_version_files_to_multiqc(config, version_files)
 
 onstart:
-    export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/softwaren")
+    export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/software")
     # Make sure that the user have the requested containers to be used
     if use_container(workflow):
         # From the config retrieve all dockers used and parse labels for software versions. Add

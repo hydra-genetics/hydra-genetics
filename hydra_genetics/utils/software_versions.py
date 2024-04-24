@@ -23,7 +23,7 @@ def _create_container_name_version_string(image_information):
             else:
                 raise Exception(f"Unable to extract container name from {image_information}")
     else:
-        container_name_and_version = re.search("/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9.-_]+)$", image_information)
+        container_name_and_version = re.search("/([A-Za-z0-9-_.]+):[ ]*([A-Za-z0-9-_.]+)$", image_information)
         if container_name_and_version:
             return "_".join(container_name_and_version.groups())
         else:

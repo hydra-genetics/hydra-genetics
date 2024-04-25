@@ -275,7 +275,7 @@ def touch_software_version_files(config, directory="versions/software", file_nam
                 name_list = _create_name_list(value, name_list)
             elif key in ["container", "default_container"]:
                 name_list.append(_create_container_name_version_string(value))
-        return name_list
+        return set(name_list)
 
     if date_string is None:
         date_string = datetime.now().strftime('%Y%m%d')

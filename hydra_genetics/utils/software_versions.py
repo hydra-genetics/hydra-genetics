@@ -250,7 +250,7 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
                         else:
                             logger.warning(f"could not extract software versions from {image_path}, {value}")
                             name = name_and_version.split("_")[0]
-                            version = name_and_version.split("_")[1:]
+                            version = "_".join(name_and_version.split("_")[1:])
                             version_found = [[name, version],
                                              ('NOTE', 'version extract from image name and not labels')]
                 else:

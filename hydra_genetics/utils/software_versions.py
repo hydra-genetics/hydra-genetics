@@ -321,7 +321,7 @@ def export_software_version_as_files(software_dict, directory="versions/software
         output_file_list.append(output_file)
         with open(output_file, 'w') as writer:
             notification = software_dict[name].pop('NOTE', None)
-            writer.write(yaml.dump(software_dict[name]))
+            writer.write(yaml.dump(software_dict))
             if notification is not None:
                 writer.write(f"# {notification}")
     return output_file_list

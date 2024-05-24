@@ -133,7 +133,8 @@ def get_software_version_from_labels(image_path):
     cmd = ["singularity", "inspect", image_path]
     software_version_list = []
     for row in subprocess.check_output(cmd).decode().split("\n"):
-        if not row.startswith("org.label-schema") and not row.startswith("maintainer"):
+
+        if not row.startswith("org.") and not row.startswith("maintainer") and not row.startswith("license"):
             software_version = re.match("^([A-Za-z0-9-_.]+): ([a-z0-9.]+)$", row)
             if software_version:
                 software_version_list.append(software_version.groups())

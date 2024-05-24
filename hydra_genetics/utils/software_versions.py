@@ -134,7 +134,7 @@ def get_software_version_from_labels(image_path):
     software_version_list = []
     for row in subprocess.check_output(cmd).decode().split("\n"):
         if not row.startswith("org.label-schema") and not row.startswith("maintainer"):
-            software_version = re.match("^([A-Za-z0-9-_.]+): ([0-9.]+)$", row)
+            software_version = re.match("^([A-Za-z0-9-_.]+): ([a-z0-9.]+)$", row)
             if software_version:
                 software_version_list.append(software_version.groups())
     return software_version_list

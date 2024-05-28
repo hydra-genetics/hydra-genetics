@@ -13,7 +13,6 @@ from snakemake.common import is_local_file
 def _create_container_name_version_string(image_information):
     if image_information.endswith(".sif"):
         container_name_and_version = re.search(r"__([A-Za-z0-9-]+)_([A-Za-z0-9.-]+)\.sif$", image_information)
-        print(container_name_and_version)
         if container_name_and_version:
             return "_".join(container_name_and_version.groups())
         else:

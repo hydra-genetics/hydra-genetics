@@ -28,23 +28,24 @@ from datetime import datetime
 from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import export_pipeline_version_as_file
 from hydra_genetics.utils.software_versions import get_pipeline_version
-from hydra_genetics.utils.software_versions import touch_pipeline_verion_file_name
+from hydra_genetics.utils.software_versions import touch_pipeline_version_file_name
 
 # default value for pipeline_name is 'pipeline'
 pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
 
-# pipeline_version
-{
-    "Twist_Solid": {
-        'version': 'v1.0.0',
-        'commit': 'ac739ca938c'
-    }
-}
+# Will generate a dict: 
+# pipeline_version =
+# {
+#     "Twist_Solid": {
+#         'version': 'v1.0.0',
+#         'commit': 'ac739ca938c'
+#     }
+# }
 
 date_string = datetime.now().strftime('%Y%m%d')
 # This will create a (empty) version file that can be defined as input to
 # multiqc, will be populated with version during onstart (before the pipeline starts)
-version_files = touch_pipeline_verion_file_name(pipeline_version, date_string=date_string)
+version_files = touch_pipeline_version_file_name(pipeline_version, date_string=date_string)
 add_version_files_to_multiqc(config, version_files)
 
 # onstart will also prevent the functions from
@@ -73,18 +74,18 @@ To log the versions of the software used during the analysis of the samples, mul
 **Code**
 ```python
 from datetime import datetime
-from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
+from hydra_genetics.utils.software_versions import add_version_file_to_multiqc
 from hydra_genetics.utils.software_versions import add_software_version_to_config
 from hydra_genetics.utils.software_versions import export_software_version_as_files
 from hydra_genetics.utils.software_versions import use_container
-from hydra_genetics.utils.software_versions import touch_software_version_files
+from hydra_genetics.utils.software_versions import touch_software_version_file
 
 
 date_string = datetime.now().strftime('%Y%m%d')
 # This will create a (empty) version files that can be defined as input to
 # multiqc, will be populated with version during onstart (before the pipeline starts)
 if use_container(workflow):
-    version_files = touch_software_version_files(config, date_string=date_string, directory="results/versions/software_version")
+    version_files = touch_software_version_file(config, date_string=date_string, directory="results/versions/software_version")
     add_version_files_to_multiqc(config, version_files)
 
 # Use onstart to make sure that containers have been downloaded
@@ -110,8 +111,7 @@ Example output
 ```bash
 # Softwares
 versions/software__20210403/
-|--bwa_mem__0.7.17_mqc_versions.yaml
-|--CONTAINERNAME__VERSION_mqc_versions.yaml
+|--softwares_mqc_versions.yaml
 ```
 
 ### Config versions
@@ -126,7 +126,7 @@ from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 date_string = datetime.now().strftime('%Y%m%d')
 
 if use_container(workflow):
-    version_files = touch_software_version_files(config, date_string=date_string, directory="results/versions/software_version")
+    version_files = touch_software_version_file(config, date_string=date_string, directory="results/versions/software_version")
     add_version_files_to_multiqc(config, version_files)
 
 # print config dict as a file. Additional parameters that can be set

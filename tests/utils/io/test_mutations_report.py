@@ -920,7 +920,6 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[32].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	protein_coding	intron_variant	vardict	-	-	-")  # noqa
             self.assertEqual(result[33].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	protein_coding	splice_region_variant&intron_variant	vardict	-	-	-")  # noqa
             self.assertEqual(result[34].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT	protein_coding	intron_variant	vardict,mutect2	-	-	-")  # noqa
-            
 
     def test_vep_wo_pick_chose_transcript(self):
         from hydra_genetics.utils.io.hotspot_report import generate_hotspot_report
@@ -978,7 +977,6 @@ class TestWp1Reports(unittest.TestCase):
             self.assertEqual(result[32].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	GT	2-indel	1144	1172	29	yes	ok	PLCG2	NM_002661.3	-	protein_coding	intron_variant	vardict	-	-	-")  # noqa
             self.assertEqual(result[33].rstrip(), "sample1	NC_000002.11	29445282	29445282	G	A	4-other	520	284	3	yes	ok	ALK	NM_004304.4	-	protein_coding	splice_region_variant&intron_variant	vardict	-	-	-")  # noqa
             self.assertEqual(result[34].rstrip(), "sample1	NC_000016.11	81954789	81954789	C	G	4-other	1144	442	349	yes	ok	SEPT	NM_002661.3	-	protein_coding	intron_variant	vardict,mutect2	-	-	-")  # noqa
-            
 
 
 if __name__ == '__main__':

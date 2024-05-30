@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.0.1](https://www.github.com/hydra-genetics/hydra-genetics/compare/v2.0.0...v2.0.1) (2024-05-30)
+
+
+### Bug Fixes
+
+* name and version extraction from name_and_version split ([b2267ac](https://www.github.com/hydra-genetics/hydra-genetics/commit/b2267ac05ab8037ae8e23c4ba5f51d8838091eee))
+
 ## [2.0.1](https://github.com/hydra-genetics/hydra-genetics/compare/v2.0.0...v2.0.1) (2024-04-25)
 
 

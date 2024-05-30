@@ -242,10 +242,7 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
                 image_path = get_image_path(value, container_cache)
                 if os.path.isfile(image_path):
                     version_found += get_software_version_from_labels(image_path)
-                    if not is_local_file(value):
-                        name_and_version = _create_container_name_version_string(value)
-                    else:
-                        name_and_version = _create_container_name_version_string(get_software_version_from_labels(value))
+                    name_and_version = _create_container_name_version_string(value)
 
                     if not version_found:
                         if fail_missing_versions:

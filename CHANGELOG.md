@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.0.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v2.0.0...v3.0.0) (2024-05-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* output software versions into one file  (#361)
+
+### Features
+
+* output software versions into one file  ([#361](https://www.github.com/hydra-genetics/hydra-genetics/issues/361)) ([155f557](https://www.github.com/hydra-genetics/hydra-genetics/commit/155f55740d8ef8ab3f1b044247692443754922c0))
+* report all region_all variants in cov_and_mut ([98dc4f6](https://www.github.com/hydra-genetics/hydra-genetics/commit/98dc4f6e1f747ab39f7d05e9083a2d2026816010))
+
+
+### Bug Fixes
+
+* convert name_list to set to remove duplicate items ([024cdb6](https://www.github.com/hydra-genetics/hydra-genetics/commit/024cdb6528ca9b24da95da93ac08a64b40da42da))
+* filter more one docker labels ([19a23cf](https://www.github.com/hydra-genetics/hydra-genetics/commit/19a23cf5dd91dff351823ff37f19f964eec153cd))
+* handle remote on local file the same ([2e02578](https://www.github.com/hydra-genetics/hydra-genetics/commit/2e025780b83c49d849e338ef6444804a6110c2d5))
+* name and version extraction from name_and_version split ([b2267ac](https://www.github.com/hydra-genetics/hydra-genetics/commit/b2267ac05ab8037ae8e23c4ba5f51d8838091eee))
+
 ## [3.0.0](https://github.com/hydra-genetics/hydra-genetics/compare/v2.0.1...v3.0.0) (2024-05-30)
 
 

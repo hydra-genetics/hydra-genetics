@@ -267,9 +267,7 @@ def generate_hotspot_report(sample,
                                               chr_translater.get_chr_value(hotspot.CHROMOSOME),
                                               hotspot.EXTENDED_START + index-1,
                                               hotspot.EXTENDED_START + index)
-                            if hotspot.REPORT == ReportClass.region_all and depth > 299:  # ToDo remove harcoded value
-                                continue
-                            elif hotspot.ALWAYS_PRINT:
+                            if hotspot.ALWAYS_PRINT:
                                 data = {'sample': sample,
                                         'chr': hotspot.CHROMOSOME,
                                         'start': hotspot.EXTENDED_START + index,

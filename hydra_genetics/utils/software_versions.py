@@ -13,13 +13,12 @@ from snakemake.common import is_local_file
 def _create_container_name_version_string(image_information):
     if image_information.endswith(".sif"):
         container_name_and_version = re.search(r"__([A-Za-z0-9-]+)_([A-Za-z0-9.-]+)\.sif$", image_information)
-        print(container_name_and_version)
         if container_name_and_version:
             return "_".join(container_name_and_version.groups())
         else:
             container_name = re.search(r"([A-Za-z0-9-]+)\.sif$", image_information)
             if container_name:
-                return "_".join([container_name.groups()[0], 'NoVersion'])
+                return "_".join([container_name.groups()[0], "NoVersion"])
             else:
                 raise Exception(f"Unable to extract container name from {image_information}")
     else:
@@ -29,36 +28,36 @@ def _create_container_name_version_string(image_information):
         else:
             container_name = re.search("/([A-Za-z0-9-]+)$", image_information)
             if container_name:
-                return "_".join([container_name.groups()[0], 'NoVersion'])
+                return "_".join([container_name.groups()[0], "NoVersion"])
             else:
                 raise Exception(f"Unable to extract container name from {image_information}")
 
 
 def add_version_files_to_multiqc(config, file_list):
-    for report in config['multiqc']['reports']:
-        config['multiqc']['reports'][report]['qc_files'] += file_list
+    for report in config["multiqc"]["reports"]:
+        config["multiqc"]["reports"][report]["qc_files"] += file_list
 
 
 def _touch(fname):
     if os.path.exists(fname):
         os.utime(fname, None)
     else:
-        open(fname, 'a').close()
+        open(fname, "a").close()
 
 
 def get_container_prefix(workflow):
-    '''
+    """
     Function used to fetch singularity cache location
-    '''
+    """
 
-    if hasattr(workflow, 'use_singularity'):
+    if hasattr(workflow, "use_singularity"):
         # Fetch singularity prefix for snakemake version with version less
         # then 8
-        if hasattr(workflow, 'singularity_prefix'):
+        if hasattr(workflow, "singularity_prefix"):
             return workflow.singularity_prefix
         else:
             return ".snakemake/singularity"
-    elif hasattr(workflow, 'deployment_settings'):
+    elif hasattr(workflow, "deployment_settings"):
         # Fetch singularity prefix for snakemake version with equal to 8.0 or newer
         if workflow.deployment_settings.apptainer_prefix is None:
             return ".snakemake/singularity"
@@ -80,6 +79,7 @@ def get_pipeline_version(workflow):
     ------
     dict with pipeline version and commit, ex {'pipeline_version': 'v1', 'pipeline_commit': 'achgk2...kacaa'}
     """
+
     def _find_root_repo(path):
         if path is None:
             return None
@@ -87,7 +87,8 @@ def get_pipeline_version(workflow):
             return path
         else:
             return _find_root_repo(os.path.dirname(path))
-    repo_path = _find_root_repo(getattr(workflow, 'basedir'))
+
+    repo_path = _find_root_repo(getattr(workflow, "basedir"))
 
     # Initialize a Git repo object
     repo = git.Repo(repo_path)
@@ -108,11 +109,11 @@ def get_pipeline_version(workflow):
             logger = logging.getLogger(__name__)
             logger.warning("Unable to get version (from tags) or an active_branch")
 
-    return {'pipeline_version': str(pipeline_version), 'pipeline_commit': str(head_commit)}
+    return {"pipeline_version": str(pipeline_version), "pipeline_commit": str(head_commit)}
 
 
 def get_software_version_from_labels(image_path):
-    '''
+    """
     Function used to create a list of software version used in a singularity image,
     usually created from a docker image. The software name and version will be extracted
     from labels that have been set in the container.  The expected format is
@@ -129,12 +130,13 @@ def get_software_version_from_labels(image_path):
     --------
     list of tuples where each tuple consist of software name and software version.
 
-    '''
+    """
     cmd = ["singularity", "inspect", image_path]
     software_version_list = []
     for row in subprocess.check_output(cmd).decode().split("\n"):
-        if not row.startswith("org.label-schema") and not row.startswith("maintainer"):
-            software_version = re.match("^([A-Za-z0-9-_.]+): ([0-9.]+)$", row)
+
+        if not row.startswith("org.") and not row.startswith("maintainer") and not row.startswith("license"):
+            software_version = re.match("^([A-Za-z0-9-_.]+): ([a-z0-9.]+)$", row)
             if software_version:
                 software_version_list.append(software_version.groups())
     return software_version_list
@@ -162,7 +164,7 @@ def get_deffile(image_path):
 
 
 def get_image_path(container, singularity_prefix_path):
-    '''
+    """
     Function used to return a path to singularity a image. If it's a local file, .i.e
     a path to a file on the file system the path will be returned without modifications. If it's
     a singularity image that has been downloaded by snakemake the function will create
@@ -179,7 +181,7 @@ def get_image_path(container, singularity_prefix_path):
     Returns
     -------
     str: path to locally store image
-    '''
+    """
     if is_local_file(container):
         return container
 
@@ -189,15 +191,16 @@ def get_image_path(container, singularity_prefix_path):
 
 
 def use_container(workflow):
-    '''
+    """
     Function used to check if containers are used,
-    '''
-    if hasattr(workflow, 'use_singularity'):
+    """
+    if hasattr(workflow, "use_singularity"):
         # For snakemake with version less then 8
         return True
-    elif hasattr(workflow, 'deployment_settings') and workflow.deployment_settings.deployment_method:
+    elif hasattr(workflow, "deployment_settings") and workflow.deployment_settings.deployment_method:
         # For snakemake with version 8 or newer
         from snakemake.settings import DeploymentMethod
+
         if DeploymentMethod.APPTAINER in workflow.deployment_settings.deployment_method:
             return True
         else:
@@ -207,7 +210,7 @@ def use_container(workflow):
 
 
 def add_software_version_to_config(config, workflow, fail_missing_versions=True):
-    '''
+    """
     Function that will look through the config dict to locate
     container definitions. When container information is found the
     softwares version will be extracted and added to the config.
@@ -223,13 +226,13 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
 
     Returns:
     a config where software_verions have been added
-    '''
+    """
     container_cache = get_container_prefix(workflow)
 
     def _add_software_version(config, version_dict):
         logger = logging.getLogger(__name__)
         version_found = []
-        software_version_key = 'software_versions'
+        software_version_key = "software_versions"
         for key, value in config.items():
             if isinstance(value, dict):
                 config[key], version_dict = _add_software_version(value, version_dict)
@@ -239,10 +242,7 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
                 image_path = get_image_path(value, container_cache)
                 if os.path.isfile(image_path):
                     version_found += get_software_version_from_labels(image_path)
-                    if not is_local_file(value):
-                        name_and_version = _create_container_name_version_string(value)
-                    else:
-                        name_and_version = _create_container_name_version_string(get_software_version_from_labels(value))
+                    name_and_version = _create_container_name_version_string(value)
 
                     if not version_found:
                         if fail_missing_versions:
@@ -251,8 +251,7 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
                             logger.warning(f"could not extract software versions from {image_path}, {value}")
                             name = name_and_version.split("_")[0]
                             version = "_".join(name_and_version.split("_")[1:])
-                            version_found = [[name, version],
-                                             ('NOTE', 'version extract from image name and not labels')]
+                            version_found = [[name, version], ("NOTE", "version extract from image name and not labels")]
                 else:
                     if fail_missing_versions:
                         raise Exception(f"could not locate local file {image_path} for {value}")
@@ -260,41 +259,19 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
                         logger.warning(f"could not locate local file {image_path} for {value}")
         if version_found:
             config[software_version_key] = {s: v for s, v in version_found}
-            if 'version' in config[software_version_key]:
-                del config[software_version_key]['version']
+            if "version" in config[software_version_key]:
+                del config[software_version_key]["version"]
             version_dict[name_and_version] = config[software_version_key]
         return config, version_dict
+
     return _add_software_version(config, {})
 
 
-def touch_software_version_files(config, directory="versions/software", file_name_ending="mqc_versions.yaml", date_string=None):
-
-    def _create_name_list(_config, name_list=None):
-        for key, value in _config.items():
-            if isinstance(value, dict):
-                name_list = _create_name_list(value, name_list)
-            elif key in ["container", "default_container"]:
-                name_list.append(_create_container_name_version_string(value))
-        return name_list
-
-    if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d')
-        if directory is not None and len(directory) > 0:
-            date_string = f"_{date_string}"
-            directory = f"{directory}{date_string}"
-        if len(directory) > 0 and not os.path.isdir(directory):
-            os.makedirs(directory)
-            output_file_list = []
-        for name in _create_name_list(config, []):
-            output_file = os.path.join(directory, f"{name}_{file_name_ending}")
-            output_file_list.append(output_file)
-    _touch(output_file)
-    return output_file_list
-
-
-def export_software_version_as_files(software_dict, directory="versions/software", file_name_ending="mqc_versions.yaml", date_string=None):
+def export_software_version_as_file(
+    software_dict, directory="versions/software", file_name="softwares_mqc_versions.yaml", date_string=None
+):
     """
-    Print software version to files. Requires a dict with key software_info which
+    Print software version to file (should be same as filename in touch_software_version_file). Requires a dict with key software_info which
     should contain a dict with software names and versions.
 
     Parameters:
@@ -303,74 +280,65 @@ def export_software_version_as_files(software_dict, directory="versions/software
        dict with key software_info, ex {software_info: {'common_1.3': {'samtools': '1.3', 'picard': '1.6'}}}
     directory: str
        path where files will be written
-    file_name_ending: str
-       a string that will be combined with the software name version key
+    file_name: str
+       file name to use for software logging
     date_string: str
        a string that will be added to the folder name to make it unique
     """
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d')
+        date_string = datetime.now().strftime("%Y%m%d")
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
     directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
-    output_file_list = []
-    for name in software_dict:
-        output_file = os.path.join(directory, f"{name}_{file_name_ending}")
-        output_file_list.append(output_file)
-        with open(output_file, 'w') as writer:
-            notification = software_dict[name].pop('NOTE', None)
-            writer.write(yaml.dump(software_dict[name]))
+    output_file = os.path.join(directory, f"{file_name}")
+    with open(output_file, "w") as writer:
+        writer.write(yaml.dump(software_dict))
+        for name in software_dict:
+            notification = software_dict[name].pop("NOTE", None)
             if notification is not None:
                 writer.write(f"# {notification}")
-    return output_file_list
+    return output_file
 
 
-def touch_software_version_files(config, directory="versions/software", file_name_ending="mqc_versions.yaml", date_string=None):
+def touch_software_version_file(config, directory="versions/software", file_name="softwares_mqc_versions.yaml", date_string=None):
     """
     To be able to pass a proper file list to multiqc the version files need to exist before the dag graph
     is built. And before the dag graph is built we can not guarantee that all images exist on the file system,
-    and therefor we can not use export_software_version_as_files to directly create the actual version files.
-    This function will create all files (empty) that export_software_version_as_files will create.
-    NOTE: you need to have the same parameter as with export_software_version_as_files
+    and therefor we can not use export_software_version_as_file to directly create the actual version files.
+    This function will create all files (empty) that export_software_version_as_file will create.
+    NOTE: you need to have the same parameter as with export_software_version_as_file
 
     Parameters:
     -----------
-    software_dict: dict
-       dict with key software_info, ex {software_info: {'common_1.3': {'samtools': '1.3', 'picard': '1.6'}}}
+    config: dict
+       dict with config file # not used?
     directory: str
        path where files will be written
-    file_name_ending: str
-       a string that will be combined with the software name version key
+    file_name: str
+       file name to use for software version logging
     date_string: str
        a string that will be added to the folder name to make it unique
     """
 
-    def _create_name_list(_config, name_list=None):
-        for key, value in _config.items():
-            if isinstance(value, dict):
-                name_list = _create_name_list(value, name_list)
-            elif key in ["container", "default_container"]:
-                name_list.append(_create_container_name_version_string(value))
-        return name_list
-
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d')
+        date_string = datetime.now().strftime("%Y%m%d")
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
         directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
-    output_file_list = []
-    for name in _create_name_list(config, []):
-        output_file = os.path.join(directory, f"{name}_{file_name_ending}")
-        output_file_list.append(output_file)
-        _touch(output_file)
-    return output_file_list
+    output_file = os.path.join(directory, f"{file_name}")
+    _touch(output_file)
+
+    if not file_name.endswith("mqc_versions.yaml"):
+        logger = logging.getLogger(__name__)
+        logger.warning(f"{file_name} is not going to be recognized by MultiQC. Should end with mqc_versions.yaml")
+    return output_file
 
 
-def get_pipeline_version(workflow, pipeline_name='pipeline'):
+def get_pipeline_version(workflow, pipeline_name="pipeline"):
     """
     Will return the pipelines tag name and commit hex.
 
@@ -383,6 +351,7 @@ def get_pipeline_version(workflow, pipeline_name='pipeline'):
     ------
     dict with pipeline version and commit, ex {'pipeline_name': {'version': 'v1', 'pipeline_commit': 'achgk2...kacaa'}}
     """
+
     def _find_root_repo(path):
         if path is None:
             return None
@@ -390,7 +359,8 @@ def get_pipeline_version(workflow, pipeline_name='pipeline'):
             return path
         else:
             return _find_root_repo(os.path.dirname(path))
-    repo_path = _find_root_repo(getattr(workflow, 'basedir'))
+
+    repo_path = _find_root_repo(getattr(workflow, "basedir"))
 
     # Initialize a Git repo object
     repo = git.Repo(repo_path)
@@ -411,13 +381,12 @@ def get_pipeline_version(workflow, pipeline_name='pipeline'):
             logger = logging.getLogger(__name__)
             logger.warning("Unable to get version (from tags) or an active_branch")
 
-    return {pipeline_name: {'version': str(pipeline_version), 'commit_id': str(head_commit)}}
+    return {pipeline_name: {"version": str(pipeline_version), "commit_id": str(head_commit)}}
 
 
-def export_pipeline_version_as_file(pipeline_version_dict,
-                                    directory="versions/software",
-                                    file_name_ending="mqc_versions.yaml",
-                                    date_string=None):
+def export_pipeline_version_as_file(
+    pipeline_version_dict, directory="versions/software", file_name_ending="mqc_versions.yaml", date_string=None
+):
     """
     Print pipeline version to a file. Requires a dict with key pipeline_info which
     should contain a dict with software names and versions.
@@ -434,7 +403,7 @@ def export_pipeline_version_as_file(pipeline_version_dict,
        a string that will be added to the folder name to make it unique
     """
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d')
+        date_string = datetime.now().strftime("%Y%m%d")
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
     directory = f"{directory}{date_string}"
@@ -442,25 +411,25 @@ def export_pipeline_version_as_file(pipeline_version_dict,
         os.makedirs(directory)
     output_file_list = []
     for pipeline_name in pipeline_version_dict:
-        output_file = os.path.join(directory,
-                                   f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}")
+        output_file = os.path.join(
+            directory, f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"
+        )
         output_file_list.append(output_file)
-        with open(output_file, 'w') as writer:
-            writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]['version']}))
+        with open(output_file, "w") as writer:
+            writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]["version"]}))
     return output_file_list
 
 
-def touch_pipeline_verion_file_name(pipeline_version_dict,
-                                    directory="versions/software",
-                                    file_name_ending="mqc_versions.yaml",
-                                    date_string=None):
+def touch_pipeline_version_file_name(
+    pipeline_version_dict, directory="versions/software", file_name_ending="mqc_versions.yaml", date_string=None
+):
     """
     Function used to create empty version file for pipeline version. This
     function is a bit redundant and export_pipeline_version_as_file could be used,
     since this function isn't dependent on singularity images which
-    export_software_version_as_files is. But the function exist to have a similar workflow
+    export_software_version_as_file is. But the function exist to have a similar workflow
     for both pipeline and software. NOTE: you need to have same parameters into
-    touch_pipeline_verion_file_name as to export_pipeline_version_as_file.
+    touch_pipeline_version_file_name as to export_pipeline_version_as_file.
 
     Parameters:
     -----------
@@ -474,7 +443,7 @@ def touch_pipeline_verion_file_name(pipeline_version_dict,
        a string that will be added to the folder name to make it unique
     """
     if date_string is None:
-        date_string = datetime.now().strftime('%Y%m%d')
+        date_string = datetime.now().strftime("%Y%m%d")
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
     directory = f"{directory}{date_string}"
@@ -483,8 +452,9 @@ def touch_pipeline_verion_file_name(pipeline_version_dict,
 
     output_file_list = []
     for pipeline_name in pipeline_version_dict:
-        output_file = os.path.join(directory,
-                                   f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}")
+        output_file = os.path.join(
+            directory, f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"
+        )
         output_file_list.append(output_file)
         _touch(output_file)
     return output_file_list

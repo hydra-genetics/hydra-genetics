@@ -66,52 +66,6 @@ def get_container_prefix(workflow):
     return None
 
 
-def get_pipeline_version(workflow):
-    """
-    Will return the pipelines tag name and commit hex.
-
-    Parameters:
-    -----------
-    workflow: object
-        workflow object from snakemake that contain a basedir attribute
-
-    Return
-    ------
-    dict with pipeline version and commit, ex {'pipeline_version': 'v1', 'pipeline_commit': 'achgk2...kacaa'}
-    """
-
-    def _find_root_repo(path):
-        if path is None:
-            return None
-        elif os.path.isdir(str(os.path.join(str(path), ".git"))):
-            return path
-        else:
-            return _find_root_repo(os.path.dirname(path))
-
-    repo_path = _find_root_repo(getattr(workflow, "basedir"))
-
-    # Initialize a Git repo object
-    repo = git.Repo(repo_path)
-
-    # Get the currently checked out commit
-    head_commit = repo.head.commit
-
-    # Iterate through all tags and find the one pointing to the HEAD commit
-    pipeline_version = None
-    for tag in repo.tags:
-        if tag.commit == head_commit:
-            pipeline_version = tag.name
-            break
-    if pipeline_version is None:
-        try:
-            pipeline_version = repo.active_branch
-        except TypeError as e:
-            logger = logging.getLogger(__name__)
-            logger.warning("Unable to get version (from tags) or an active_branch")
-
-    return {"pipeline_version": str(pipeline_version), "pipeline_commit": str(head_commit)}
-
-
 def get_software_version_from_labels(image_path):
     """
     Function used to create a list of software version used in a singularity image,

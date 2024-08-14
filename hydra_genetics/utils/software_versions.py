@@ -34,8 +34,12 @@ def _create_container_name_version_string(image_information):
 
 
 def add_version_files_to_multiqc(config, file_list):
-    for report in config["multiqc"]["reports"]:
-        config["multiqc"]["reports"][report]["qc_files"] += file_list
+    if "multiqc" in config.keys():
+        for report in config["multiqc"]["reports"]:
+            config["multiqc"]["reports"][report]["qc_files"] += file_list
+    else:
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Could not find key multiqc in configuration.")
 
 
 def _touch(fname):

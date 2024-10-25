@@ -67,7 +67,6 @@ def generate_hotspot_report(sample,
             transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
         except KeyError:
             continue
-        
         transcript_dict[variant_key] = transcript
 
     if vcf_file_wo_pick is not None:

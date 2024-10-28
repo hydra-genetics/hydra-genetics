@@ -36,14 +36,20 @@ def get_annotation_data_vep(field_dict, transcript_dict=None):
     def extractor(variant, info_name):
         data = None
         if not transcript_dict:
-            data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+            try:
+                data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+            except KeyError:
+                return None
         else:
             variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
-            for transcript_data in variant.info['CSQ']:
-                if transcript_data.split("|")[field_dict['Feature']].startswith(transcript_dict[variant_key]):
-                    data = transcript_data.split("|")[field_dict[info_name]]
-            if data is None:
-                data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+            try:
+                for transcript_data in variant.info['CSQ']:
+                    if transcript_data.split("|")[field_dict['Feature']].startswith(transcript_dict[variant_key]):
+                        data = transcript_data.split("|")[field_dict[info_name]]
+                if data is None:
+                    data = variant.info['CSQ'][0].split("|")[field_dict[info_name]]
+            except KeyError:
+                return None
         if data == "":
             return None
         return data

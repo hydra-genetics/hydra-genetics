@@ -14,8 +14,10 @@ This tutorial will guide you through making a pipeline that trim and then align 
 
 ## Pre-requirements:
 
-* Python => 3.8 (with pip and venv)
-* Singularity >= 3.8.6
+Local installations:
+
+* Python => 3.8 (with pip and venv) but < 3.10 (otherwise there are compatibility issues with the *core* module of the `click` package)
+* Singularity >= 3.8.6 or Apptainer
 * graphviz
 
 <hr />
@@ -24,7 +26,7 @@ This tutorial will guide you through making a pipeline that trim and then align 
 ```bash
 python3.8 -m venv hackaton_venv
 source hackaton_venv/bin/activate
-pip install hydra-genetics==1.9.0
+pip install hydra-genetics==3.0.0
 ```
 
 <hr />
@@ -42,7 +44,12 @@ hydra-genetics create-pipeline \
 cd simple_pipeline
 ```
 
-Look through the generated files
+Look through the generated files.
+
+### Optional: Add a remote repository
+
+Note the hidden *.git* subdirectory in the `simple-pipeline` directory: with the `hydra-genetics create-pipeline` command, the skeleton pipeline is created with Git version control that is set up, however the pipeline's repository does not have any remote repository defined.
+The user may add a remote repository.
 
 <hr />
 
@@ -73,16 +80,40 @@ hydra-genetics create-input-files \
    --nreads 10
 ```
 
-Check out the input files created: `samples.tsv` and `units.tsv`.
+**Hint**: type `hydra-genetics create-input-files --help` to display all (default) options that are available and figure out what should be added.
 
-### Config pipeline
-The pipeline is supposed to trim the fastq files and then output merged and sorted bamfiles.  
-Look at the schemas, example configs and documentation for prealignment and alignment to find out what is required to be added in the config (`config/config.yaml`).
+Check out the input files created in the directory *simple_pipeline*: `samples.tsv` and `units.tsv`. 
+
+The contents of the file `samples.tsv` should be 
+```
+sample	tumor_content
+HD827sonic-testing1	1.0
+HD827sonic-testing2	1.0
+HD827sonic-testing3	1.0
+```
+
+In the file `units.tsv`, all samples should be of type "T" and sequenced on  Illumina platform.
+
+### Config file for the simple pipeline
+Upon creation, the config file for the pipeline is minimalistic as it should suit any pipeline.
+
+The simple pipeline in this tutorial is supposed to trim the fastq files and then output merged and sorted BAM files.
+The modules *prealignment* and *alignment* will used for this purpose. The config requirements for these modules are also necessary in the newly created pipeline.
+Look at the schemas, example configs, and documentation for *prealignment* and *alignment* to find out what needs to be added in the config (`config/config.yaml`) of *simple-pipeline*. Recall that one should look at the versions of the repositories *prealignment* and *alignment* with the correct tag. 
 
 * `prealignment/config/config.yaml`
 * `alignment/config/config.yaml`
 * `prealignment/workflow/schemas/config.schemas.yaml`
 * `alignment/workflow/schemas/config.schemas.yaml`
+
+Any requirement in `simple-pipeline/workflow/schemas/config.schemas.yaml`  must be met in `simple-pipeline/config/config.yaml` by adding the relevant section.
+
+**Hint**: Furthermore, some configurations that are found in `alignment/config/config.yaml` and in `prealignment/config/config.yaml` are necessary in order to run the simple pipeline, even if those are not specified as "required" in any of the schemas of the 2 modules. These necessary configurations in `config/config.yaml` are specifications for:
+
+- paths to the fasta and fai files used as reference data,
+- name of the trimmer software and location of the Docker container with this tool,
+- location of the Docker container with the tool bwa-mem as well as the paths to the reference files required by this tool,
+- location of the Docker container with the tool Picard.
 
 ### Run pipeline
 Install required programs (snakemake, …):
@@ -91,7 +122,10 @@ pip install -r requirements.txt
 ```
 
 <br />
-Make sure workflow can execute using dry-run. Here we specify what output file we expect in the command line.
+
+#### Dry run
+
+Make sure workflow can execute using dry-run. Here we specify what output file we expect in the command line and the pipeline is stopped once the file `alignment/samtools_merge_bam/HD827sonic-testing1_T.bam` has been created (partial execution).
 ```bash
 snakemake -s workflow/Snakefile \
       --use-singularity \
@@ -99,8 +133,12 @@ snakemake -s workflow/Snakefile \
       --configfile config/config.yaml \
       --until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam
 ```
+
 <br />
-Run pipeline
+
+#### (Actual) partial run
+
+Run the pipeline until reads alignment is completed for the sample *HD827sonic-testing1*.
 ```bash
 snakemake -s workflow/Snakefile \
       --use-singularity \
@@ -109,13 +147,41 @@ snakemake -s workflow/Snakefile \
       --configfile config/config.yaml \
       --until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam
 ```
+
+**NB**: if Apptainer is used as local installation instead of Singularity, no binding arguments are needed. Run the following command instead:
+
+```bash
+snakemake -s workflow/Snakefile \
+      --use-singularity \
+      -c1 \
+      --configfile config/config.yaml \
+      --until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam
+```
+
 <br />
-Modify workflow/rules/common.smk so that you don’t have to include “--until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam”  in your shell command and also so that all samples in samples.tsv are run without hard coding the file path. Run again.
+
+Modify `config/output_files.yaml` so that you don’t have to include “--until alignment/samtools_merge_bam/HD827sonic-testing1_T.bam”  in your shell command, remove the *alignment* folder and (dry-)run the pipeline again.
+
+**NB**: per default in hydra-genetics, all files are set to temporary and deleted upon completion of the pipeline, that in order to keep a clean directory and to avoid memory issues due to too many files. Therefore, the files that the user wants to keep as output must be copied. This can be explicitly specified in `config/output_files.yaml`.
+
+#### Full run
+
+Modify then the input and output paths so that all samples in `samples.tsv` are also processed without hard coding the file path. Run the pipeline again.
 ```bash
 snakemake -s workflow/Snakefile \
       --use-singularity \
       -c1 \
       --singularity-args "-B path/to/fastq_and_reference_files/" \
+      --configfile config/config.yaml
+```
+
+**Hint**: wildcards can be used in the YAML files if they are defined in the .smk file that uses the YAML file.
+
+**NB**: if Apptainer is used as local installation instead of Singularity, the same remark as previously applies:
+```bash
+snakemake -s workflow/Snakefile \
+      --use-singularity \
+      -c1 \
       --configfile config/config.yaml
 ```
 
@@ -133,22 +199,30 @@ Install test programs:
 ```bash
 pip install -r requirements.test.txt
 ```
+
 <br />
+
 Check syntax of snakemake rules
 ```bash
 snakefmt --compact-diff -l 130 workflow/
 ```
+
 <br />
+
 Check syntax of python scripts
 ```bash
 pycodestyle --max-line-length=130 --statistics workflow/scripts/
 ```
+
 <br />
+
 Run pytest for scripts with implemented tests
 ```bash
 python -m pytest workflow/scripts/test_dummy.py
 ```
+
 <br />
+
 Run linting of the pipeline
 ```bash
 snakemake --lint -s workflow/Snakefile --configfile config/config.yaml

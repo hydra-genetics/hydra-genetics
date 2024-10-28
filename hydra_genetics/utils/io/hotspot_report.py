@@ -63,7 +63,10 @@ def generate_hotspot_report(sample,
             raise Exception("Multiple allele found: " + str(variant.alts))
         chromosomes_to_look_at.add(variant.chrom)
         variant_key = f"{variant.chrom}_{variant.start}_{variant.stop}_{variant.ref}_{','.join(variant.alts)}"
-        transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
+        try:
+            transcript = variant.info['CSQ'][0].split("|")[vep_fields['Feature']]
+        except KeyError:
+            continue
         transcript_dict[variant_key] = transcript
 
     if vcf_file_wo_pick is not None:

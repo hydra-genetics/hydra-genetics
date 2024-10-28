@@ -34,8 +34,12 @@ def _create_container_name_version_string(image_information):
 
 
 def add_version_files_to_multiqc(config, file_list):
-    for report in config["multiqc"]["reports"]:
-        config["multiqc"]["reports"][report]["qc_files"] += file_list
+    if "multiqc" in config.keys():
+        for report in config["multiqc"]["reports"]:
+            config["multiqc"]["reports"][report]["qc_files"] += file_list
+    else:
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Could not find key multiqc in configuration.")
 
 
 def _touch(fname):
@@ -64,52 +68,6 @@ def get_container_prefix(workflow):
         else:
             return workflow.deployment_settings.apptainer_prefix
     return None
-
-
-def get_pipeline_version(workflow):
-    """
-    Will return the pipelines tag name and commit hex.
-
-    Parameters:
-    -----------
-    workflow: object
-        workflow object from snakemake that contain a basedir attribute
-
-    Return
-    ------
-    dict with pipeline version and commit, ex {'pipeline_version': 'v1', 'pipeline_commit': 'achgk2...kacaa'}
-    """
-
-    def _find_root_repo(path):
-        if path is None:
-            return None
-        elif os.path.isdir(str(os.path.join(str(path), ".git"))):
-            return path
-        else:
-            return _find_root_repo(os.path.dirname(path))
-
-    repo_path = _find_root_repo(getattr(workflow, "basedir"))
-
-    # Initialize a Git repo object
-    repo = git.Repo(repo_path)
-
-    # Get the currently checked out commit
-    head_commit = repo.head.commit
-
-    # Iterate through all tags and find the one pointing to the HEAD commit
-    pipeline_version = None
-    for tag in repo.tags:
-        if tag.commit == head_commit:
-            pipeline_version = tag.name
-            break
-    if pipeline_version is None:
-        try:
-            pipeline_version = repo.active_branch
-        except TypeError as e:
-            logger = logging.getLogger(__name__)
-            logger.warning("Unable to get version (from tags) or an active_branch")
-
-    return {"pipeline_version": str(pipeline_version), "pipeline_commit": str(head_commit)}
 
 
 def get_software_version_from_labels(image_path):
@@ -351,9 +309,10 @@ def get_pipeline_version(workflow, pipeline_name="pipeline"):
     ------
     dict with pipeline version and commit, ex {'pipeline_name': {'version': 'v1', 'pipeline_commit': 'achgk2...kacaa'}}
     """
+    logger = logging.getLogger(__name__)
 
     def _find_root_repo(path):
-        if path is None:
+        if path is None or os.path.dirname(str(path)) == str(path):
             return None
         elif os.path.isdir(str(os.path.join(str(path), ".git"))):
             return path
@@ -361,6 +320,10 @@ def get_pipeline_version(workflow, pipeline_name="pipeline"):
             return _find_root_repo(os.path.dirname(path))
 
     repo_path = _find_root_repo(getattr(workflow, "basedir"))
+
+    if not repo_path:
+        logger.warning("Pipeline directory is not a git repo")
+        return {pipeline_name: {"version": None, "commit_id": None}}
 
     # Initialize a Git repo object
     repo = git.Repo(repo_path)
@@ -378,7 +341,6 @@ def get_pipeline_version(workflow, pipeline_name="pipeline"):
         try:
             pipeline_version = repo.active_branch
         except TypeError as e:
-            logger = logging.getLogger(__name__)
             logger.warning("Unable to get version (from tags) or an active_branch")
 
     return {pipeline_name: {"version": str(pipeline_version), "commit_id": str(head_commit)}}

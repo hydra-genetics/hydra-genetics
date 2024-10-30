@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.1.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.0.0...v3.1.0) (2024-10-30)
+
+
+### Features
+
+* hotspot report can handle missing VEP annotaiton ([174d7b0](https://github.com/hydra-genetics/hydra-genetics/commit/174d7b04cd0951388552b570528a2f39cfb48bfb))
+
+
+### Bug Fixes
+
+* change to append to handle string output properly ([bef4d6c](https://github.com/hydra-genetics/hydra-genetics/commit/bef4d6c362ee72f6027c07f43212d1f1aa951012))
+* crash if pipeline dir is not a git repo ([#373](https://github.com/hydra-genetics/hydra-genetics/issues/373)) ([de667e0](https://github.com/hydra-genetics/hydra-genetics/commit/de667e03c5b68c2d7e49df156452d99c620ccea5))
+* handle missing VEP annotation ([a5a929d](https://github.com/hydra-genetics/hydra-genetics/commit/a5a929df815555b7308c6829ae00889fc7491bbb))
+* Handling of missing multiqc module ([6b0d4b6](https://github.com/hydra-genetics/hydra-genetics/commit/6b0d4b62aa59addc82d041fe0b838bd2ce7f096a))
+* update python action ([266f849](https://github.com/hydra-genetics/hydra-genetics/commit/266f849bf0337360e5b396ab1c6edcfab7d15ad8))
+
 ## [3.0.0](https://github.com/hydra-genetics/hydra-genetics/compare/v2.0.1...v3.0.0) (2024-05-30)
 
 

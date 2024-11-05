@@ -54,7 +54,7 @@ def generate_hotspot_report(sample,
     for record in variants.header.records:
         if record.type == "INFO":
             if record['ID'] == "CSQ":
-                vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
+                vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split('">')[0].split("|"))}
 
     for variant in variants:
         if variant is None:
@@ -241,8 +241,8 @@ def generate_hotspot_report(sample,
         if record.type == "INFO":
             if record['ID'] == "CSQ":
                 log.info(" -- found vep information: {}".format(vcf_file))
-                log.debug(" -- -- {}".format(record['Description'].split("Format: ")[1].split("|")))
-                vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split("|"))}
+                log.debug(" -- -- {}".format(record['Description'].split("Format: ")[1].split('">')[0].split("|")))
+                vep_fields = {v: c for c, v in enumerate(record['Description'].split("Format: ")[1].split('">')[0].split("|"))}
                 annotation_extractor = utils.get_annotation_data_vep(vep_fields, transcript_dict)
 
     def get_depth(data, chr, start, stop):

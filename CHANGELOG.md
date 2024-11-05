@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.1](https://github.com/hydra-genetics/hydra-genetics/compare/v3.1.0...v3.1.1) (2024-11-05)
+
+
+### Bug Fixes
+
+* Correct reading VEP header from vcf ([76c3ed8](https://github.com/hydra-genetics/hydra-genetics/commit/76c3ed89dea6629a4f5b491d613cd66d2c91e28e))
+
 ## [3.1.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.0.0...v3.1.0) (2024-10-30)
 
 

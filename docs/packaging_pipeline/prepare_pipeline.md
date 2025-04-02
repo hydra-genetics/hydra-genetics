@@ -1,9 +1,9 @@
-# Adjust pipeline
+# Preparing a pipeline for packaging
 
 This is a one-time effort in order to make the pipeline compatible with a restricted cluster. Here we use the **Miarka** cluster as an example but can easily be changed to another cluster with some modifications.
 
 ## Make reference file configs
-These .yaml files are used for reference file download and packaging. Save files under config/references/. Example `config/references/references.hg19.yaml`
+These .yaml files are used for reference file download and packaging. Save files under config/references/. Example `config/references/references.hg19.yaml`. Files may be located on the local file system (see padded_regions in the examples below)  or hosted online (see svdb_query in the examples below).
 
 ### Examples
 File on local cluster
@@ -70,12 +70,12 @@ fusioncatcher:
       human_v102/shield_against_pseudo-genes.txt : ae05c5a3a1fc94c8d78442e5f539a47d
 ```
 
-## Modify configs and profile
+## Modifying configs and profile for a new cluster
 
 ### Resource
 
-Make a copy of the resources file and make sure it matches your system setup, ex:
- - partition
+Make a copy of the resources file and make adapt the new resource file to match the new clusters system setup, ex:
+ - partition(s)
  - number of cores
  - memory
 
@@ -114,7 +114,7 @@ pbrun_fq2bam:
 
 ### Config files
 
-Make new the config files were all file paths point to the reference directory. Example of new config `config/config.data.hg19.miarka.yaml`.
+Make a new config files where all file paths point to the reference directory. Example of new config `config/config.data.hg19.miarka.yaml`.
 ```yaml
 # Add the following line at the top with the actual absolute path (example /proj/ngi2024001/bin/wp1_gms560/design_and_ref_files)
 REFERENCE_DATA: "<EXTRACT_PATH>/>PIPELINE_SHORT_NAME>/design_and_ref_files"
@@ -137,7 +137,7 @@ Add path to local singularities in the main config.yaml file
 # config/config.yaml
 # Make sure the environment is active
 cp config/config.yaml config/config.yaml.copy
-hydra-genetics prepare-environment container-path-update -c config/config.yaml.copy -n config/config.yaml -p ${PATH_TO_singularity_cache}
+hydra-genetics prepare-environment container-path-update -c config/config.yaml.copy -n config/config.yaml -p ${PATH_TO_apptainer_cache}
 ```
 
 ### Profile
@@ -193,4 +193,4 @@ config = replace_dict_variables(config) # Add this after the imports
 
 ## Add build script to pipeline
 
-Add the build script `build/build_conda.sh` found in `https://github.com/hydra-genetics/hydra-genetics` to the pipeline.
+Add the build script `build/build_conda.sh` found in `https://github.com/hydra-genetics/hydra-genetics` to the pipeline. This can be placed in a subdirectory of your pipeline call build

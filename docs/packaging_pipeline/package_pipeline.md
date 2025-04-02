@@ -1,15 +1,15 @@
 # Pipeline packaging
 
-Some system doesn't allow access to internet making it impossible to have a pipeline that are dependent on resource hosted on web, like docker hub and github. This is solved by packing the pipeline and all dependencies.
-
-## On local computer or unrestricted cluster
-Do these instructions on your local computer or a cluster with internet access.
+Some systems don't allow access to internet making it impossible to use a pipeline that is dependent on resources hosted on the web, like docker hub and github. This is solved by packing the pipeline and all its dependencies.
 
 ## Package pipeline
 
+### On local computer or unrestricted cluster
+The following instructions on packaging the pipeline for an offline environment should be performed on your local computer or a cluster with internet access.
+
 Use a build script that will package all files needed to run the pipeline:
 
- * Environment
+ * The virtual environment
  * Github repositories (Pipeline, hydra-genetics modules, Snakemake-wrappers)
  * Singularities / Apptainers
 
@@ -26,7 +26,7 @@ module load miniconda3
 ```
 
 ### Package and download all files with the build script
-Set pipeline version and pipeline name which must match version and name found on github
+Set pipeline version and pipeline name which must match an existing version and name found on github
 List all reference config files that should be used as arguments to the build script
 
 

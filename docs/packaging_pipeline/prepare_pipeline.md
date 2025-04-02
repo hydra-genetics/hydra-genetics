@@ -135,7 +135,11 @@ hydra_local_path: "{EXTRACT_PATH}/{PIPELINE_SHORT_NAME}/{TAG_OR_BRANCH}/hydra-ge
 Add path to local singularities in the main config.yaml file 
 ```bash
 # config/config.yaml
-# Make sure the environment is active
+# Build new python environment if needed and install requirements
+python3.11 -m venv python_venv/
+pip install -r requirements.txt
+# Activate python environment if not already active
+source python_venv/bin/activate
 cp config/config.yaml config/config.yaml.copy
 hydra-genetics prepare-environment container-path-update -c config/config.yaml.copy -n config/config.yaml -p ${PATH_TO_apptainer_cache}
 ```

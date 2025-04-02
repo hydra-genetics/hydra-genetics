@@ -49,6 +49,6 @@ Copy the pipeline packaged files to the compute cluster.
 
 ```bash
 # Miarka
-rsync -Pav design_and_ref_files.tar.gz ${USER}@miarka1.uppmax.uu.se:/proj/ngi2024001/bin/${PIPELINE_SHORT_NAME}/
-rsync -Pav ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz apptainer_cache ${USER}@miarka1.uppmax.uu.se:/proj/ngi2024001/bin/${PIPELINE_SHORT_NAME}/${TAG_OR_BRANCH}/
+rsync -Pav design_and_ref_files.tar.gz <USER>@<cluster>:<basepath>/${PIPELINE_SHORT_NAME}/
+rsync -Pav ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz apptainer_cache <USER>@<cluster>:<basepath>/${PIPELINE_SHORT_NAME}/${TAG_OR_BRANCH}/
 ```

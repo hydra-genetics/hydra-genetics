@@ -4,7 +4,7 @@ set -e
 eval "$(conda shell.bash hook)"
 
 # Clone git
-git clone --branch ${TAG_OR_BRANCH} https://github.com/genomic-medicine-sweden/${PIPELINE_NAME}.git
+git clone --branch ${TAG_OR_BRANCH} ${PIPELINE_GITHUB_REPO}
 cd ${PIPELINE_NAME}
 
 # Create and activate conda, then install pipeline requirements
@@ -18,7 +18,7 @@ then
 fi
 
 mkdir ${PIPELINE_NAME}_${TAG_OR_BRANCH}
-git clone --branch ${TAG_OR_BRANCH} https://github.com/genomic-medicine-sweden/${PIPELINE_NAME}.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}
+git clone --branch ${TAG_OR_BRANCH} ${PIPELINE_GITHUB_REPO} ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}
 pip install -r ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}/requirements.txt 
 conda pack -n ${PIPELINE_NAME}_${TAG_OR_BRANCH} -o ${PIPELINE_NAME}_${TAG_OR_BRANCH}/env.tar.gz
 

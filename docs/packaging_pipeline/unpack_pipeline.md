@@ -48,5 +48,5 @@ hydra-genetics --debug references validate -c config/config.yaml -c config/confi
 
 
 ## Run Pipeline
-
+Load any required modules (e.g., slurm-drmaa for the clusters job submission system)
 Run the pipeline as usual but with updated profile or updated start script.

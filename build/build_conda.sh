@@ -7,9 +7,9 @@ eval "$(conda shell.bash hook)"
 git clone --branch ${TAG_OR_BRANCH} ${PIPELINE_GITHUB_REPO}
 cd ${PIPELINE_NAME}
 
-# Create and activate conda, then install pipeline requirements
-conda create --name ${PIPELINE_NAME}_${TAG_OR_BRANCH} python=3.9 -y
-conda activate ${PIPELINE_NAME}_${TAG_OR_BRANCH}
+# Create and activate conda envrionmnet in the current directory, then install pipeline requirements
+conda create --prefix ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env python=3.9 -y
+conda activate ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env
 conda install -c conda-forge pip -y
 
 if [ -d ${PIPELINE_NAME}_${TAG_OR_BRANCH} ];
@@ -19,8 +19,8 @@ fi
 
 mkdir ${PIPELINE_NAME}_${TAG_OR_BRANCH}
 git clone --branch ${TAG_OR_BRANCH} ${PIPELINE_GITHUB_REPO} ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}
-pip install -r ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}/requirements.txt 
-conda pack -n ${PIPELINE_NAME}_${TAG_OR_BRANCH} -o ${PIPELINE_NAME}_${TAG_OR_BRANCH}/env.tar.gz
+./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env/bin/pip3 install -r ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}/requirements.txt 
+conda pack -n ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env -o ${PIPELINE_NAME}_${TAG_OR_BRANCH}/env.tar.gz
 
 
 # Clone snakemake-wrappers and hydra-genetics

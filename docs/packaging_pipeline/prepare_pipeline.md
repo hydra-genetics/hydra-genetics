@@ -116,7 +116,7 @@ pbrun_fq2bam:
 
 Make a new config files where all file paths point to the reference directory. Example of new config `config/config.data.hg19.miarka.yaml`.
 ```yaml
-# Add the following line at the top with the actual absolute path (example /proj/ngi2024001/bin/wp1_gms560/design_and_ref_files)
+# Add the following line at the top with the actual absolute path (example /proj/ngi2024001/nobackup/bin/wp1_gms560/design_and_ref_files)
 REFERENCE_DATA: "<EXTRACT_PATH>/>PIPELINE_SHORT_NAME>/design_and_ref_files"
 
 # Adjust config so that all reference files have the {{REFERENCE_DATA}} variable
@@ -165,7 +165,7 @@ drmaa: "-p {resources.partition} -t {resources.time} -n {resources.threads} --me
 default-resources: [gres="", ]
 drmaa-log-dir: "slurm"
 singularity-args: "-e --cleanenv -B /proj -B $HOME --nv"
-singularity-prefix: "/proj/ngi2024001/bin/<PIPELINE_SHORT_NAME>/<TAG_OR_BRANCH>/singularity_cache/"
+singularity-prefix: "/proj/ngi2024001/nobackup/bin/<PIPELINE_SHORT_NAME>/<TAG_OR_BRANCH>/apptainer_cache/"
 wrapper-prefix: "git+file://proj/ngi2024001/bin/<PIPELINE_SHORT_NAME>/<TAG_OR_BRANCH>/snakemake-wrappers/"
 ```
 

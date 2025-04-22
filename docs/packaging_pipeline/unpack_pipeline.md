@@ -16,7 +16,7 @@ Extract environment and repositories
 ```bash
 # Miarka
 cd /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/${TAG_OR_BRANCH}/
-tar -strip-components=1 -zxvf ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz
+tar --strip-components=1 -zxvf ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz
 mkdir venv && tar zxvf env.tar.gz -C venv/
 source venv/bin/activate
 ```

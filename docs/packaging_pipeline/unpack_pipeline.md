@@ -27,9 +27,7 @@ Decompress reference files
 ```bash
 # Miarka
 cd /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/
-mkdir new_design_and_ref_files
-tar -xvf design_and_ref_files.tar.gz -C new_design_and_ref_files
-rsync -Pav new_design_and_ref_files/ design_and_ref_files/
+tar -xvf design_and_ref_files.tar.gz design_and_ref_files
 ```
 
 ## Validate reference files

@@ -42,7 +42,7 @@ git clone https://github.com/hydra-genetics/prealignment.git ${PIPELINE_NAME}_${
 git clone https://github.com/hydra-genetics/qc.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/qc
 git clone https://github.com/hydra-genetics/reports.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/reports
 git clone https://github.com/hydra-genetics/snv_indels.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/snv_indels
-
+git clone https://github.com/hydra-genetics/references.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/references
 
 # Pack all cloned repositories
 tar -zcvf ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz ${PIPELINE_NAME}_${TAG_OR_BRANCH}
@@ -59,6 +59,12 @@ done
 
 
 conda deactivate
+
+if [ -d ${PIPELINE_NAME}_${TAG_OR_BRANCH}_env ];
+then
+    rm -fr ${PIPELINE_NAME}_${TAG_OR_BRANCH}_env
+fi
+
 if [ -d ${PIPELINE_NAME}_${TAG_OR_BRANCH} ];
 then
     rm -fr ${PIPELINE_NAME}_${TAG_OR_BRANCH}

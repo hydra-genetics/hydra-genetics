@@ -48,7 +48,7 @@ git clone https://github.com/hydra-genetics/snv_indels.git ${PIPELINE_NAME}_${TA
 tar -zcvf ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz ${PIPELINE_NAME}_${TAG_OR_BRANCH}
 
 # Download containers
-conda activate ${PIPELINE_NAME}_${TAG_OR_BRANCH}
+conda activate ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env
 hydra-genetics prepare-environment create-singularity-files -c config/config.yaml -o apptainer_cache
 
 # Download references

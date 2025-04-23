@@ -11,7 +11,7 @@ USER="username_on_remote_cluster"
 
 ## Uncompress files
 
-Extract environment and repositories
+Extract environment and repositories, and run conda-unpack to remove prefixes from build environment.
 
 ```bash
 # Miarka
@@ -19,6 +19,7 @@ cd /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/${TAG_OR_BRANCH}/
 tar --strip-components=1 -zxvf ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz
 mkdir venv && tar zxvf env.tar.gz -C venv/
 source venv/bin/activate
+conda-unpack 
 ```
 
 Decompress reference files

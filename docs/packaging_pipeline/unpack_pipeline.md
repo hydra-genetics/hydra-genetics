@@ -38,7 +38,7 @@ Validate that all design and reference files exists and haven't changed
 
 ```bash
 # Twist solid example for Miarka
-hydra-genetics --debug references validate -c config/config.yaml -c config/config.data.hg19.yaml -v config/references/design_files.hg19.yaml -v config/references/nextseq.hg19.pon.yaml -v config/references/references.hg19.yaml -p /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/
+hydra-genetics --debug references validate -c config/config.yaml -c config/config.data.hg19.yaml -v config/references/design_files.hg19.yaml -v config/references/nextseq.hg19.pon.yaml -v config/references/references.hg19.yaml -p /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/design_and_ref_files
 ```
 
 ## Final adjustments of profile and start-scripts

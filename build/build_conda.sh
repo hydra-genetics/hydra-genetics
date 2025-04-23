@@ -8,7 +8,7 @@ git clone --branch ${TAG_OR_BRANCH} ${PIPELINE_GITHUB_REPO}
 cd ${PIPELINE_NAME}
 
 # Create and activate conda envrionmnet in the current directory, then install pipeline requirements
-conda create --prefix ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env python=3.9 -y
+conda create --prefix ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env python=${PYTHON_VERSION} -y
 conda activate ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env
 conda install -c conda-forge pip -y
 

@@ -11,7 +11,7 @@ USER="username_on_remote_cluster"
 
 ## Uncompress files
 
-Extract environment and repositories
+Extract environment and repositories, and run conda-unpack to remove prefixes from build environment.
 
 ```bash
 # Miarka
@@ -19,6 +19,7 @@ cd /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/${TAG_OR_BRANCH}/
 tar --strip-components=1 -zxvf ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz
 mkdir venv && tar zxvf env.tar.gz -C venv/
 source venv/bin/activate
+conda-unpack 
 ```
 
 Decompress reference files
@@ -26,9 +27,7 @@ Decompress reference files
 ```bash
 # Miarka
 cd /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/
-mkdir new_design_and_ref_files
-tar -xvf design_and_ref_files.tar.gz -C new_design_and_ref_files
-rsync -Pav new_design_and_ref_files/ design_and_ref_files/
+tar -xvf design_and_ref_files.tar.gz design_and_ref_files
 ```
 
 ## Validate reference files
@@ -39,7 +38,7 @@ Validate that all design and reference files exists and haven't changed
 
 ```bash
 # Twist solid example for Miarka
-hydra-genetics --debug references validate -c config/config.yaml -c config/config.data.hg19.yaml -v config/references/design_files.hg19.yaml -v config/references/nextseq.hg19.pon.yaml -v config/references/references.hg19.yaml -p /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/
+hydra-genetics --debug references validate -c config/config.yaml -c config/config.data.hg19.yaml -v config/references/design_files.hg19.yaml -v config/references/nextseq.hg19.pon.yaml -v config/references/references.hg19.yaml -p /proj/ngi2024001/nobackup/bin/${PIPELINE_SHORT_NAME}/design_and_ref_files
 ```
 
 ## Final adjustments of profile and start-scripts

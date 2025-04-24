@@ -7,9 +7,9 @@ eval "$(conda shell.bash hook)"
 git clone --branch ${TAG_OR_BRANCH} ${PIPELINE_GITHUB_REPO}
 cd ${PIPELINE_NAME}
 
-# Create and activate conda, then install pipeline requirements
-conda create --name ${PIPELINE_NAME}_${TAG_OR_BRANCH} python=3.9 -y
-conda activate ${PIPELINE_NAME}_${TAG_OR_BRANCH}
+# Create and activate conda envrionmnet in the current directory, then install pipeline requirements
+conda create --prefix ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env python=${PYTHON_VERSION} -y
+conda activate ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env
 conda install -c conda-forge pip -y
 
 if [ -d ${PIPELINE_NAME}_${TAG_OR_BRANCH} ];
@@ -19,8 +19,8 @@ fi
 
 mkdir ${PIPELINE_NAME}_${TAG_OR_BRANCH}
 git clone --branch ${TAG_OR_BRANCH} ${PIPELINE_GITHUB_REPO} ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}
-pip install -r ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}/requirements.txt 
-conda pack -n ${PIPELINE_NAME}_${TAG_OR_BRANCH} -o ${PIPELINE_NAME}_${TAG_OR_BRANCH}/env.tar.gz
+./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env/bin/pip3 install -r ${PIPELINE_NAME}_${TAG_OR_BRANCH}/${PIPELINE_NAME}/requirements.txt 
+conda pack --prefix ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env -o ${PIPELINE_NAME}_${TAG_OR_BRANCH}/env.tar.gz
 
 
 # Clone snakemake-wrappers and hydra-genetics
@@ -42,13 +42,13 @@ git clone https://github.com/hydra-genetics/prealignment.git ${PIPELINE_NAME}_${
 git clone https://github.com/hydra-genetics/qc.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/qc
 git clone https://github.com/hydra-genetics/reports.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/reports
 git clone https://github.com/hydra-genetics/snv_indels.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/snv_indels
-
+git clone https://github.com/hydra-genetics/references.git ${PIPELINE_NAME}_${TAG_OR_BRANCH}/hydra-genetics/references
 
 # Pack all cloned repositories
 tar -zcvf ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz ${PIPELINE_NAME}_${TAG_OR_BRANCH}
 
 # Download containers
-conda activate ${PIPELINE_NAME}_${TAG_OR_BRANCH}
+conda activate ./${PIPELINE_NAME}_${TAG_OR_BRANCH}_env
 hydra-genetics prepare-environment create-singularity-files -c config/config.yaml -o apptainer_cache
 
 # Download references
@@ -59,6 +59,12 @@ done
 
 
 conda deactivate
+
+if [ -d ${PIPELINE_NAME}_${TAG_OR_BRANCH}_env ];
+then
+    rm -fr ${PIPELINE_NAME}_${TAG_OR_BRANCH}_env
+fi
+
 if [ -d ${PIPELINE_NAME}_${TAG_OR_BRANCH} ];
 then
     rm -fr ${PIPELINE_NAME}_${TAG_OR_BRANCH}

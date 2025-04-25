@@ -29,6 +29,7 @@ module load miniconda3
 Set pipeline version and pipeline name which must match an existing version and name found on github
 List all reference config files that should be used as arguments to the build script
 
+An example build script can be found in the [hydra-genetics github repo](https://github.com/hydra-genetics/hydra-genetics/tree/develop/build)
 
 ```bash
 # Example: TAG_OR_BRANCH="v0.18.3" PIPELINE_NAME="Twist_Solid" PIPELINE_GITHUB_REPO="https://github.com/genomic-medicine-sweden/Twist_Solid.git" bash build/build_conda.sh config/references/design_files.hg19.yaml config/references/novaseq.hg19.pon.yaml config/references/references.hg19.yaml

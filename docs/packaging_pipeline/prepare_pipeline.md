@@ -144,6 +144,18 @@ cp config/config.yaml config/config.yaml.copy
 hydra-genetics prepare-environment container-path-update -c config/config.yaml.copy -n config/config.yaml -p ${PATH_TO_apptainer_cache}
 ```
 
+The path to the apptainer cache can also be given once at the top of the config, much like the REFERENCE_DATA variable.
+```
+PIPELINE_VERSION: v0.7.0
+REFERENCE_DATA: /proj/ngi2024001/nobackup/bin/wp3_te/design_and_ref_files
+APPTAINER_CACHE: /proj/ngi2024001/nobackup/bin/wp3_te/{{PIPELINE_VERSION}}/apptainer_cache
+
+hydra_local_path: /proj/ngi2024001/nobackup/bin/wp3_te/{{PIPELINE_VERSION}}/hydra-genetics
+
+default_container: '{{APPTAINER_CACHE}}/hydragenetics__common_1.11.1.sif'
+
+```
+
 ### Profile
 
 Make a new profile and adjust it to the computer cluster 

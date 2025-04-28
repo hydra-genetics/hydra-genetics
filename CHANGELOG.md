@@ -1,5 +1,50 @@
 # Changelog
 
+## [3.0.0](https://www.github.com/hydra-genetics/hydra-genetics/compare/v2.0.0...v3.0.0) (2025-04-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* output software versions into one file  (#361)
+
+### Features
+
+* hotspot report can handle missing VEP annotaiton ([174d7b0](https://www.github.com/hydra-genetics/hydra-genetics/commit/174d7b04cd0951388552b570528a2f39cfb48bfb))
+* output software versions into one file  ([#361](https://www.github.com/hydra-genetics/hydra-genetics/issues/361)) ([155f557](https://www.github.com/hydra-genetics/hydra-genetics/commit/155f55740d8ef8ab3f1b044247692443754922c0))
+* report all region_all variants in cov_and_mut ([98dc4f6](https://www.github.com/hydra-genetics/hydra-genetics/commit/98dc4f6e1f747ab39f7d05e9083a2d2026816010))
+* update build_conda.sh ([6a34754](https://www.github.com/hydra-genetics/hydra-genetics/commit/6a347541b2feb46c9b0f230ff51927aad02ce021))
+
+
+### Bug Fixes
+
+* change to append to handle string output properly ([bef4d6c](https://www.github.com/hydra-genetics/hydra-genetics/commit/bef4d6c362ee72f6027c07f43212d1f1aa951012))
+* convert name_list to set to remove duplicate items ([024cdb6](https://www.github.com/hydra-genetics/hydra-genetics/commit/024cdb6528ca9b24da95da93ac08a64b40da42da))
+* Correct reading VEP header from vcf ([76c3ed8](https://www.github.com/hydra-genetics/hydra-genetics/commit/76c3ed89dea6629a4f5b491d613cd66d2c91e28e))
+* crash if pipeline dir is not a git repo ([#373](https://www.github.com/hydra-genetics/hydra-genetics/issues/373)) ([de667e0](https://www.github.com/hydra-genetics/hydra-genetics/commit/de667e03c5b68c2d7e49df156452d99c620ccea5))
+* filter more one docker labels ([19a23cf](https://www.github.com/hydra-genetics/hydra-genetics/commit/19a23cf5dd91dff351823ff37f19f964eec153cd))
+* handle missing VEP annotation ([a5a929d](https://www.github.com/hydra-genetics/hydra-genetics/commit/a5a929df815555b7308c6829ae00889fc7491bbb))
+* handle remote on local file the same ([2e02578](https://www.github.com/hydra-genetics/hydra-genetics/commit/2e025780b83c49d849e338ef6444804a6110c2d5))
+* Handling of missing multiqc module ([6b0d4b6](https://www.github.com/hydra-genetics/hydra-genetics/commit/6b0d4b62aa59addc82d041fe0b838bd2ce7f096a))
+* name and version extraction from name_and_version split ([b2267ac](https://www.github.com/hydra-genetics/hydra-genetics/commit/b2267ac05ab8037ae8e23c4ba5f51d8838091eee))
+* **pipeline-template:** remove conda/mamba from the integration template ([d507144](https://www.github.com/hydra-genetics/hydra-genetics/commit/d50714436aec2aec464179db72820875da4653ca))
+* update pycodestyle actions ([07a495e](https://www.github.com/hydra-genetics/hydra-genetics/commit/07a495ecfe25caaaebe7a70b5a386972aad6fcb5))
+* update python action ([266f849](https://www.github.com/hydra-genetics/hydra-genetics/commit/266f849bf0337360e5b396ab1c6edcfab7d15ad8))
+
+
+### Documentation
+
+* add python environment creation ([21c5d07](https://www.github.com/hydra-genetics/hydra-genetics/commit/21c5d07bd108692aba525e61be0b216efc9f705a))
+* added documentation on how to package pipeline for a restricted cluster like Miarka ([526c611](https://www.github.com/hydra-genetics/hydra-genetics/commit/526c611b5fa4af4be6377fa0a2d7d10351a7b3c1))
+* Apply suggestions from code review ([67f085c](https://www.github.com/hydra-genetics/hydra-genetics/commit/67f085cbc201be2b887d1264a44026c517d5475d))
+* Apply suggestions from code review ([8ce0e1d](https://www.github.com/hydra-genetics/hydra-genetics/commit/8ce0e1d4ab740b9e23af5a5504773de367326861))
+* examples use of {{APPTAINER_CACHE}} and {{PIPELINE_VERSION}} in config ([6d3178e](https://www.github.com/hydra-genetics/hydra-genetics/commit/6d3178efc9d9af6908dce1ae35d58b5906c870c8))
+* github_repo variable and conda links ([d37671f](https://www.github.com/hydra-genetics/hydra-genetics/commit/d37671f2011c3c226e340a8cb750dabdeae780bf))
+* github_repo variable in build command ([539b639](https://www.github.com/hydra-genetics/hydra-genetics/commit/539b6393497d37c06257ea12d3ca0e6718855ca3))
+* github_repo variable in build script ([8964f52](https://www.github.com/hydra-genetics/hydra-genetics/commit/8964f5293da8b790499c25a49744df6648f84648))
+* link to the build script ([ede7043](https://www.github.com/hydra-genetics/hydra-genetics/commit/ede704343aa8cbc8f1c7088fcdad1e21ea742072))
+* rm server name ([a90723a](https://www.github.com/hydra-genetics/hydra-genetics/commit/a90723a4cad7894fb7ebad12630a39f91196614e))
+* Update docs/packaging_pipeline/unpack_pipeline.md ([186520f](https://www.github.com/hydra-genetics/hydra-genetics/commit/186520f5e18a704af205add7dd519a344a24ddf5))
+
 ## [3.1.1](https://github.com/hydra-genetics/hydra-genetics/compare/v3.1.0...v3.1.1) (2024-11-05)
 
 

@@ -1,5 +1,33 @@
 # Changelog
 
+## [3.2.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.1.1...v3.2.0) (2025-04-28)
+
+
+### Features
+
+* update build_conda.sh ([6a34754](https://github.com/hydra-genetics/hydra-genetics/commit/6a347541b2feb46c9b0f230ff51927aad02ce021))
+
+
+### Bug Fixes
+
+* **pipeline-template:** remove conda/mamba from the integration template ([d507144](https://github.com/hydra-genetics/hydra-genetics/commit/d50714436aec2aec464179db72820875da4653ca))
+* update pycodestyle actions ([07a495e](https://github.com/hydra-genetics/hydra-genetics/commit/07a495ecfe25caaaebe7a70b5a386972aad6fcb5))
+
+
+### Documentation
+
+* add python environment creation ([21c5d07](https://github.com/hydra-genetics/hydra-genetics/commit/21c5d07bd108692aba525e61be0b216efc9f705a))
+* added documentation on how to package pipeline for a restricted cluster like Miarka ([526c611](https://github.com/hydra-genetics/hydra-genetics/commit/526c611b5fa4af4be6377fa0a2d7d10351a7b3c1))
+* Apply suggestions from code review ([67f085c](https://github.com/hydra-genetics/hydra-genetics/commit/67f085cbc201be2b887d1264a44026c517d5475d))
+* Apply suggestions from code review ([8ce0e1d](https://github.com/hydra-genetics/hydra-genetics/commit/8ce0e1d4ab740b9e23af5a5504773de367326861))
+* examples use of {{APPTAINER_CACHE}} and {{PIPELINE_VERSION}} in config ([6d3178e](https://github.com/hydra-genetics/hydra-genetics/commit/6d3178efc9d9af6908dce1ae35d58b5906c870c8))
+* github_repo variable and conda links ([d37671f](https://github.com/hydra-genetics/hydra-genetics/commit/d37671f2011c3c226e340a8cb750dabdeae780bf))
+* github_repo variable in build command ([539b639](https://github.com/hydra-genetics/hydra-genetics/commit/539b6393497d37c06257ea12d3ca0e6718855ca3))
+* github_repo variable in build script ([8964f52](https://github.com/hydra-genetics/hydra-genetics/commit/8964f5293da8b790499c25a49744df6648f84648))
+* link to the build script ([ede7043](https://github.com/hydra-genetics/hydra-genetics/commit/ede704343aa8cbc8f1c7088fcdad1e21ea742072))
+* rm server name ([a90723a](https://github.com/hydra-genetics/hydra-genetics/commit/a90723a4cad7894fb7ebad12630a39f91196614e))
+* Update docs/packaging_pipeline/unpack_pipeline.md ([186520f](https://github.com/hydra-genetics/hydra-genetics/commit/186520f5e18a704af205add7dd519a344a24ddf5))
+
 ## [3.1.1](https://github.com/hydra-genetics/hydra-genetics/compare/v3.1.0...v3.1.1) (2024-11-05)
 
 

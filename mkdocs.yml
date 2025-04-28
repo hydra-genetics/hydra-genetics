@@ -11,6 +11,10 @@ nav:
     - Cluster profile: run_pipeline/profile.md
     - Create sample files: run_pipeline/create_sample_files.md
     - Make a python environment: run_pipeline/environment.md
+  - How-to run on a restricted cluster:
+    - Preparing your pipeline: packaging_pipeline/prepare_pipeline.md
+    - Packaging your pipeline: packaging_pipeline/package_pipeline.md
+    - Installing your pipeline on a restricted cluster: packaging_pipeline/unpack_pipeline.md
   - Development:
     - Snakemake rules: development/rules.md
     - Code standards: development/standards.md

@@ -155,6 +155,10 @@ hydra_local_path: /proj/ngi2024001/nobackup/bin/wp3_te/{{PIPELINE_VERSION}}/hydr
 default_container: '{{APPTAINER_CACHE}}/hydragenetics__common_1.11.1.sif'
 
 ```
+In this case the prepare-environent command would be:
+```bash
+hydra-genetics prepare-environment container-path-update -c config/config.yaml.copy -n config/config.yaml -p {{APPTAINER_CACHE}}
+```
 
 ### Profile
 

@@ -2,6 +2,8 @@
 
 import unittest
 import yaml
+import types
+from hydra_genetics.utils.misc import get_longread_bam, get_input_aligned_bam, get_input_haplotagged_bam
 
 
 class TestResourcesUtils(unittest.TestCase):
@@ -43,3 +45,87 @@ class TestResourcesUtils(unittest.TestCase):
         from hydra_genetics.utils.misc import replace_dict_variables
         self.assertEqual(replace_dict_variables(config),
                          {'PROJECT': 'MY variable', 'bwa_mem': {'extra': 'some settings MY variable'}})
+
+
+class TestGetInputAlignedBam(unittest.TestCase):
+    def test_get_longread_bam(self):
+        # Test with default aligner
+        config = {}
+        wildcards = types.SimpleNamespace(sample="sample1", type="T")
+        bam, bai = get_longread_bam(wildcards, config)
+        self.assertEqual(bam, "alignment/minimap2_align/sample1_T.bam")
+        self.assertEqual(bai, "alignment/minimap2_align/sample1_T.bam.bai")
+        # Test with custom aligner
+        config = {"aligner": "pbmm2"}
+        wildcards = types.SimpleNamespace(sample="sample2", type="N")
+        bam, bai = get_longread_bam(wildcards, config)
+        self.assertEqual(bam, "alignment/pbmm2_align/sample2_N.bam")
+        self.assertEqual(bai, "alignment/pbmm2_align/sample2_N.bam.bai")
+
+    def test_with_aligner(self):
+        config = {"aligner": "minimap2"}
+        wildcards = types.SimpleNamespace(sample="S1", type="T")
+        bam, bai = get_input_aligned_bam(wildcards, config)
+        self.assertEqual(bam, "alignment/minimap2_align/S1_T.bam")
+        self.assertEqual(bai, "alignment/minimap2_align/S1_T.bam.bai")
+
+    def test_without_aligner(self):
+        config = {}
+        wildcards = types.SimpleNamespace(sample="S2", type="N")
+        bam, bai = get_input_aligned_bam(wildcards, config)
+        self.assertEqual(bam, "alignment/samtools_merge_bam/S2_N.bam")
+        self.assertEqual(bai, "alignment/samtools_merge_bam/S2_N.bam.bai")
+
+    def test_custom_default_path(self):
+        config = {}
+        wildcards = types.SimpleNamespace(sample="S3", type="T")
+        bam, bai = get_input_aligned_bam(wildcards, config, default_path="custom/path")
+        self.assertEqual(bam, "custom/path/S3_T.bam")
+        self.assertEqual(bai, "custom/path/S3_T.bam.bai")
+
+    def test_missing_sample_key(self):
+        config = {}
+        wildcards = types.SimpleNamespace(type="T")
+        with self.assertRaises(Exception):
+            get_input_aligned_bam(wildcards, config)
+
+    def test_missing_type_key(self):
+        config = {}
+        wildcards = types.SimpleNamespace(sample="S4")
+        with self.assertRaises(Exception):
+            get_input_aligned_bam(wildcards, config)
+
+
+class TestGetInputHaplotaggedBam(unittest.TestCase):
+    def test_with_haplotagging(self):
+        config = {"haplotagging": "whatshap"}
+        wildcards = types.SimpleNamespace(sample="S1", type="T")
+        bam, bai = get_input_haplotagged_bam(wildcards, config)
+        self.assertEqual(bam, "snv_indels/whatshap/S1_T.haplotagged.bam")
+        self.assertEqual(bai, "snv_indels/whatshap/S1_T.haplotagged.bam.bai")
+
+    def test_without_haplotagging(self):
+        config = {}
+        wildcards = types.SimpleNamespace(sample="S2", type="N")
+        bam, bai = get_input_haplotagged_bam(wildcards, config)
+        self.assertEqual(bam, "alignment/samtools_merge_bam/S2_N.bam")
+        self.assertEqual(bai, "alignment/samtools_merge_bam/S2_N.bam.bai")
+
+    def test_custom_default_path(self):
+        config = {}
+        wildcards = types.SimpleNamespace(sample="S3", type="T")
+        bam, bai = get_input_haplotagged_bam(wildcards, config, default_path="custom/path")
+        self.assertEqual(bam, "custom/path/S3_T.bam")
+        self.assertEqual(bai, "custom/path/S3_T.bam.bai")
+
+    def test_missing_sample_key(self):
+        config = {"haplotagging": "whatshap"}
+        wildcards = types.SimpleNamespace(type="T")
+        with self.assertRaises(Exception):
+            get_input_haplotagged_bam(wildcards, config)
+
+    def test_missing_type_key(self):
+        config = {"haplotagging": "whatshap"}
+        wildcards = types.SimpleNamespace(sample="S4")
+        with self.assertRaises(Exception):
+            get_input_haplotagged_bam(wildcards, config)

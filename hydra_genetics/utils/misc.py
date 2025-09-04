@@ -6,7 +6,99 @@ import os
 import yaml
 import re
 from datetime import datetime
-from snakemake.sourcecache import GithubFile, LocalGitFile
+from snakemake.sourcecache import GithubFile, LocalGitFile, WorkflowError
+
+
+def get_longread_bam(wildcards, config):
+    """
+    This function generates the file paths for a BAM file and its corresponding index file
+    based on the sample and type specified in the wildcards, as well as the aligner
+    specified in the config.
+
+    Args:
+        wildcards (object): A Snakemake wildcards object containing the following attributes:
+          - sample: The name of the sample.
+          - type: The type of data ("T" for tumor, "N" for normal).
+        config (dict): A dictionary containing configuration parameters, including:
+          - aligner (str): The aligner used for generating the BAM file (default is "minimap2").
+
+    Returns:
+        tuple: A tuple containing two strings:
+            - alignment_path: The file path to the BAM file.
+            - index_path: The file path to the BAM index file.
+
+    Notes:
+        - The aligner is retrieved from the config file
+        using the key "aligner". If not specified, it defaults to "minimap2".
+        - The returned paths are constructed under the "alignment" directory, with subdirectories
+        and filenames based on the aligner, sample, and type.
+    """
+    aligner = config.get("aligner", "minimap2")
+    alignment_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam"
+    index_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam.bai"
+    return alignment_path, index_path
+
+
+def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_merge_bam"):
+    """
+    Compile the paths to input aligned BAM and BAI files for the workflow.
+
+    This function determines the appropriate BAM file path based on the configuration
+    and workflow parameters.
+
+    Args:
+        wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
+        config (dict): Configuration dictionary with possible keys:
+            - aligner (str or None): The aligner used for generating the BAM file.
+        default_path (str): Default path for BAM files if no specific configuration is provided.
+
+    Returns:
+        tuple: A tuple containing the alignment BAM file path and its BAI index file path.
+    """
+    try:
+        if config.get("aligner") is not None:
+            # Use aligner to compile the paths
+            alignment_path, index_path = get_longread_bam(wildcards, config)
+        else:
+            # no aligner, use the default path
+            alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"
+            index_path = f"{alignment_path}.bai"
+
+        return alignment_path, index_path
+
+    except KeyError as e:
+        raise WorkflowError(f"Missing required wildcards: {e}")
+
+
+def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtools_merge_bam"):
+    """
+    Compile paths to haplotagged BAM/BAI files (may be required for downstream analyses with e.g. cnvkit_batch)
+
+    This function determines the appropriate BAM file path based on the configuration.
+
+    Args:
+        wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
+        config (dict): Configuration dictionary with possible keys:
+            - haplotagging (str or None): The tool used for haplotagging.
+        default_path (str): Default path for BAM files if no specific configuration is provided.
+    Returns:
+        tuple: A tuple containing the alignment BAM file path and its BAI index file path.
+
+    """
+    try:
+        if config.get("haplotagging") is not None:
+            tool = config.get("haplotagging")
+            alignment_path = f"snv_indels/{tool}/{wildcards.sample}_{wildcards.type}.haplotagged.bam"
+            index_path = f"{alignment_path}.bai"
+        else:
+            # no haplotagging, use the default path
+            alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"
+            index_path = f"{alignment_path}.bai"
+
+        return alignment_path, index_path
+
+    except KeyError as e:
+        raise WorkflowError(f"Missing required wildcards: {e}")
 
 
 def get_module_snakefile(config, repo, path, tag):

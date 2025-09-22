@@ -2,7 +2,6 @@ import gzip
 import hashlib
 import logging
 import os
-import requests
 import shutil
 import tarfile
 import tempfile

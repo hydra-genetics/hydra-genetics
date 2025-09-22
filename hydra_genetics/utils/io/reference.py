@@ -7,6 +7,7 @@ import shutil
 import tarfile
 import tempfile
 from urllib.request import urlretrieve
+from urllib.error import HTTPError
 
 # Expected input file format
 # --------------------------
@@ -69,7 +70,12 @@ def fetch_reference_data(validation_data, output_dir,
                     temp_content_holder = os.path.join(tmpdirname, "tempfile")
 
                     # Fetch content and merge any split files
-                    fetch_url_content(value['url'], temp_content_holder, tmpdirname)
+                    try:
+                        fetch_url_content(value['url'], temp_content_holder, tmpdirname)
+                    except HTTPError as e:
+                        logging.error(f"failed to fetch resource at {value['url']}: {e}")
+                        failed.append(content_path)
+                        continue
 
                     checksum_value = value['compressed_checksum'] if 'compressed_checksum' in value else value['checksum']
 

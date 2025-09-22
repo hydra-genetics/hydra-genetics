@@ -19,6 +19,11 @@
      checksum:  2d0065f49766670be5735d49199e0408
      url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/ref_genomes/hg19.with.mt.fasta
 
+   not_a_file:
+     path: not_a_file.txt
+     type: file
+     url: https://raw.githubusercontent.com/hydra-genetics/hydra-genetics/develop/tests/utils/files/data/not_a_file.txt
+
    design_bed:
      path: DNA_DATA/design.bed
      type: file

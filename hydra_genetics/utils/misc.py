@@ -70,35 +70,40 @@ def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_me
         raise WorkflowError(f"Missing required wildcards: {e}")
 
 
-def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtools_merge_bam"):
+def get_input_haplotagged_bam(wildcards, haplotag_path=None, default_path="alignment/samtools_merge_bam", suffix=None):
     """
     Compile paths to haplotagged BAM/BAI files (may be required for downstream analyses with e.g. cnvkit_batch)
-
     This function determines the appropriate BAM file path based on the configuration.
 
+    For backward compatibility, if only wildcards are provided, the function will default to using the
+    default path and return 'alignment/samtools_merge_bam/{sample}_{type}.bam'.
+    
     Args:
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
-        config (dict): Configuration dictionary with possible keys:
-            - haplotagging (str or None): The tool used for haplotagging.
+        haplotag_path (str): Path to the haplotagged BAM, e.g. 'snv_indels/whatshap_haplotag'
         default_path (str): Default path for BAM files if no specific configuration is provided.
+        suffix (str): Suffix to append to the BAM file name (default is "haplotagged").
     Returns:
         tuple: A tuple containing the alignment BAM file path and its BAI index file path.
 
     """
     try:
-        if config.get("haplotagging") is not None:
-            tool = config.get("haplotagging")
-            alignment_path = f"snv_indels/{tool}/{wildcards.sample}_{wildcards.type}.haplotagged.bam"
-            index_path = f"{alignment_path}.bai"
-        else:
-            # no haplotagging, use the default path
-            alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"
-            index_path = f"{alignment_path}.bai"
-
-        return alignment_path, index_path
-
-    except KeyError as e:
+        sample_name = getattr(wildcards, "sample")
+        sample_type = getattr(wildcards, "type")
+    except AttributeError as e:
         raise WorkflowError(f"Missing required wildcards: {e}")
+
+    path_to_input_bam = haplotag_path if haplotag_path is not None else default_path
+
+    if suffix:  # This will be False for None and ''
+        file_name = f"{sample_name}_{sample_type}.{suffix}.bam"
+    else:
+        file_name = f"{sample_name}_{sample_type}.bam"
+
+    bam_path = os.path.join(path_to_input_bam, file_name)
+    bai_path = f"{bam_path}.bai"
+
+    return bam_path, bai_path
 
 
 def get_module_snakefile(config, repo, path, tag):

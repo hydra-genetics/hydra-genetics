@@ -4,6 +4,7 @@ import unittest
 import yaml
 import types
 from hydra_genetics.utils.misc import get_longread_bam, get_input_aligned_bam, get_input_haplotagged_bam
+from snakemake.sourcecache import WorkflowError
 
 
 class TestResourcesUtils(unittest.TestCase):
@@ -97,35 +98,85 @@ class TestGetInputAlignedBam(unittest.TestCase):
 
 
 class TestGetInputHaplotaggedBam(unittest.TestCase):
-    def test_with_haplotagging(self):
-        config = {"haplotagging": "whatshap"}
-        wildcards = types.SimpleNamespace(sample="S1", type="T")
-        bam, bai = get_input_haplotagged_bam(wildcards, config)
-        self.assertEqual(bam, "snv_indels/whatshap/S1_T.haplotagged.bam")
-        self.assertEqual(bai, "snv_indels/whatshap/S1_T.haplotagged.bam.bai")
-
-    def test_without_haplotagging(self):
-        config = {}
-        wildcards = types.SimpleNamespace(sample="S2", type="N")
-        bam, bai = get_input_haplotagged_bam(wildcards, config)
-        self.assertEqual(bam, "alignment/samtools_merge_bam/S2_N.bam")
-        self.assertEqual(bai, "alignment/samtools_merge_bam/S2_N.bam.bai")
-
-    def test_custom_default_path(self):
-        config = {}
-        wildcards = types.SimpleNamespace(sample="S3", type="T")
-        bam, bai = get_input_haplotagged_bam(wildcards, config, default_path="custom/path")
-        self.assertEqual(bam, "custom/path/S3_T.bam")
-        self.assertEqual(bai, "custom/path/S3_T.bam.bai")
-
-    def test_missing_sample_key(self):
-        config = {"haplotagging": "whatshap"}
+    def test_default_path_only(self):
+        wildcards = types.SimpleNamespace(sample="S10", type="N")
+        bam, bai = get_input_haplotagged_bam(
+            wildcards,
+            default_path="custom/default/path"
+        )
+        self.assertEqual(bam, "custom/default/path/S10_N.bam")
+        self.assertEqual(bai, "custom/default/path/S10_N.bam.bai")
+    
+    def test_missing_type_wildcard(self):
+        wildcards = types.SimpleNamespace(sample="S11")
+        with self.assertRaises(WorkflowError):
+            get_input_haplotagged_bam(wildcards)
+    
+    def test_missing_sample_wildcard(self):
         wildcards = types.SimpleNamespace(type="T")
-        with self.assertRaises(Exception):
-            get_input_haplotagged_bam(wildcards, config)
+        with self.assertRaises(WorkflowError):
+            get_input_haplotagged_bam(wildcards)
+    
+    def test_empty_haplotag_path(self):
+        wildcards = types.SimpleNamespace(sample="S12", type="T")
+        bam, bai = get_input_haplotagged_bam(
+            wildcards,
+            haplotag_path=""
+        )
+        self.assertEqual(bam, "S12_T.bam")
+        self.assertEqual(bai, "S12_T.bam.bai")
+    
+    def test_default_values(self):
+        wildcards = types.SimpleNamespace(sample="S13", type="N")
+        bam, bai = get_input_haplotagged_bam(wildcards)
+        self.assertEqual(bam, "alignment/samtools_merge_bam/S13_N.bam")
+        self.assertEqual(bai, "alignment/samtools_merge_bam/S13_N.bam.bai")
+    def test_with_custom_suffix(self):
+        wildcards = types.SimpleNamespace(sample="S5", type="T")
+        bam, bai = get_input_haplotagged_bam(
+            wildcards, 
+            haplotag_path="snv_indels/whatshap_haplotag",
+            suffix="custom_suffix"
+        )
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S5_T.custom_suffix.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S5_T.custom_suffix.bam.bai")
 
-    def test_missing_type_key(self):
-        config = {"haplotagging": "whatshap"}
-        wildcards = types.SimpleNamespace(sample="S4")
-        with self.assertRaises(Exception):
-            get_input_haplotagged_bam(wildcards, config)
+    def test_with_empty_suffix(self):
+        wildcards = types.SimpleNamespace(sample="S6", type="T")
+        bam, bai = get_input_haplotagged_bam(
+            wildcards, 
+            haplotag_path="snv_indels/whatshap_haplotag",
+            suffix=""
+        )
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S6_T.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S6_T.bam.bai")
+
+    def test_with_haplotag_path_only(self):
+        wildcards = types.SimpleNamespace(sample="S7", type="N")
+        bam, bai = get_input_haplotagged_bam(
+            wildcards,
+            haplotag_path="custom/haplotag/path"
+        )
+        self.assertEqual(bam, "custom/haplotag/path/S7_N.bam")
+        self.assertEqual(bai, "custom/haplotag/path/S7_N.bam.bai")
+
+    def test_with_all_parameters(self):
+        wildcards = types.SimpleNamespace(sample="S8", type="T")
+        bam, bai = get_input_haplotagged_bam(
+            wildcards,
+            haplotag_path="custom/path",
+            default_path="should/not/use",
+            suffix="special"
+        )
+        self.assertEqual(bam, "custom/path/S8_T.special.bam")
+        self.assertEqual(bai, "custom/path/S8_T.special.bam.bai")
+
+    def test_none_suffix(self):
+        wildcards = types.SimpleNamespace(sample="S9", type="N")
+        bam, bai = get_input_haplotagged_bam(
+            wildcards,
+            haplotag_path="path",
+            suffix=None
+        )
+        self.assertEqual(bam, "path/S9_N.bam")
+        self.assertEqual(bai, "path/S9_N.bam.bai")

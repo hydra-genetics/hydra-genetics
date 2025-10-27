@@ -78,7 +78,7 @@ def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtool
 
     For backward compatibility, if only wildcards and config are provided, the function will default to using the
     default path and return 'alignment/samtools_merge_bam/{sample}_{type}.bam'.
-    
+
     Args:
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
         config (dict): config with or without 'haplotag_path' key.
@@ -93,14 +93,14 @@ def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtool
         sample_type = getattr(wildcards, "type")
     except AttributeError as e:
         raise WorkflowError(f"Missing required wildcards: {e}")
-    
+
     haplotag_path = config.get("haplotag_path", None)
     path_to_input_bam = haplotag_path if haplotag_path is not None else default_path
-    
+
     # check for suffix in the config
     if suffix is None:
         suffix = config.get("haplotag_suffix", None)
-    
+
     if suffix:  # This will be False for None and ''
         file_name = f"{sample_name}_{sample_type}.{suffix}.bam"
     else:

@@ -6,7 +6,7 @@ import os
 import yaml
 import re
 from datetime import datetime
-from snakemake.sourcecache import GithubFile, LocalGitFile
+from snakemake.sourcecache import GithubFile, LocalGitFile, WorkflowError
 
 
 def get_module_snakefile(config, repo, path, tag):

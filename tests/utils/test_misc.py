@@ -108,19 +108,19 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         )
         self.assertEqual(bam, "custom/default/path/S10_N.bam")
         self.assertEqual(bai, "custom/default/path/S10_N.bam.bai")
-    
+
     def test_missing_type_wildcard(self):
         wildcards = types.SimpleNamespace(sample="S11")
         config = dict()
         with self.assertRaises(WorkflowError):
             get_input_haplotagged_bam(wildcards, config)
-    
+
     def test_missing_sample_wildcard(self):
         wildcards = types.SimpleNamespace(type="T")
         config = dict()
         with self.assertRaises(WorkflowError):
             get_input_haplotagged_bam(wildcards, config)
-    
+
     def test_empty_haplotag_path(self):
         wildcards = types.SimpleNamespace(sample="S12", type="T")
         config = dict({'haplotag_path': ""})
@@ -147,7 +147,7 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         bam, bai = get_input_haplotagged_bam(wildcards, config)
         self.assertEqual(bam, "alignment/samtools_merge_bam/S13_N.bam")
         self.assertEqual(bai, "alignment/samtools_merge_bam/S13_N.bam.bai")
-    
+
     def test_with_custom_suffix(self):
         wildcards = types.SimpleNamespace(sample="S5", type="T")
         config = dict({"haplotag_path": "snv_indels/whatshap_haplotag"})

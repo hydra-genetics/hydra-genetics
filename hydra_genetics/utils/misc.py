@@ -70,19 +70,20 @@ def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_me
         raise WorkflowError(f"Missing required wildcards: {e}")
 
 
-def get_input_haplotagged_bam(wildcards, haplotag_path=None, default_path="alignment/samtools_merge_bam", suffix=None):
+def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtools_merge_bam", suffix=None):
     """
     Compile paths to haplotagged BAM/BAI files (may be required for downstream analyses with e.g. cnvkit_batch)
-    This function determines the appropriate BAM file path based on the configuration.
+    This function determines the appropriate BAM file path based on the configuration. suffix can be provided
+    either as a function argument or in the config file under the key 'haplotag_suffix'.
 
-    For backward compatibility, if only wildcards are provided, the function will default to using the
+    For backward compatibility, if only wildcards and config are provided, the function will default to using the
     default path and return 'alignment/samtools_merge_bam/{sample}_{type}.bam'.
     
     Args:
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
-        haplotag_path (str): Path to the haplotagged BAM, e.g. 'snv_indels/whatshap_haplotag'
+        config (dict): config with or without 'haplotag_path' key.
         default_path (str): Default path for BAM files if no specific configuration is provided.
-        suffix (str): Suffix to append to the BAM file name (default is "haplotagged").
+        suffix (str): Suffix to append to the BAM file name (default is None).
     Returns:
         tuple: A tuple containing the alignment BAM file path and its BAI index file path.
 
@@ -92,9 +93,14 @@ def get_input_haplotagged_bam(wildcards, haplotag_path=None, default_path="align
         sample_type = getattr(wildcards, "type")
     except AttributeError as e:
         raise WorkflowError(f"Missing required wildcards: {e}")
-
+    
+    haplotag_path = config.get("haplotag_path", None)
     path_to_input_bam = haplotag_path if haplotag_path is not None else default_path
-
+    
+    # check for suffix in the config
+    if suffix is None:
+        suffix = config.get("haplotag_suffix", None)
+    
     if suffix:  # This will be False for None and ''
         file_name = f"{sample_name}_{sample_type}.{suffix}.bam"
     else:

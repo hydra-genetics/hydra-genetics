@@ -47,6 +47,7 @@ class TestResourcesUtils(unittest.TestCase):
         self.assertEqual(replace_dict_variables(config),
                          {'PROJECT': 'MY variable', 'bwa_mem': {'extra': 'some settings MY variable'}})
 
+
 class TestGetInputAlignedBam(unittest.TestCase):
     def test_get_longread_bam(self):
         # Test with default aligner

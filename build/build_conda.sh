@@ -57,7 +57,6 @@ do
     hydra-genetics --debug references download -o design_and_ref_files -v $reference_config
 done
 
-
 conda deactivate
 
 if [ -d ${PIPELINE_NAME}_${TAG_OR_BRANCH}_env ];

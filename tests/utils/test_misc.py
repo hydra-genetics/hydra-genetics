@@ -176,7 +176,7 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         wildcards = types.SimpleNamespace(sample="S6", type="T")
         config = dict({"haplotag_path": "snv_indels/whatshap_haplotag"})
         bam, bai = get_input_haplotagged_bam(
-            wildcards, 
+            wildcards,
             config,
             suffix=""
         )

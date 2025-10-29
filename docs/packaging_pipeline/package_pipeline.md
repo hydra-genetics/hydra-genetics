@@ -49,7 +49,9 @@ The following files and folders have been created and need to be moved to your s
 Copy the pipeline packaged files to the compute cluster.
 
 ```bash
-# Miarka
+# Commands to be run from the cluster where the pipeline was packaged
+# <USER>@<cluster>:<basepath> are relative to the offline cluster where the package pipeline should be transferred
+# For example: run the `rsync` command from marvin with your credentials on miarka
 rsync -Pav design_and_ref_files.tar.gz <USER>@<cluster>:<basepath>/${PIPELINE_SHORT_NAME}/
 rsync -Pav ${PIPELINE_NAME}_${TAG_OR_BRANCH}.tar.gz apptainer_cache <USER>@<cluster>:<basepath>/${PIPELINE_SHORT_NAME}/${TAG_OR_BRANCH}/
 ```

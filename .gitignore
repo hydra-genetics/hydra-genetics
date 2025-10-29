@@ -7,3 +7,6 @@ dist
 venv
 samples.tsv
 units.tsv
+.venv/
+.idea/
+.vscode/

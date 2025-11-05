@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.3.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.2.0...v3.3.0) (2025-11-05)
+
+
+### Features
+
+* add  funcitons to make paths to input BAM files ([ae290db](https://github.com/hydra-genetics/hydra-genetics/commit/ae290db192acaabeb62905d6fe16b764cf0d6080))
+
+
+### Bug Fixes
+
+* catch http errors when downloading reference files ([#402](https://github.com/hydra-genetics/hydra-genetics/issues/402)) ([9f11eec](https://github.com/hydra-genetics/hydra-genetics/commit/9f11eeca591299783aaf08e1d0e1310e7ca72bb2))
+* import required modules and functions ([0524876](https://github.com/hydra-genetics/hydra-genetics/commit/0524876efdfeae4acbafe1e146c5182d662e7e09))
+* remove empty lines build_conda.sh ([3483da0](https://github.com/hydra-genetics/hydra-genetics/commit/3483da0fef4fa8b7fa1d41c7862deab6c4c9d2a4))
+
 ## [3.2.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.1.1...v3.2.0) (2025-04-28)
 
 

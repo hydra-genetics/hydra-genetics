@@ -14,7 +14,7 @@ Function `get_input_aligned_bam` compiles paths to aligned BAM files and their c
  - **wildcards**: A Snakemake Wildcards object that typically contains sample-specific identifiers like sample and type. These are used to construct file names.
  - **config**: A dictionary containing workflow configuration options. It may include:
    - **aligner**: Specifies which aligner was used (e.g., `minimap2`, `bwa`, etc.). If this is set, the function will delegate path construction to `get_longread_bam`(see below).
-- **default_path** (optional): A fallback directory path used when no aligner is specified. Defaults to `"alignment/samtools_merge_bam"`
+- **default_path** (optional): A fallback directory path used when no aligner is specified. Defaults to `"alignment/samtools_merge_bam", which is equivalent to choosing bwa as the aligner`
 
 ### How it works
 

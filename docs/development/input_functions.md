@@ -1,6 +1,6 @@
 # Input functions
 
-Hydra Genetics contains helper functions to compile paths to BAM files depending on your pipeline configuration. These paths are used as inputs to some rules in the other Hydra Genetics modules.
+Hydra Genetics contains helper functions to compile paths to BAM files depending on your pipeline configuration. These paths are used  by rules in other Hydra Genetics modules that require an aligned BAM file as input.
 
 The functions are located in `hydra_genetics/utils/misc.py`.
 

@@ -11,10 +11,10 @@ Function `get_input_aligned_bam` compiles paths to aligned BAM files and their c
 
 ### Parameters
 
- - **wildcards**: A Snakemake Wildcards object that typically contains sample-specific identifiers like sample and type. These are used to construct file names.
+ - **wildcards**: A Snakemake Wildcards object that contains sample and type. These are used to construct file names.
  - **config**: A dictionary containing workflow configuration options. It may include:
-   - **aligner**: Specifies which aligner was used (e.g., `minimap2`, `bwa`, etc.). If this is set, the function will delegate path construction to `get_longread_bam`(see below).
-- **default_path** (optional): A fallback directory path used when no aligner is specified. Defaults to `"alignment/samtools_merge_bam", which is equivalent to choosing bwa as the aligner`
+   - **aligner**: Specifies which aligner was used (e.g., `minimap2`, `pbmm2`, etc.). If this is set, the function will construct path using these tools names.
+- **default_path** (optional): A fallback directory path used when no aligner is specified. Defaults to `"alignment/samtools_merge_bam"`, which is equivalent to choosing bwa as the aligner
 
 ### How it works
 
@@ -69,12 +69,12 @@ Function `get_input_haplotagged_bam` constructs the file paths for haplotagged B
  - **config**: A dictionary containing workflow configuration options. It may include:
    - **haplotag_path**: custom path to haplotagged BAMs
    - **haplotag_suffix**: optional suffix for filenames, if not provided no suffix is used.
- - **default_path**: A path used if haplotag_path is not provided. Defaults to `"alignment/samtools_merge_bam"`.
+ - **default_path**: A path used if `haplotag_path` is not provided. Defaults to `"alignment/samtools_merge_bam"`.
  - **suffix**: Optional suffix to append to the BAM filename. Default is `None`.
 
 ### How it works
 
-1. **Wildcard Extraction**: Retrieves sample and type from the wildcards object. If missing, raises a WorkflowError.
+1. **Wildcard Extraction**: Retrieves sample and type from the wildcards object. If missing, raises a `WorkflowError`.
 
 2. **Path Resolution**: Uses `haplotag_path` from config if available. Falls back to `default_path` if not.
 
@@ -129,3 +129,11 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
     "custom/path/sample1_rna.bam.bai"
 )
 ```
+
+## List of valid aligners
+
+- **pbmm2**
+
+- **minimap2**
+
+Leaving aligner **blank** is equivalent to choosing duplicate marked bwa bam file

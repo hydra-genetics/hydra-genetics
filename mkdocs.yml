@@ -20,6 +20,7 @@ nav:
     - Code standards: development/standards.md
     - Code testing: development/testing.md
     - Help code: development/help_code.md
+    - Input functions: development/input_functions.md
   - Tutorials:
     - Make a simple pipeline: tutorials/simple_pipeline.md
 

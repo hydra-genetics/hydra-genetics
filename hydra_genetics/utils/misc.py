@@ -88,36 +88,6 @@ def export_config_as_file(config, output_file="config", directory="versions", da
         writer.write(yaml.dump(config))
 
 
-def get_longread_bam(wildcards, config):
-    """
-    This function generates the file paths for a BAM file and its corresponding index file
-    based on the sample and type specified in the wildcards, as well as the aligner
-    specified in the config.
-
-    Args:
-        wildcards (object): A Snakemake wildcards object containing the following attributes:
-          - sample: The name of the sample.
-          - type: The type of data ("T" for tumor, "N" for normal).
-        config (dict): A dictionary containing configuration parameters, including:
-          - aligner (str): The aligner used for generating the BAM file (default is "minimap2").
-
-    Returns:
-        tuple: A tuple containing two strings:
-            - alignment_path: The file path to the BAM file.
-            - index_path: The file path to the BAM index file.
-
-    Notes:
-        - The aligner is retrieved from the config file
-        using the key "aligner". If not specified, it defaults to "minimap2".
-        - The returned paths are constructed under the "alignment" directory, with subdirectories
-        and filenames based on the aligner, sample, and type.
-    """
-    aligner = config.get("aligner", "minimap2")
-    alignment_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam"
-    index_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam.bai"
-    return alignment_path, index_path
-
-
 def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_merge_bam"):
     """
     Compile the paths to input aligned BAM and BAI files for the workflow.
@@ -137,7 +107,9 @@ def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_me
     try:
         if config.get("aligner") is not None:
             # Use aligner to compile the paths
-            alignment_path, index_path = get_longread_bam(wildcards, config)
+            aligner = config.get("aligner")
+            alignment_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam"
+            index_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam.bai"
         else:
             # no aligner, use the default path
             alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"

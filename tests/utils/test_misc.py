@@ -3,8 +3,8 @@
 import unittest
 import yaml
 import types
-from snakemake.workflow import WorkflowError
-from hydra_genetics.utils.misc import get_input_aligned_bam, get_input_haplotagged_bam, get_longread_bam
+from snakemake.sourcecache import WorkflowError
+from hydra_genetics.utils.misc import get_input_aligned_bam, get_input_haplotagged_bam
 
 
 class TestResourcesUtils(unittest.TestCase):
@@ -49,20 +49,6 @@ class TestResourcesUtils(unittest.TestCase):
 
 
 class TestGetInputAlignedBam(unittest.TestCase):
-    def test_get_longread_bam(self):
-        # Test with default aligner
-        config = {}
-        wildcards = types.SimpleNamespace(sample="sample1", type="T")
-        bam, bai = get_longread_bam(wildcards, config)
-        self.assertEqual(bam, "alignment/minimap2_align/sample1_T.bam")
-        self.assertEqual(bai, "alignment/minimap2_align/sample1_T.bam.bai")
-        # Test with custom aligner
-        config = {"aligner": "pbmm2"}
-        wildcards = types.SimpleNamespace(sample="sample2", type="N")
-        bam, bai = get_longread_bam(wildcards, config)
-        self.assertEqual(bam, "alignment/pbmm2_align/sample2_N.bam")
-        self.assertEqual(bai, "alignment/pbmm2_align/sample2_N.bam.bai")
-
     def test_with_aligner(self):
         config = {"aligner": "minimap2"}
         wildcards = types.SimpleNamespace(sample="S1", type="T")

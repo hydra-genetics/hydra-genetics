@@ -6,6 +6,7 @@ import shutil
 import tarfile
 import tempfile
 import requests
+import time
 from urllib.error import HTTPError
 
 # Expected input file format

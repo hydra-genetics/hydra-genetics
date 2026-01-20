@@ -158,8 +158,11 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
                     r.close()
                     time.sleep(10)
                     continue
-                # raise_for_status kastar requests.exceptions.HTTPError vid 404
-                r.raise_for_status()
+                try:
+                    r.raise_for_status()
+                except HTTPError as e:
+                    e.status = e.response.status_code 
+                    raise e
                 with open(target_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=1024*1024):
                         if chunk:

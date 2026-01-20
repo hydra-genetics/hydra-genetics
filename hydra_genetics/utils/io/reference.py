@@ -7,7 +7,7 @@ import tarfile
 import tempfile
 import requests
 import time
-from urllib.error import HTTPError
+from requests import HTTPError
 from urllib.parse import urlparse
 
 # Expected input file format
@@ -158,6 +158,7 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
                     r.close()
                     time.sleep(10)
                     continue
+                # raise_for_status kastar requests.exceptions.HTTPError vid 404
                 r.raise_for_status()
                 with open(target_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=1024*1024):

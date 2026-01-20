@@ -153,11 +153,11 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
             
-            # Download with requests
-            with requests.get(part_url, headers=headers, stream=True) as r:
-                r.raise_for_status()
-                with open(temp_file, 'wb') as f:
-                    shutil.copyfileobj(r.raw, f)
+            r = requests.get(part_url, headers=headers, stream=True)
+            r.raise_for_status()
+            with open(temp_file, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
 
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
@@ -170,13 +170,15 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
             logging.debug(f"Merge {list_of_temp_files} into {content_holder}")
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:
-                    shutil.copyfileobj(reader, writer)
+                    # Behåller din ursprungliga merge-logik
+                    for line in reader:
+                        writer.write(line)
     else:
-        # Download single file with requests
-        with requests.get(url, headers=headers, stream=True) as r:
-            r.raise_for_status()
-            with open(content_holder, 'wb') as f:
-                shutil.copyfileobj(r.raw, f)
+        r = requests.get(url, headers=headers, stream=True)
+        r.raise_for_status()
+        with open(content_holder, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

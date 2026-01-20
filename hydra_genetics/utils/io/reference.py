@@ -136,7 +136,7 @@ def fetch_reference_data(validation_data, output_dir,
     return fetched, links, failed, skipped
 
 
-def fetch_url_content(url, content_holder, tmpdir) -> None:
+def fetch_url_content(url, content_holder, tmpdir):
     """
     Fetch content from the provided url and make sure that the downloaded file
     has the correct md5 value.
@@ -161,7 +161,7 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
                 try:
                     r.raise_for_status()
                 except HTTPError as e:
-                    e.status = e.response.status_code 
+                    e.status = e.response.status_code
                     raise e
                 with open(target_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=1024*1024):
@@ -178,19 +178,18 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
             list_of_temp_files.append(temp_file)
             if not download_with_retry(part_url, temp_file):
                 return False
+            # Här antas checksum_validate_file finnas tillgänglig
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
                 return False
-            else:
-                logging.debug(f"Retrieved part {counter}: {part_url}")
             counter += 1
         with open(content_holder, 'wb') as writer:
-            logging.debug(f"Merge {list_of_temp_files} into {content_holder}")
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:
                     shutil.copyfileobj(reader, writer)
+        return True
     else:
-        download_with_retry(url, content_holder)
+        return download_with_retry(url, content_holder)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

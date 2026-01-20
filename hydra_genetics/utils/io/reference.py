@@ -5,7 +5,7 @@ import os
 import shutil
 import tarfile
 import tempfile
-from urllib.request import urlretrieve
+import requests
 from urllib.error import HTTPError
 
 # Expected input file format
@@ -140,33 +140,43 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
         has the correct md5 value.
 
         Parameters:
-            url (string): url to file
+            url (string/dict): url to file
             content_holder (string): path where the data will be saved
             tmpdir: folder where we can save data temporary
-
-
     """
+    headers = {"User-Agent": "hydra-genetics"}
+    
     if isinstance(url, dict):
         counter = 1
         list_of_temp_files = []
         for part_url, part_checksum in url.items():
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
-            urlretrieve(part_url, temp_file)
+            
+            # Download with requests
+            with requests.get(part_url, headers=headers, stream=True) as r:
+                r.raise_for_status()
+                with open(temp_file, 'wb') as f:
+                    shutil.copyfileobj(r.raw, f)
+
             if not checksum_validate_file(temp_file, part_checksum):
-                logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {calculated_md5}, got {part_checksum}")
+                logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
                 return False
             else:
                 logging.debug(f"Retrieved part {counter}: {part_url}")
             counter += 1
+            
         with open(content_holder, 'wb') as writer:
             logging.debug(f"Merge {list_of_temp_files} into {content_holder}")
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:
-                    for line in reader:
-                        writer.write(line)
+                    shutil.copyfileobj(reader, writer)
     else:
-        urlretrieve(url, content_holder)
+        # Download single file with requests
+        with requests.get(url, headers=headers, stream=True) as r:
+            r.raise_for_status()
+            with open(content_holder, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

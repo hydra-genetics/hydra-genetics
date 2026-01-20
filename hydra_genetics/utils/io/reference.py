@@ -136,18 +136,32 @@ def fetch_reference_data(validation_data, output_dir,
 
 
 def fetch_url_content(url, content_holder, tmpdir) -> None:
-    headers = {"User-Agent": "hydra-genetics"}
+    # Vi lägger till fler headers för att se ut som en riktig webbläsare.
+    # Detta gör ofta att Figshare hoppar över 202-steget.
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1"
+    }
 
     def download_with_retry(target_url, target_path):
-        for _ in range(5):  # Retry 5 times
+        # Vi försöker hämta filen, och om vi får 202 väntar vi (precis som webbläsaren gör dolt)
+        for i in range(10):
             r = requests.get(target_url, headers=headers, stream=True, allow_redirects=True)
+            
             if r.status_code == 202:
-                time.sleep(5)
+                wait_time = 5 * (i + 1) 
+                logging.info(f"Figshare is preparing file (202). Waiting {wait_time}s...")
+                time.sleep(wait_time)
                 continue
+            
             r.raise_for_status()
             with open(target_path, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
+                for chunk in r.iter_content(chunk_size=1024*1024):
+                    if chunk:
+                        f.write(chunk)
             return True
         return False
 
@@ -159,14 +173,12 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
             list_of_temp_files.append(temp_file)
             
             if not download_with_retry(part_url, temp_file):
-                logging.error(f"Failed to download {part_url} after retries.")
+                logging.error(f"Failed to download {part_url}")
                 return False
 
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
                 return False
-            else:
-                logging.debug(f"Retrieved part {counter}: {part_url}")
             counter += 1
             
         with open(content_holder, 'wb') as writer:

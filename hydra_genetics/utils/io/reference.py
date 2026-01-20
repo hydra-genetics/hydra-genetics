@@ -8,6 +8,7 @@ import tempfile
 import requests
 import time
 from urllib.error import HTTPError
+from urllib.parse import urlparse
 
 # Expected input file format
 # --------------------------
@@ -136,27 +137,31 @@ def fetch_reference_data(validation_data, output_dir,
 
 
 def fetch_url_content(url, content_holder, tmpdir) -> None:
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Referer": "https://figshare.scilifelab.se/",
-        "Accept": "*/*"
-    }
-
+    
     def download_with_retry(target_url, target_path):
+        parsed_url = urlparse(target_url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": base_url,
+            "Accept": "*/*"
+        }
+
         with requests.Session() as s:
             s.headers.update(headers)
-            
-            for i in range(15):  # Ökat till 15 försök
+
+            for i in range(10):
                 r = s.get(target_url, stream=True, allow_redirects=True)
-                
+
                 if r.status_code == 202:
-                    logging.info(f"Figshare is preparing file (202). Waiting 10s... (Attempt {i+1})")
+                    logging.info(f"Server at {parsed_url.netloc} is preparing file (202). Waiting 10s...")
                     r.close()
                     time.sleep(10)
                     continue
-                
+
                 r.raise_for_status()
-                # Om vi når hit är status 200 OK
+
                 with open(target_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=1024*1024):
                         if chunk:
@@ -170,7 +175,7 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
         for part_url, part_checksum in url.items():
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
-            
+
             if not download_with_retry(part_url, temp_file):
                 logging.error(f"Failed to download {part_url}")
                 return False
@@ -179,7 +184,7 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
                 return False
             counter += 1
-            
+
         with open(content_holder, 'wb') as writer:
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:

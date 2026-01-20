@@ -5,7 +5,7 @@ import os
 import shutil
 import tarfile
 import tempfile
-from urllib.request import urlretrieve
+import urllib.request
 from urllib.error import HTTPError
 
 # Expected input file format
@@ -152,7 +152,10 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
         for part_url, part_checksum in url.items():
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
-            urlretrieve(part_url, temp_file)
+            opener = urllib.request.build_opener()
+            opener.addheaders = [("User-Agent", "hydra-genetics")]
+            urllib.request.install_opener(opener)
+            urllib.request.urlretrieve(part_url, temp_file)
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {calculated_md5}, got {part_checksum}")
                 return False
@@ -166,7 +169,10 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
                     for line in reader:
                         writer.write(line)
     else:
-        urlretrieve(url, content_holder)
+        opener = urllib.request.build_opener()
+        opener.addheaders = [("User-Agent", "hydra-genetics")]
+        urllib.request.install_opener(opener)
+        urllib.request.urlretrieve(url, content_holder)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

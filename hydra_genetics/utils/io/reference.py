@@ -135,29 +135,31 @@ def fetch_reference_data(validation_data, output_dir,
     return fetched, links, failed, skipped
 
 
+import os
+import logging
+import requests
+import time
+
 def fetch_url_content(url, content_holder, tmpdir) -> None:
-    # Vi lägger till fler headers för att se ut som en riktig webbläsare.
-    # Detta gör ofta att Figshare hoppar över 202-steget.
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
     def download_with_retry(target_url, target_path):
-        # Vi försöker hämta filen, och om vi får 202 väntar vi (precis som webbläsaren gör dolt)
-        for i in range(10):
-            r = requests.get(target_url, headers=headers, stream=True, allow_redirects=True)
+        for i in range(10):  # Prova upp till 10 gånger
+            # Vi sätter allow_redirects=True (default) för att följa med till S3-lagringen
+            r = requests.get(target_url, headers=headers, stream=True)
             
+            # Om Figshare svarar 202, stäng anslutningen och vänta
             if r.status_code == 202:
-                wait_time = 5 * (i + 1) 
-                logging.info(f"Figshare is preparing file (202). Waiting {wait_time}s...")
+                wait_time = 10
+                logging.info(f"Figshare is preparing file (202). Waiting {wait_time}s... (Attempt {i+1})")
+                r.close() # Stäng anslutningen för att inte läsa in 202-svaret
                 time.sleep(wait_time)
                 continue
             
             r.raise_for_status()
+            # Om vi kommer hit har vi status 200 OK
             with open(target_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=1024*1024):
                     if chunk:
@@ -173,21 +175,26 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
             list_of_temp_files.append(temp_file)
             
             if not download_with_retry(part_url, temp_file):
-                logging.error(f"Failed to download {part_url}")
+                logging.error(f"Failed to download {part_url} after multiple retries.")
                 return False
 
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
                 return False
+            else:
+                logging.debug(f"Retrieved part {counter}: {part_url}")
             counter += 1
             
         with open(content_holder, 'wb') as writer:
+            logging.debug(f"Merge {list_of_temp_files} into {content_holder}")
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:
                     for line in reader:
                         writer.write(line)
     else:
-        download_with_retry(url, content_holder)
+        # Singel fil
+        if not download_with_retry(url, content_holder):
+             logging.error(f"Failed to download {url}")
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

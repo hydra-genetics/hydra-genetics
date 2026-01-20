@@ -135,36 +135,33 @@ def fetch_reference_data(validation_data, output_dir,
     return fetched, links, failed, skipped
 
 
-import os
-import logging
-import requests
-import time
-
 def fetch_url_content(url, content_holder, tmpdir) -> None:
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://figshare.scilifelab.se/",
+        "Accept": "*/*"
     }
 
     def download_with_retry(target_url, target_path):
-        for i in range(10):  # Prova upp till 10 gånger
-            # Vi sätter allow_redirects=True (default) för att följa med till S3-lagringen
-            r = requests.get(target_url, headers=headers, stream=True)
+        with requests.Session() as s:
+            s.headers.update(headers)
             
-            # Om Figshare svarar 202, stäng anslutningen och vänta
-            if r.status_code == 202:
-                wait_time = 10
-                logging.info(f"Figshare is preparing file (202). Waiting {wait_time}s... (Attempt {i+1})")
-                r.close() # Stäng anslutningen för att inte läsa in 202-svaret
-                time.sleep(wait_time)
-                continue
-            
-            r.raise_for_status()
-            # Om vi kommer hit har vi status 200 OK
-            with open(target_path, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1024*1024):
-                    if chunk:
-                        f.write(chunk)
-            return True
+            for i in range(15):  # Ökat till 15 försök
+                r = s.get(target_url, stream=True, allow_redirects=True)
+                
+                if r.status_code == 202:
+                    logging.info(f"Figshare is preparing file (202). Waiting 10s... (Attempt {i+1})")
+                    r.close()
+                    time.sleep(10)
+                    continue
+                
+                r.raise_for_status()
+                # Om vi når hit är status 200 OK
+                with open(target_path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=1024*1024):
+                        if chunk:
+                            f.write(chunk)
+                return True
         return False
 
     if isinstance(url, dict):
@@ -175,26 +172,21 @@ def fetch_url_content(url, content_holder, tmpdir) -> None:
             list_of_temp_files.append(temp_file)
             
             if not download_with_retry(part_url, temp_file):
-                logging.error(f"Failed to download {part_url} after multiple retries.")
+                logging.error(f"Failed to download {part_url}")
                 return False
 
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
                 return False
-            else:
-                logging.debug(f"Retrieved part {counter}: {part_url}")
             counter += 1
             
         with open(content_holder, 'wb') as writer:
-            logging.debug(f"Merge {list_of_temp_files} into {content_holder}")
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:
                     for line in reader:
                         writer.write(line)
     else:
-        # Singel fil
-        if not download_with_retry(url, content_holder):
-             logging.error(f"Failed to download {url}")
+        download_with_retry(url, content_holder)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

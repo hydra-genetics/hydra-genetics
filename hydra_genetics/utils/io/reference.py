@@ -72,7 +72,9 @@ def fetch_reference_data(validation_data, output_dir,
 
                     # Fetch content and merge any split files
                     try:
-                        fetch_url_content(value['url'], temp_content_holder, tmpdirname)
+                        if not fetch_url_content(value['url'], temp_content_holder, tmpdirname):
+                            failed.append(content_path)
+                            continue
                     except HTTPError as e:
                         logging.error(f"failed to fetch resource at {value['url']}: {e}")
                         failed.append(content_path)

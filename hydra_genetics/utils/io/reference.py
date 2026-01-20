@@ -137,7 +137,7 @@ def fetch_reference_data(validation_data, output_dir,
 
 
 def fetch_url_content(url, content_holder, tmpdir) -> None:
-    
+
     def download_with_retry(target_url, target_path):
         parsed_url = urlparse(target_url)
         base_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"

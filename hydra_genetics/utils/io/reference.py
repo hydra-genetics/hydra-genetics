@@ -154,7 +154,7 @@ def fetch_url_content(url, content_holder, tmpdir):
         with requests.Session() as s:
             s.headers.update(headers)
             for i in range(10):
-                r = s.get(target_url, stream=True, allow_redirects=True)
+                r = s.get(target_url, stream=True, allow_redirects=True, timeout=60)
                 if r.status_code == 202:
                     logging.info(f"Figshare is preparing file (202). Waiting 10s... (Attempt {i+1})")
                     r.close()
@@ -180,7 +180,6 @@ def fetch_url_content(url, content_holder, tmpdir):
             list_of_temp_files.append(temp_file)
             if not download_with_retry(part_url, temp_file):
                 return False
-            # Här antas checksum_validate_file finnas tillgänglig
             if not checksum_validate_file(temp_file, part_checksum):
                 logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
                 return False

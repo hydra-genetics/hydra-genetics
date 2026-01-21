@@ -1,7 +1,7 @@
 import shutil
 import tempfile
 import unittest
-from urllib.error import HTTPError
+from requests import HTTPError
 
 from hydra_genetics.utils.io.reference import fetch_reference_data, fetch_url_content
 

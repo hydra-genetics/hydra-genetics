@@ -5,8 +5,10 @@ import os
 import shutil
 import tarfile
 import tempfile
-from urllib.request import urlretrieve
-from urllib.error import HTTPError
+import requests
+import time
+from requests import HTTPError
+from urllib.parse import urlparse
 
 # Expected input file format
 # --------------------------
@@ -70,7 +72,9 @@ def fetch_reference_data(validation_data, output_dir,
 
                     # Fetch content and merge any split files
                     try:
-                        fetch_url_content(value['url'], temp_content_holder, tmpdirname)
+                        if not fetch_url_content(value['url'], temp_content_holder, tmpdirname):
+                            failed.append(content_path)
+                            continue
                     except HTTPError as e:
                         logging.error(f"failed to fetch resource at {value['url']}: {e}")
                         failed.append(content_path)
@@ -134,39 +138,59 @@ def fetch_reference_data(validation_data, output_dir,
     return fetched, links, failed, skipped
 
 
-def fetch_url_content(url, content_holder, tmpdir) -> None:
+def fetch_url_content(url, content_holder, tmpdir):
     """
-        Fetch content from the provided url and make sure that the downloaded file
-        has the correct md5 value.
-
-        Parameters:
-            url (string): url to file
-            content_holder (string): path where the data will be saved
-            tmpdir: folder where we can save data temporary
-
-
+    Fetch content from the provided url and make sure that the downloaded file
+    has the correct md5 value.
     """
+    def download_with_retry(target_url, target_path):
+        parsed_url = urlparse(target_url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": base_url,
+            "Accept": "*/*"
+        }
+        with requests.Session() as s:
+            s.headers.update(headers)
+            for i in range(10):
+                r = s.get(target_url, stream=True, allow_redirects=True, timeout=60)
+                if r.status_code == 202:
+                    logging.info(f"Figshare is preparing file (202). Waiting 10s... (Attempt {i+1})")
+                    r.close()
+                    time.sleep(10)
+                    continue
+                try:
+                    r.raise_for_status()
+                except HTTPError as e:
+                    e.status = e.response.status_code
+                    raise e
+                with open(target_path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=1024*1024):
+                        if chunk:
+                            f.write(chunk)
+                return True
+        return False
+
     if isinstance(url, dict):
         counter = 1
         list_of_temp_files = []
         for part_url, part_checksum in url.items():
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
-            urlretrieve(part_url, temp_file)
-            if not checksum_validate_file(temp_file, part_checksum):
-                logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {calculated_md5}, got {part_checksum}")
+            if not download_with_retry(part_url, temp_file):
                 return False
-            else:
-                logging.debug(f"Retrieved part {counter}: {part_url}")
+            if not checksum_validate_file(temp_file, part_checksum):
+                logging.info(f"Failed to retrieved part {counter}: {part_url}, expected {part_checksum}")
+                return False
             counter += 1
         with open(content_holder, 'wb') as writer:
-            logging.debug(f"Merge {list_of_temp_files} into {content_holder}")
             for temp_content in list_of_temp_files:
                 with open(temp_content, 'rb') as reader:
-                    for line in reader:
-                        writer.write(line)
+                    shutil.copyfileobj(reader, writer)
+        return True
     else:
-        urlretrieve(url, content_holder)
+        return download_with_retry(url, content_holder)
 
 
 def validate_reference_data(validation_data, path_to_ref_data,

@@ -1,5 +1,31 @@
 # Changelog
 
+## [3.3.1](https://github.com/hydra-genetics/hydra-genetics/compare/v3.3.0...v3.3.1) (2026-01-22)
+
+
+### Bug Fixes
+
+* code review (rm comment and introduce timeout) ([1d6cb00](https://github.com/hydra-genetics/hydra-genetics/commit/1d6cb004ea03fb6606129ca2075ce3059862b072))
+* **reference.py:** add User-Agent meta info in urlretrieve to make figshare happy ([730ebd8](https://github.com/hydra-genetics/hydra-genetics/commit/730ebd8d64d813075e49bcb6c68bf66b6bda6f8e))
+* **reference.py:** added missing time import ([9451284](https://github.com/hydra-genetics/hydra-genetics/commit/9451284fc55df988c4b92be40d5a66f9c527f01d))
+* **reference.py:** correct function return ([85c05c6](https://github.com/hydra-genetics/hydra-genetics/commit/85c05c641e9cfdd7ec7674f6a7f5d92c2ce1c830))
+* **reference.py:** correct HTTP error handling ([fcfa637](https://github.com/hydra-genetics/hydra-genetics/commit/fcfa637c342745266f9ecb743da451c4b06651d7))
+* **reference.py:** correct HTTPError ([46f6577](https://github.com/hydra-genetics/hydra-genetics/commit/46f65770e7d52e5e10c9aba25d5057e1f1fb591e))
+* **reference.py:** dynamic referer ([3a06003](https://github.com/hydra-genetics/hydra-genetics/commit/3a06003615d541f0cdb161eb9052c28a48dc4ff6))
+* **reference.py:** give figshare some extra time ([c740fef](https://github.com/hydra-genetics/hydra-genetics/commit/c740fef730cb2f7588a3c3441cdcd1b188b9e7a9))
+* **reference.py:** some more url metadata ([12c87d2](https://github.com/hydra-genetics/hydra-genetics/commit/12c87d29b07943a661792aec14747ed1b61f5f95))
+* **reference.py:** waiting even more ([744eb47](https://github.com/hydra-genetics/hydra-genetics/commit/744eb471f07aeb8b1529a5e9ef02d53ee7ff16cf))
+* solve compression issue ([f75cf75](https://github.com/hydra-genetics/hydra-genetics/commit/f75cf75ccf7c8497c9ebeb2cbf3e93a837eee052))
+
+
+### Documentation
+
+* add description of input functions in utils/misc.py ([90d48dc](https://github.com/hydra-genetics/hydra-genetics/commit/90d48dcaae29cfa5962a09a5b9941a21f669e23b))
+* add input_functions section to development ([b63383b](https://github.com/hydra-genetics/hydra-genetics/commit/b63383bb782e03812a626f98d3dd8fab126d2a76))
+* add list of valid aligners ([57a968f](https://github.com/hydra-genetics/hydra-genetics/commit/57a968f32e042c546eba4faff151c2cdfdbda532))
+* update docs/development/input_functions.md ([29b1d8a](https://github.com/hydra-genetics/hydra-genetics/commit/29b1d8ad0cf97b5ca8d4c5bf7b1479824308f908))
+* update docs/development/input_functions.md ([816a6bc](https://github.com/hydra-genetics/hydra-genetics/commit/816a6bc798c08ed97292910f3874e0d036a8173e))
+
 ## [3.3.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.2.0...v3.3.0) (2025-11-05)
 
 

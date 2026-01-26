@@ -69,14 +69,18 @@ Function `get_input_haplotagged_bam` constructs the file paths for haplotagged B
  - **config**: A dictionary containing workflow configuration options. It may include:
    - **haplotag_path**: custom path to haplotagged BAMs
    - **haplotag_suffix**: optional suffix for filenames, if not provided no suffix is used.
- - **default_path**: A path used if `haplotag_path` is not provided. Defaults to `"alignment/samtools_merge_bam"`.
+   - **aligner**: Specifies which aligner was used (e.g., `minimap2`, `pbmm2`, etc.). If `haplotag_path` is not provided, this is used to construct the base path as `alignment/{aligner}_align`.
+  - **default_path**: A path used if `haplotag_path` and `aligner` are not provided. Defaults to `"alignment/samtools_merge_bam"`.
  - **suffix**: Optional suffix to append to the BAM filename. Default is `None`.
 
 ### How it works
 
 1. **Wildcard Extraction**: Retrieves sample and type from the wildcards object. If missing, raises a `WorkflowError`.
 
-2. **Path Resolution**: Uses `haplotag_path` from config if available. Falls back to `default_path` if not.
+2. **Path Resolution**: 
+    - Uses `haplotag_path` from config if available. 
+    - If `haplotag_path` is missing but `aligner` is specified in config, it constructs the path as `alignment/{aligner}_align`.
+    - Falls back to `default_path` if neither are available.
 
 3. **Suffix Handling**: If suffix is provided as an argument, it is used. Otherwise, the function checks for `haplotag_suffix` in config, if it not specified, no suffix is used.
 
@@ -127,6 +131,20 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 (
     "custom/path/sample1_rna.bam",
     "custom/path/sample1_rna.bam.bai"
+)
+```
+
+4. No suffix, aligner specified
+```
+wildcards = types.SimpleNamespace(sample="sample1", type="rna")
+config = {"aligner": "bwa-mem2"}
+
+bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
+
+# Returns
+(
+    "alignment/bwa-mem2_align/sample1_rna.bam",
+    "alignment/bwa-mem2_align/sample1_rna.bam.bai"
 )
 ```
 

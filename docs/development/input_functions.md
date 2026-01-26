@@ -31,7 +31,7 @@ A tuple containing:
 
 #### Example: no aligner
 
-```
+```python
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {}
 
@@ -46,7 +46,7 @@ bam_path, bai_path = get_input_aligned_bam(wildcards, config)
 
 #### Example: with aligner
 
-```
+```python
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {"aligner": "pbmm2"}
 
@@ -70,8 +70,8 @@ Function `get_input_haplotagged_bam` constructs the file paths for haplotagged B
    - **haplotag_path**: custom path to haplotagged BAMs
    - **haplotag_suffix**: optional suffix for filenames, if not provided no suffix is used.
    - **aligner**: Specifies which aligner was used (e.g., `minimap2`, `pbmm2`, etc.). If `haplotag_path` is not provided, this is used to construct the base path as `alignment/{aligner}_align`.
-  - **default_path**: A path used if `haplotag_path` and `aligner` are not provided. Defaults to `"alignment/samtools_merge_bam"`.
- - **suffix**: Optional suffix to append to the BAM filename. Default is `None`.
+   - **default_path**: A path used if `haplotag_path` and `aligner` are not provided. Defaults to `"alignment/samtools_merge_bam"`.
+   - **suffix**: Optional suffix to append to the BAM filename. Default is `None`.
 
 ### How it works
 
@@ -93,7 +93,7 @@ Function `get_input_haplotagged_bam` constructs the file paths for haplotagged B
 ### Examples
 
 1. No suffix, default path
-```
+```python
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {}
 
@@ -107,7 +107,7 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 ```
 
 2. Suffix from config, default path
-```
+```python
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {"haplotag_suffix": "haplotagged"}
 
@@ -121,7 +121,7 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 ```
 
 3. No suffix, custom path
-```
+```python
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {"haplotag_path": "custom/path"}
 
@@ -135,7 +135,7 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 ```
 
 4. No suffix, aligner specified
-```
+```python
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {"aligner": "bwa-mem2"}
 

@@ -191,3 +191,13 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         )
         self.assertEqual(bam, "custom/path/S9_N.bam")
         self.assertEqual(bai, "custom/path/S9_N.bam.bai")
+
+    def test_with_aligner_no_haplotag_path(self):
+        wildcards = types.SimpleNamespace(sample="S1", type="T")
+        config = {"aligner": "bwa-mem2"}
+        bam, bai = get_input_haplotagged_bam(
+            wildcards,
+            config
+        )
+        self.assertEqual(bam, "alignment/bwa-mem2_align/S1_T.bam")
+        self.assertEqual(bai, "alignment/bwa-mem2_align/S1_T.bam.bai")

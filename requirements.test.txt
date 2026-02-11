@@ -1,4 +1,5 @@
 click>=8,<9
+packaging
 gitpython
 jinja2==3.0.1
 pandas>=1.3.1

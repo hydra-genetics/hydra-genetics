@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.3.2](https://github.com/hydra-genetics/hydra-genetics/compare/v3.3.1...v3.3.2) (2026-02-12)
+
+
+### Bug Fixes
+
+* Allow `aligner` configuration to determine input BAM path in `get_input_haplotagged_bam` when `haplotag_path` is not provided. ([40fa2dc](https://github.com/hydra-genetics/hydra-genetics/commit/40fa2dc095d3f80168a21c16ef2dcde83aae1179))
+
+
+### Documentation
+
+* style fixes in docs ([9280db3](https://github.com/hydra-genetics/hydra-genetics/commit/9280db31b2772c9bef204eb6180246ef8d7c9bc8))
+* update section on input functions ([1367f60](https://github.com/hydra-genetics/hydra-genetics/commit/1367f603893a4a8ecbc39c123cc3fa5c2eb81ed5))
+
 ## [3.3.1](https://github.com/hydra-genetics/hydra-genetics/compare/v3.3.0...v3.3.1) (2026-01-22)
 
 

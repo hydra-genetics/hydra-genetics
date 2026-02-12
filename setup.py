@@ -57,7 +57,8 @@ setup(
         'snakemake',
         'pysam',
         'gitpython',
-        'pyaml'
+        'pyaml',
+        'packaging'
     ],
     packages=find_packages(exclude=("docs")),
     include_package_data=True,

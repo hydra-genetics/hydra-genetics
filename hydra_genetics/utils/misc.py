@@ -146,7 +146,13 @@ def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtool
         raise WorkflowError(f"Missing required wildcards: {e}")
 
     haplotag_path = config.get("haplotag_path", None)
-    path_to_input_bam = haplotag_path if haplotag_path is not None else default_path
+    if haplotag_path is not None:
+        path_to_input_bam = haplotag_path
+    elif config.get("aligner") is not None:
+        aligner = config.get("aligner")
+        path_to_input_bam = f"alignment/{aligner}_align"
+    else:
+        path_to_input_bam = default_path
 
     # check for suffix in the config
     if suffix is None:

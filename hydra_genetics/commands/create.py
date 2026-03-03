@@ -634,6 +634,8 @@ class CreateLongReadInputFiles(object):
             dir_files_found = 0
             log.info(f"Dir: {d}")
             for f in glob.glob(f"{d}/**/*.bam", recursive=True):
+                if "unclassified" in f or "unassigned" in f:
+                    continue
                 file_list.append(f)
                 dir_files_found += 1
                 log.info(f"    found: {f}")
@@ -798,7 +800,7 @@ def extract_value(field, default, data):
         return data[head]
 
 
-def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
+def extract_bam_information(file_path, default_barcode='NNNN', platform="ONT"):
 
     """
     extract read group information and check for methylation tags
@@ -853,11 +855,25 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
     except KeyError:
         barcode = default_barcode
 
-    # some ONT bam have only LB and it is the sample id.
-    try:
-        sample_id = read_group_dict["SM"]
-    except KeyError:
-        sample_id = read_group_dict["LB"]
+    # A demultiplexed ONT bam will have the sample id in the al tag
+    # if a sample sheet with barcode alias was used during
+    # basecalling and demultiplexing. Otherwise
+    # the SM tag which lists the barcode id will be used. 
+    # If none of these tags are present, the LB tag will be used as a last resort 
+    if platform == "ONT":
+        try:
+            sample_id = read_group_dict["al"]
+            
+        except KeyError:
+            try:
+                sample_id = read_group_dict["SM"]
+            except KeyError:
+                sample_id = read_group_dict["LB"]
+    else:
+        try:
+            sample_id = read_group_dict["SM"]
+        except KeyError:
+            sample_id = read_group_dict["LB"]
 
     # check first read for methylation tags
     first_read = bam.head(1)

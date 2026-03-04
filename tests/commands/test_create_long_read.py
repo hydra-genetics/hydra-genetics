@@ -5,11 +5,12 @@ import tempfile
 import pandas as pd
 from hydra_genetics.commands.create import CreateLongReadInputFiles
 
+
 class TestCreateLongReadInputFiles(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
         self.out_dir = tempfile.mkdtemp()
-        
+
         # Paths to the test BAM files relative to this test file
         test_file_dir = os.path.dirname(os.path.abspath(__file__))
         repo_root = os.path.abspath(os.path.join(test_file_dir, "..", ".."))
@@ -36,11 +37,15 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
                 self.fail(f"Required PacBio fixture missing: {src_path}")
             shutil.copy(src_path, self.pacbio_test_dir)
 
+    def tearDown(self):
+        shutil.rmtree(self.test_dir)
+        shutil.rmtree(self.out_dir)
+
     def test_init_ont_bams(self):
         # Change working directory to out_dir to avoid polluting the workspace
         original_cwd = os.getcwd()
         os.chdir(self.out_dir)
-        
+
         try:
             creator = CreateLongReadInputFiles(
                 directory=[self.ont_test_dir],
@@ -67,7 +72,7 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
             self.assertIn("ONT", units_df["platform"].values)
             self.assertIn("basecalling_model", units_df.columns)
             self.assertIn("run_id", units_df.columns)
-            
+
         finally:
             os.chdir(original_cwd)
 
@@ -75,12 +80,12 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
         # Change working directory to out_dir to avoid polluting the workspace
         original_cwd = os.getcwd()
         os.chdir(self.out_dir)
-        
+
         try:
             creator = CreateLongReadInputFiles(
                 directory=[self.pacbio_test_dir],
                 outdir=self.out_dir,
-                platform="PACBIO" 
+                platform="PACBIO"
             )
             creator.init()
 
@@ -100,9 +105,10 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
             # PacBio/non-ONT shouldn't have ONT specific columns
             self.assertNotIn("basecalling_model", units_df.columns)
             self.assertNotIn("run_id", units_df.columns)
-            
+
         finally:
             os.chdir(original_cwd)
+
 
 if __name__ == "__main__":
     unittest.main()

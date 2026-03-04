@@ -861,12 +861,11 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
     # A demultiplexed ONT bam will have the sample id in the al tag
     # if a sample sheet with barcode alias was used during
     # basecalling and demultiplexing. Otherwise
-    # the SM tag which lists the barcode id will be used. 
-    # If none of these tags are present, the LB tag will be used as a last resort 
+    # the SM tag which lists the barcode id will be used.
+    # If none of these tags are present, the LB tag will be used as a last resort
     if platform == "ONT":
         try:
             sample_id = read_group_dict["al"]
-            
         except KeyError:
             try:
                 sample_id = read_group_dict["SM"]

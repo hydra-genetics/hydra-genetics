@@ -800,7 +800,7 @@ def extract_value(field, default, data):
         return data[head]
 
 
-def extract_bam_information(file_path, default_barcode='NNNN', platform="ONT"):
+def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
 
     """
     extract read group information and check for methylation tags
@@ -809,7 +809,7 @@ def extract_bam_information(file_path, default_barcode='NNNN', platform="ONT"):
     :param file_path: path to BAM file
     :type file_path: string
     :param default_barcode: barcode string used when a barcode can not
-    be extracted
+    be extracted. Defaults to 'NNNN' if None or empty.
     :type default_barcode: string
     :param: platform: specifies which sequencing platform this is
     :type platform: string
@@ -818,6 +818,9 @@ def extract_bam_information(file_path, default_barcode='NNNN', platform="ONT"):
     Additional basecalling_model and run_id when platform is ONT
     :rtype: dict
     """
+
+    if not default_barcode:
+        default_barcode = "NNNN"
 
     bam = pysam.AlignmentFile(file_path, "rb", check_sq=False)
     header_dict = bam.header.to_dict()

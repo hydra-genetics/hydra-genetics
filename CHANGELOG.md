@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.3.2...v3.4.0) (2026-03-06)
+
+
+### Features
+
+* handle alias tag in ont bam files and skip unclassified bams ([e316550](https://github.com/hydra-genetics/hydra-genetics/commit/e316550401a8afc7443c745aa0fe8f9792195f33))
+
 ## [3.3.2](https://github.com/hydra-genetics/hydra-genetics/compare/v3.3.1...v3.3.2) (2026-02-12)
 
 

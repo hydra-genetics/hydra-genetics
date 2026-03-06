@@ -634,6 +634,8 @@ class CreateLongReadInputFiles(object):
             dir_files_found = 0
             log.info(f"Dir: {d}")
             for f in glob.glob(f"{d}/**/*.bam", recursive=True):
+                if "unclassified" in f or "unassigned" in f:
+                    continue
                 file_list.append(f)
                 dir_files_found += 1
                 log.info(f"    found: {f}")
@@ -807,7 +809,7 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
     :param file_path: path to BAM file
     :type file_path: string
     :param default_barcode: barcode string used when a barcode can not
-    be extracted
+    be extracted. Defaults to 'NNNN' if None or empty.
     :type default_barcode: string
     :param: platform: specifies which sequencing platform this is
     :type platform: string
@@ -816,6 +818,9 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
     Additional basecalling_model and run_id when platform is ONT
     :rtype: dict
     """
+
+    if not default_barcode:
+        default_barcode = "NNNN"
 
     bam = pysam.AlignmentFile(file_path, "rb", check_sq=False)
     header_dict = bam.header.to_dict()
@@ -853,11 +858,24 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
     except KeyError:
         barcode = default_barcode
 
-    # some ONT bam have only LB and it is the sample id.
-    try:
-        sample_id = read_group_dict["SM"]
-    except KeyError:
-        sample_id = read_group_dict["LB"]
+    # A demultiplexed ONT bam will have the sample id in the al tag
+    # if a sample sheet with barcode alias was used during
+    # basecalling and demultiplexing. Otherwise
+    # the SM tag which lists the barcode id will be used.
+    # If none of these tags are present, the LB tag will be used as a last resort
+    if platform == "ONT":
+        try:
+            sample_id = read_group_dict["al"]
+        except KeyError:
+            try:
+                sample_id = read_group_dict["SM"]
+            except KeyError:
+                sample_id = read_group_dict["LB"]
+    else:
+        try:
+            sample_id = read_group_dict["SM"]
+        except KeyError:
+            sample_id = read_group_dict["LB"]
 
     # check first read for methylation tags
     first_read = bam.head(1)

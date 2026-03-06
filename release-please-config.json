@@ -1,0 +1,12 @@
+{
+  "include-component-in-tag": false,
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "package-name": "hydra-genetics",
+      "bump-minor-pre-major": true,
+      "include-v-in-tag": true
+    }
+  },
+  "bootstrap-sha": "0b4e505fad2ae8421d28f2e758a67aa32692fb4f"
+}

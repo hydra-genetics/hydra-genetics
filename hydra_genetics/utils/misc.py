@@ -9,6 +9,15 @@ from datetime import datetime
 from snakemake.sourcecache import GithubFile, LocalGitFile, WorkflowError
 
 
+# Dictionary mapping aligners to their path prefixes
+ALIGNER_PATHS = {"minimap2": "alignment/minimap2_align",
+                 "pbmm2": "alignment/pbmm2_align",
+                 "vacmap": "alignment/vacmap_align",
+                 "star": "alignment/star",
+                 "parabricks_fq2bam": "parabricks/fq2bam",
+                 "parabricks_fq2bam_recal": "parabricks/pbrun_fq2bam_recal", 
+                 "parabricks_rna_fq2bam": "parabricks/pbrun_rna_fq2bam"}
+
 def get_module_snakefile(config, repo, path, tag):
     ''' return a complete snakefile path, either pointing to github or a local repo'''
     if 'hydra_local_path' in config:
@@ -93,7 +102,8 @@ def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_me
     Compile the paths to input aligned BAM and BAI files for the workflow.
 
     This function determines the appropriate BAM file path based on the configuration
-    and workflow parameters.
+    and workflow parameters. Uses the ALIGNER_PATHS dictionary to map aligners to their
+    path prefixes.
 
     Args:
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
@@ -104,21 +114,18 @@ def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_me
     Returns:
         tuple: A tuple containing the alignment BAM file path and its BAI index file path.
     """
-    try:
-        if config.get("aligner") is not None:
-            # Use aligner to compile the paths
-            aligner = config.get("aligner")
-            alignment_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam"
-            index_path = f"alignment/{aligner}_align/{wildcards.sample}_{wildcards.type}.bam.bai"
-        else:
-            # no aligner, use the default path
-            alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"
-            index_path = f"{alignment_path}.bai"
+    if config.get("aligner") is not None:
+        # Use aligner to compile the paths using ALIGNER_PATHS dictionary
+        aligner = config.get("aligner")
+        path_prefix = ALIGNER_PATHS.get(aligner, f"alignment/{aligner}_align")
+        alignment_path = f"{path_prefix}/{wildcards.sample}_{wildcards.type}.bam"
+        index_path = f"{alignment_path}.bai"
+    else:
+        # no aligner, use the default path
+        alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"
+        index_path = f"{alignment_path}.bai"
 
-        return alignment_path, index_path
-
-    except KeyError as e:
-        raise WorkflowError(f"Missing required wildcards: {e}")
+    return alignment_path, index_path
 
 
 def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtools_merge_bam", suffix=None):
@@ -150,7 +157,7 @@ def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtool
         path_to_input_bam = haplotag_path
     elif config.get("aligner") is not None:
         aligner = config.get("aligner")
-        path_to_input_bam = f"alignment/{aligner}_align"
+        path_to_input_bam = ALIGNER_PATHS.get(aligner, f"alignment/{aligner}_align")
     else:
         path_to_input_bam = default_path
 

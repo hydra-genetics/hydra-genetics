@@ -15,8 +15,9 @@ ALIGNER_PATHS = {"minimap2": "alignment/minimap2_align",
                  "vacmap": "alignment/vacmap_align",
                  "star": "alignment/star",
                  "parabricks_fq2bam": "parabricks/pbrun_fq2bam",
-                 "parabricks_fq2bam_recal": "parabricks/pbrun_fq2bam_recal", 
+                 "parabricks_fq2bam_recal": "parabricks/pbrun_fq2bam_recal",
                  "parabricks_rna_fq2bam": "parabricks/pbrun_rna_fq2bam"}
+
 
 def get_module_snakefile(config, repo, path, tag):
     ''' return a complete snakefile path, either pointing to github or a local repo'''

@@ -218,7 +218,7 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         self.assertEqual(bai, "custom/path/S9_N.bam.bai")
 
     def test_with_aligner_no_haplotag_path(self):
-        """Test aligner without haplotag_path uses ALIGNER_PATHS"""
+        """Test aligner without haplotag_path falls back to alignment/{aligner}_align"""
         wildcards = types.SimpleNamespace(sample="S1", type="T")
         config = {"aligner": "bwa-mem2"}
         bam, bai = get_input_haplotagged_bam(

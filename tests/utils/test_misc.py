@@ -62,8 +62,8 @@ class TestGetInputAlignedBam(unittest.TestCase):
         config = {"aligner": "parabricks_fq2bam"}
         wildcards = types.SimpleNamespace(sample="S1", type="N")
         bam, bai = get_input_aligned_bam(wildcards, config)
-        self.assertEqual(bam, "parabricks/fq2bam/S1_N.bam")
-        self.assertEqual(bai, "parabricks/fq2bam/S1_N.bam.bai")
+        self.assertEqual(bam, "parabricks/pbrun_fq2bam/S1_N.bam")
+        self.assertEqual(bai, "parabricks/pbrun_fq2bam/S1_N.bam.bai")
 
     def test_with_aligner_not_in_dict(self):
         """Test aligner not in ALIGNER_PATHS uses default pattern"""

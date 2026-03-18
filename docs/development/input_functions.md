@@ -18,9 +18,27 @@ Function `get_input_aligned_bam` compiles paths to aligned BAM files and their c
 
 ### How it works
 
-1. **Aligner specified**: If the config dictionary includes an aligner, the function assumes you're working with long-read data and constructs the correct BAM and BAI paths using this aligner in the path.
+The function uses the `ALIGNER_PATHS` dictionary to map aligner names to their output directory paths. This dictionary contains predefined paths for common aligners:
+
+```python
+ALIGNER_PATHS = {
+    "minimap2": "alignment/minimap2_align",
+    "pbmm2": "alignment/pbmm2_align",
+    "vacmap": "alignment/vacmap_align",
+    "star": "alignment/star",
+    "parabricks_fq2bam": "parabricks/pbrun_fq2bam",
+    "parabricks_fq2bam_recal": "parabricks/pbrun_fq2bam_recal",
+    "parabricks_rna_fq2bam": "parabricks/pbrun_rna_fq2bam"
+}
+```
+
+1. **Aligner specified**: If the config dictionary includes an aligner:
+   - First checks if the aligner exists in `ALIGNER_PATHS` and uses that custom path
+   - If not in the dictionary, falls back to the pattern: `alignment/{aligner}_align`
+   - Constructs BAM and BAI paths using the determined path prefix
 
 2. **No aligner specified**: If no aligner is defined, the function constructs the file paths using the `default_path` and the `wildcards.sample` and `wildcards.type` values.
+
 
 #### Returns
 
@@ -54,10 +72,57 @@ bam_path, bai_path = get_input_aligned_bam(wildcards, config)
 
 # Returns
 (
-    "alignment/pbmm2/sample1_rna.bam",
-    "alignment/pbmm2/sample1_rna.bam.bai"
+    "alignment/pbmm2_align/sample1_rna.bam",
+    "alignment/pbmm2_align/sample1_rna.bam.bai"
 )
 ```
+
+## Customizing Aligner Paths
+
+The following aligners have predefined paths in `ALIGNER_PATHS`:
+
+- **minimap2** → `alignment/minimap2_align`
+- **pbmm2** → `alignment/pbmm2_align`
+- **vacmap** → `alignment/vacmap_align`
+- **star** → `alignment/star`
+- **parabricks_fq2bam** → `parabricks/pbrun_fq2bam`
+- **parabricks_fq2bam_recal** → `parabricks/pbrun_fq2bam_recal`
+- **parabricks_rna_fq2bam** → `parabricks/pbrun_rna_fq2bam`
+
+However, you can override or extend the `ALIGNER_PATHS` dictionary in your `common.smk` or workflow file to support custom aligners or non-standard directory structures.
+
+### Option 1: Update the existing dictionary (recommended)
+
+Add or override specific aligner paths while keeping the defaults:
+
+```python
+from hydra_genetics.utils import misc
+
+# Add custom aligners or override existing ones
+misc.ALIGNER_PATHS.update({
+    "custom_aligner": "my/custom/path",
+    "minimap2": "my/different/minimap2/path",  # Override existing
+    "bwa": "alignment/bwa_mem"
+})
+```
+
+### Option 2: Replace the entire dictionary
+
+Completely replace the dictionary with your own custom paths:
+
+```python
+from hydra_genetics.utils import misc
+
+# Replace with completely custom paths
+misc.ALIGNER_PATHS = {
+    "bwa": "custom/bwa/location",
+    "minimap2": "custom/minimap2/location",
+    "my_aligner": "tools/my_aligner/output"
+}
+```
+
+**Note**: Modifications must be made using the module reference (`misc.ALIGNER_PATHS`) for changes to take effect in the helper functions.
+
 
 ## Haplotagged BAM files
 
@@ -148,10 +213,3 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 )
 ```
 
-## List of valid aligners
-
-- **pbmm2**
-
-- **minimap2**
-
-Leaving aligner **blank** is equivalent to choosing duplicate marked bwa bam file

@@ -14,7 +14,7 @@ ALIGNER_PATHS = {"minimap2": "alignment/minimap2_align",
                  "pbmm2": "alignment/pbmm2_align",
                  "vacmap": "alignment/vacmap_align",
                  "star": "alignment/star",
-                 "parabricks_fq2bam": "parabricks/fq2bam",
+                 "parabricks_fq2bam": "parabricks/pbrun_fq2bam",
                  "parabricks_fq2bam_recal": "parabricks/pbrun_fq2bam_recal", 
                  "parabricks_rna_fq2bam": "parabricks/pbrun_rna_fq2bam"}
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.5.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.4.0...v3.5.0) (2026-03-19)
+
+
+### Features
+
+* use dict for bam  paths ([b557e40](https://github.com/hydra-genetics/hydra-genetics/commit/b557e404b22e413f811fc52cb000d9dde2ca3545))
+* use dict for bam  paths ([82f609b](https://github.com/hydra-genetics/hydra-genetics/commit/82f609b570280edb92ac2cb66deac6635743d998))
+
+
+### Bug Fixes
+
+* convert to pyproject.toml ([2530bee](https://github.com/hydra-genetics/hydra-genetics/commit/2530beec88dd0ebbf707aaa14ddc6de4c297e28a))
+* update please release action ([1aa8919](https://github.com/hydra-genetics/hydra-genetics/commit/1aa8919578652f9311f0ab13aec0dfc37c4ba88a))
+* update please release action ([deb06df](https://github.com/hydra-genetics/hydra-genetics/commit/deb06df6498c4ca8031befb08a4e4f0bd1f76457))
+
 ## [3.4.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.3.2...v3.4.0) (2026-03-06)
 
 

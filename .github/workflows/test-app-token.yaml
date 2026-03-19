@@ -20,4 +20,4 @@ jobs:
         run: |
           echo "Token length: ${#GH_TOKEN}"
           gh api rate_limit --jq '.rate | "Remaining: \(.remaining)/\(.limit)"'
-          gh api app --jq '"App: \(.name) (id: \(.id))"'
+          gh api /installation/repositories --jq '"Accessible repos: \(.total_count)"'

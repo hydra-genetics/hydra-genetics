@@ -1,0 +1,23 @@
+name: test-app-token
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Validate token
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "Token length: ${#GH_TOKEN}"
+          gh api rate_limit --jq '.rate | "Remaining: \(.remaining)/\(.limit)"'
+          gh api app --jq '"App: \(.name) (id: \(.id))"'

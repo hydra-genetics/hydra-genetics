@@ -10,3 +10,4 @@ units.tsv
 .venv/
 .idea/
 .vscode/
+hydra_genetics/_version.py

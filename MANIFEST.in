@@ -1,5 +1,3 @@
 include LICENSE.md
 include README.md
 recursive-include hydra_genetics *
-include versioneer.py
-include hydra_genetics/_version.py

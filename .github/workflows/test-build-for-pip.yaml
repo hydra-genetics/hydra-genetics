@@ -7,7 +7,7 @@ on:
     branches:
      - develop
      - master
-     
+
   workflow_dispatch:
 
 name: test-build-pip-package
@@ -16,24 +16,16 @@ jobs:
   test-build-pip-package:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v3
-        id: release
-        with:
-          release-type: python
-          package-name: hydra-genetics
-          default-branch: master
-
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
       - name: Build package
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install setuptools
-          python setup.py sdist
+          python -m pip install --upgrade pip build
+          python -m build

@@ -1,11 +1,14 @@
 {
-  "include-component-in-tag": false,
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
     ".": {
       "release-type": "python",
       "package-name": "hydra-genetics",
-      "bump-minor-pre-major": true,
-      "include-v-in-tag": true
+      "changelog-path": "CHANGELOG.md",
+      "include-v-in-tag": true,
+      "include-component-in-tag": false,
+      "draft": false,
+      "prerelease": false
     }
   },
   "bootstrap-sha": "0b4e505fad2ae8421d28f2e758a67aa32692fb4f"

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hydra-genetics"
+dynamic = ["version"]
+description = "Helper tools for use with hydra-genetics pipelines."
+readme = "README.md"
+license = {text = "GPL-3"}
+authors = [
+    {name = "Patrik Smeds", email = "patrik.smeds@scilifelab.uu.se"},
+]
+requires-python = ">=3.8"
+keywords = [
+    "hydra-genetics",
+    "snakemake",
+    "bioinformatics",
+    "workflow",
+    "pipeline",
+    "clinical",
+    "biology",
+    "sequencing",
+    "NGS",
+    "next generation sequencing",
+]
+dependencies = [
+    "pandas>=1.3.1",
+    "click>=8,<9",
+    "jinja2==3.0.1",
+    "rich==10.9.0",
+    "snakemake",
+    "pysam",
+    "gitpython",
+    "pyaml",
+    "packaging",
+]
+
+[project.urls]
+Homepage = "https://github.com/hydra-genetics/tools"
+
+[project.scripts]
+hydra-genetics = "hydra_genetics.__main__:run"
+
+[tool.setuptools.packages.find]
+exclude = ["docs*", "tests*"]
+
+[tool.setuptools_scm]
+version_file = "hydra_genetics/_version.py"

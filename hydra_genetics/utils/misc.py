@@ -98,7 +98,7 @@ def export_config_as_file(config, output_file="config", directory="versions", da
         writer.write(yaml.dump(config))
 
 
-def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_merge_bam"):
+def get_input_aligned_bam(wildcards, config, set_type=None, default_path="alignment/samtools_merge_bam"):
     """
     Compile the paths to input aligned BAM and BAI files for the workflow.
 
@@ -110,20 +110,29 @@ def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_me
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
         config (dict): Configuration dictionary with possible keys:
             - aligner (str or None): The aligner used for generating the BAM file.
+        set_type (str or None): Override the type from wildcards. Must be None, 'N', 'T', or 'R'.
+            If None (default), uses wildcards.type.
         default_path (str): Default path for BAM files if no specific configuration is provided.
 
     Returns:
         tuple: A tuple containing the alignment BAM file path and its BAI index file path.
     """
+    # Validate set_type parameter
+    if set_type is not None and set_type not in ['N', 'T', 'R']:
+        raise ValueError(f"set_type must be None, 'N', 'T', or 'R', got: {set_type}")
+    
+    # Determine which type to use
+    sample_type = set_type if set_type is not None else wildcards.type
+    
     if config.get("aligner") is not None:
         # Use aligner to compile the paths using ALIGNER_PATHS dictionary
         aligner = config.get("aligner")
         path_prefix = ALIGNER_PATHS.get(aligner, f"alignment/{aligner}_align")
-        alignment_path = f"{path_prefix}/{wildcards.sample}_{wildcards.type}.bam"
+        alignment_path = f"{path_prefix}/{wildcards.sample}_{sample_type}.bam"
         index_path = f"{alignment_path}.bai"
     else:
         # no aligner, use the default path
-        alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"
+        alignment_path = f"{default_path}/{wildcards.sample}_{sample_type}.bam"
         index_path = f"{alignment_path}.bai"
 
     return alignment_path, index_path

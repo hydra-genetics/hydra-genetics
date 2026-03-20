@@ -107,6 +107,54 @@ class TestGetInputAlignedBam(unittest.TestCase):
         with self.assertRaises(Exception):
             get_input_aligned_bam(wildcards, config)
 
+    def test_set_type_override_N(self):
+        """Test set_type='N' overrides wildcards.type"""
+        config = {"aligner": "minimap2"}
+        wildcards = types.SimpleNamespace(sample="S5", type="T")
+        bam, bai = get_input_aligned_bam(wildcards, config, set_type="N")
+        self.assertEqual(bam, "alignment/minimap2_align/S5_N.bam")
+        self.assertEqual(bai, "alignment/minimap2_align/S5_N.bam.bai")
+
+    def test_set_type_override_T(self):
+        """Test set_type='T' overrides wildcards.type"""
+        config = {}
+        wildcards = types.SimpleNamespace(sample="S6", type="N")
+        bam, bai = get_input_aligned_bam(wildcards, config, set_type="T")
+        self.assertEqual(bam, "alignment/samtools_merge_bam/S6_T.bam")
+        self.assertEqual(bai, "alignment/samtools_merge_bam/S6_T.bam.bai")
+
+    def test_set_type_override_R(self):
+        """Test set_type='R' overrides wildcards.type"""
+        config = {"aligner": "pbmm2"}
+        wildcards = types.SimpleNamespace(sample="S7", type="N")
+        bam, bai = get_input_aligned_bam(wildcards, config, set_type="R")
+        self.assertEqual(bam, "alignment/pbmm2_align/S7_R.bam")
+        self.assertEqual(bai, "alignment/pbmm2_align/S7_R.bam.bai")
+
+    def test_set_type_none_uses_wildcard(self):
+        """Test set_type=None uses wildcards.type"""
+        config = {"aligner": "minimap2"}
+        wildcards = types.SimpleNamespace(sample="S8", type="T")
+        bam, bai = get_input_aligned_bam(wildcards, config, set_type=None)
+        self.assertEqual(bam, "alignment/minimap2_align/S8_T.bam")
+        self.assertEqual(bai, "alignment/minimap2_align/S8_T.bam.bai")
+
+    def test_set_type_invalid_value(self):
+        """Test invalid set_type raises ValueError"""
+        config = {"aligner": "minimap2"}
+        wildcards = types.SimpleNamespace(sample="S9", type="T")
+        with self.assertRaises(ValueError) as context:
+            get_input_aligned_bam(wildcards, config, set_type="X")
+        self.assertIn("set_type must be None, 'N', 'T', or 'R'", str(context.exception))
+
+    def test_set_type_invalid_lowercase(self):
+        """Test lowercase set_type raises ValueError"""
+        config = {}
+        wildcards = types.SimpleNamespace(sample="S10", type="T")
+        with self.assertRaises(ValueError) as context:
+            get_input_aligned_bam(wildcards, config, set_type="n")
+        self.assertIn("set_type must be None, 'N', 'T', or 'R'", str(context.exception))
+
 
 class TestGetInputHaplotaggedBam(unittest.TestCase):
     def test_default_path_only(self):

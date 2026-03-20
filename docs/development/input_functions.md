@@ -103,8 +103,8 @@ res = get_input_aligned_bam(wildcards, config, set_type="N")
 
 # Returns
 {
-    "bam": "alignment/minimap2_align/sample1_N.bam",
-    "bai": "alignment/minimap2_align/sample1_N.bam.bai"
+    "bam_n": "alignment/minimap2_align/sample1_N.bam",
+    "bai_n": "alignment/minimap2_align/sample1_N.bam.bai"
 }
 ```
 
@@ -218,8 +218,8 @@ res = get_input_haplotagged_bam(wildcards, config, set_type="T")
 
 # Returns
 {
-    "bam": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
-    "bai": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
+    "bam_t": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
+    "bai_t": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
 }
 ```
 

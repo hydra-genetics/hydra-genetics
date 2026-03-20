@@ -209,8 +209,6 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         self.assertEqual(bam, "snv_indels/whatshap_haplotag/S13_N.haplotagged.bam")
         self.assertEqual(bai, "snv_indels/whatshap_haplotag/S13_N.haplotagged.bam.bai")
 
-    # Removed test_with_custom_suffix since suffix argument is no longer supported
-
     def test_set_type_override_haplotag(self):
         """Test set_type='R' overrides wildcards.type in haplotagged bams"""
         wildcards = types.SimpleNamespace(sample="S15", type="T")
@@ -222,8 +220,6 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         )
         self.assertEqual(bam, "snv_indels/whatshap_haplotag/S15_R.haplotagged.bam")
         self.assertEqual(bai, "snv_indels/whatshap_haplotag/S15_R.haplotagged.bam.bai")
-
-    # Removed test_set_type_with_suffix since suffix argument is no longer supported
 
     def test_set_type_invalid_haplotag(self):
         """Test invalid set_type raises ValueError in haplotagged bam"""

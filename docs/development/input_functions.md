@@ -149,10 +149,8 @@ Function `get_input_haplotagged_bam` constructs the file paths for haplotagged/p
  - **wildcards**: A Snakemake Wildcards object that contains sample and type. These are used to construct file names.
  - **config**: A dictionary containing workflow configuration options. It may include:
    - **phaser**: Name of phasing/haplotagging tool used (e.g., `whatshap`, `hiphase`).
-   - **haplotag_suffix**: Optional suffix for filenames from config.
  - **set_type** (optional): Override the type from wildcards. Must be `None`, `'N'`, `'T'`, or `'R'`. If `None` (default), uses `wildcards.type`.
  - **default_path** (optional): Default path for BAM files if no phaser is specified. Defaults to `"snv_indels/whatshap_haplotag"`.
- - **suffix** (optional): Suffix to append to the BAM file name. Default is `'haplotagged.bam'`.
 
 ### How it works
 
@@ -172,11 +170,8 @@ PHASED_BAM_PATHS = {
 
 2. **No phaser specified**: If no phaser is defined, the function uses the `default_path`.
 
-3. **Suffix Handling**: If suffix is provided as an argument, it is used. Otherwise, the function checks for `haplotag_suffix` in config. If not specified in either location, the default suffix `'haplotagged.bam'` is used.
-
-4. **Filename Construction**: 
-   - With suffix: `{sample}_{type}.{suffix}.bam`
-   - Without suffix: `{sample}_{type}.bam`
+3. **Filename Construction**: 
+   - `{sample}_{type}.haplotagged.bam`
 
 ### Returns
 
@@ -200,21 +195,7 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 )
 ```
 
-2. With phaser and suffix
-```python
-wildcards = types.SimpleNamespace(sample="sample1", type="T")
-config = {"phaser": "hiphase", "haplotag_suffix": "phased"}
-
-bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
-
-# Returns
-(
-    "snv_indels/hiphase/sample1_T.phased.bam",
-    "snv_indels/hiphase/sample1_T.phased.bam.bai"
-)
-```
-
-3. With set_type override
+2. With set_type override
 ```python
 wildcards = types.SimpleNamespace(sample="sample1", type="N")
 config = {"phaser": "whatshap"}
@@ -224,12 +205,12 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config, set_type="T")
 
 # Returns
 (
-    "snv_indels/whatshap_haplotag/sample1_T.bam",
-    "snv_indels/whatshap_haplotag/sample1_T.bam.bai"
+    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
+    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
 )
 ```
 
-4. No phaser specified (uses default)
+3. No phaser specified (uses default)
 ```python
 wildcards = types.SimpleNamespace(sample="sample1", type="T")
 config = {}
@@ -238,8 +219,8 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 
 # Returns
 (
-    "snv_indels/whatshap_haplotag/sample1_T.bam",
-    "snv_indels/whatshap_haplotag/sample1_T.bam.bai"
+    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
+    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
 )
 ```
 

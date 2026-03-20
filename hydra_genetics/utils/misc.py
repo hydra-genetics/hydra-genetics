@@ -102,7 +102,7 @@ def export_config_as_file(config, output_file="config", directory="versions", da
         writer.write(yaml.dump(config))
 
 
-def get_input_aligned_bam(wildcards, config, set_type=None, default_path="alignment/samtools_merge_bam"):
+def get_input_aligned_bam(wildcards, config, *, default_path="alignment/samtools_merge_bam", set_type=None):
     """
     Compile the paths to input aligned BAM and BAI files for the workflow.
 
@@ -142,9 +142,9 @@ def get_input_aligned_bam(wildcards, config, set_type=None, default_path="alignm
     return alignment_path, index_path
 
 
-def get_input_haplotagged_bam(wildcards, config, set_type=None, default_path="snv_indels/whatshap_haplotag", suffix='haplotagged.bam'):
+def get_input_haplotagged_bam(wildcards, config, *, default_path="snv_indels/whatshap_haplotag", set_type=None):
     """
-    Compile paths to haplotagged BAM/BAI files (may be required for downstream analyses with e.g. severus SV caller)
+    Compile paths to haplotagged BAM/BAI files, required for some downstream analyses using phase information.
     This function determines the appropriate BAM file path based on the configuration. Uses the PHASED_BAM_PATHS
     dictionary to map phasers to their path prefixes.
 
@@ -152,11 +152,9 @@ def get_input_haplotagged_bam(wildcards, config, set_type=None, default_path="sn
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
         config (dict): Configuration dictionary with possible keys:
             - phaser (str): Name of phasing tool used (e.g., 'whatshap', 'hiphase')
-            - haplotag_suffix (str): Optional suffix for filenames from config
         set_type (str or None): Override the type from wildcards. Must be None, 'N', 'T', or 'R'.
             If None (default), uses wildcards.type.
         default_path (str): Default path for BAM files if no specific configuration is provided.
-        suffix (str or None): Suffix to append to the BAM file name (default is 'haplotagged.bam').
 
     Returns:
         tuple: A tuple containing the haplotagged BAM file path and its BAI index file path.
@@ -170,31 +168,12 @@ def get_input_haplotagged_bam(wildcards, config, set_type=None, default_path="sn
 
     # Determine the path prefix using PHASED_BAM_PATHS dictionary
     if config.get("phaser") is not None:
-        # Use phaser to compile paths using PHASED_BAM_PATHS dictionary
         phaser = config.get("phaser")
         path_prefix = PHASED_BAM_PATHS.get(phaser, f"snv_indels/{phaser}")
     else:
-        # No phaser specified, use default path
         path_prefix = default_path
 
-    # Set default suffix if not provided
-    if suffix is None:
-        suffix = "haplotagged.bam"
-    # Allow config to override if explicitly set
-    if "haplotag_suffix" in config and config["haplotag_suffix"]:
-        suffix = config["haplotag_suffix"]
-
-    # Construct the file name with or without suffix
-    if suffix:  # This will be False for None and ''
-        # If suffix already ends with .bam, use as-is; otherwise add .bam
-        if suffix.endswith('.bam'):
-            file_name = f"{wildcards.sample}_{sample_type}.{suffix}"
-        else:
-            file_name = f"{wildcards.sample}_{sample_type}.{suffix}.bam"
-    else:
-        file_name = f"{wildcards.sample}_{sample_type}.bam"
-
-    alignment_path = f"{path_prefix}/{file_name}"
+    alignment_path  = f"{path_prefix}/{wildcards.sample}_{sample_type}.haplotagged.bam"
     index_path = f"{alignment_path}.bai"
 
     return alignment_path, index_path

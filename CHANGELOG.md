@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.0.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.5.0...v4.0.0) (2026-03-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* add PHASED_BAM_PATHS dictionary and set_type to get_input_haplotagged_bam
+
+### Features
+
+* add PHASED_BAM_PATHS dictionary and set_type to get_input_haplotagged_bam ([8c3e533](https://github.com/hydra-genetics/hydra-genetics/commit/8c3e533a4a7479c619315c66ad2cff853e439d53))
+* overide wildcards type for bam path ([2fac7c6](https://github.com/hydra-genetics/hydra-genetics/commit/2fac7c6ee2c0c7134a0e087dd7894b418e59a27c))
+* overide wildcards type for bam path ([92a706b](https://github.com/hydra-genetics/hydra-genetics/commit/92a706b138b9ebc2852b19e7af35ee1b8c1cb6fc))
+
+
+### Bug Fixes
+
+* make set_type keyword-only in get_input bam functions and remove suffix logic ([5775aa8](https://github.com/hydra-genetics/hydra-genetics/commit/5775aa81b54900a2d8c1b9265f3f476b4e316adf))
+
 ## [3.5.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.4.0...v3.5.0) (2026-03-19)
 
 

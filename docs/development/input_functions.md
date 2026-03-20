@@ -4,6 +4,21 @@ Hydra Genetics contains helper functions to compile paths to BAM files depending
 
 The functions are located in `hydra_genetics/utils/misc.py`.
 
+## Using Snakemake's unpack()
+
+Because these helper functions return a dictionary containing the path to the BAM file and its BAI index, they are designed to be used seamlessly with Snakemake's `unpack()` function. `unpack()` maps the dictionary keys to named input dimensions, allowing you to cleanly access them as `{input.bam}` and `{input.bai}` directly in your rule's shell, script, or run commands.
+
+For example:
+```python
+rule align_sample:
+    input:
+        unpack(lambda wildcards: get_input_aligned_bam(wildcards, config))
+    output:
+        "results/some_output.txt"
+    shell:
+        "my_tool --bam {input.bam} --bai {input.bai} > {output}"
+```
+
 
 ## Aligned BAM files
 
@@ -43,10 +58,9 @@ ALIGNER_PATHS = {
 
 #### Returns
 
-A tuple containing:
+A dictionary containing:
 
- - The full path to the BAM file
- - The full path to the corresponding BAI index file
+  - Keys depend on the set_type parameter (e.g., 'bam' and 'bai', or 'bam_t' and 'bai_t').
 
 #### Example: no aligner
 
@@ -54,7 +68,7 @@ A tuple containing:
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {}
 
-bam_path, bai_path = get_input_aligned_bam(wildcards, config)
+res = get_input_aligned_bam(wildcards, config)
 
 # Returns:
 (
@@ -69,13 +83,13 @@ bam_path, bai_path = get_input_aligned_bam(wildcards, config)
 wildcards = types.SimpleNamespace(sample="sample1", type="rna")
 config = {"aligner": "pbmm2"}
 
-bam_path, bai_path = get_input_aligned_bam(wildcards, config)
+res = get_input_aligned_bam(wildcards, config)
 
 # Returns
-(
-    "alignment/pbmm2_align/sample1_rna.bam",
-    "alignment/pbmm2_align/sample1_rna.bam.bai"
-)
+{
+    "bam": "alignment/pbmm2_align/sample1_rna.bam",
+    "bai": "alignment/pbmm2_align/sample1_rna.bam.bai"
+}
 ```
 
 #### Example: with set_type override
@@ -85,13 +99,13 @@ wildcards = types.SimpleNamespace(sample="sample1", type="T")
 config = {"aligner": "minimap2"}
 
 # Override type to 'N' (normal)
-bam_path, bai_path = get_input_aligned_bam(wildcards, config, set_type="N")
+res = get_input_aligned_bam(wildcards, config, set_type="N")
 
 # Returns
-(
-    "alignment/minimap2_align/sample1_N.bam",
-    "alignment/minimap2_align/sample1_N.bam.bai"
-)
+{
+    "bam_n": "alignment/minimap2_align/sample1_N.bam",
+    "bai_n": "alignment/minimap2_align/sample1_N.bam.bai"
+}
 ```
 
 ## Customizing Aligner Paths
@@ -175,24 +189,23 @@ PHASED_BAM_PATHS = {
 
 ### Returns
 
-A tuple containing:
- - Full path to the haplotagged BAM file
- - Full path to the corresponding BAI index file
+A dictionary containing:
+  - Keys depend on the set_type parameter (e.g., 'bam' and 'bai', or 'bam_t' and 'bai_t').
 
 ### Examples
 
-1. With phaser, no suffix
+1. With phaser
 ```python
 wildcards = types.SimpleNamespace(sample="sample1", type="T")
 config = {"phaser": "whatshap"}
 
-bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
+res = get_input_haplotagged_bam(wildcards, config)
 
 # Returns
-(
-    "snv_indels/whatshap_haplotag/sample1_T.bam",
-    "snv_indels/whatshap_haplotag/sample1_T.bam.bai"
-)
+{
+    "bam": "snv_indels/whatshap_haplotag/sample1_T.bam",
+    "bai": "snv_indels/whatshap_haplotag/sample1_T.bam.bai"
+}
 ```
 
 2. With set_type override
@@ -201,13 +214,13 @@ wildcards = types.SimpleNamespace(sample="sample1", type="N")
 config = {"phaser": "whatshap"}
 
 # Override type to 'T' (tumor)
-bam_path, bai_path = get_input_haplotagged_bam(wildcards, config, set_type="T")
+res = get_input_haplotagged_bam(wildcards, config, set_type="T")
 
 # Returns
-(
-    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
-    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
-)
+{
+    "bam_t": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
+    "bai_t": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
+}
 ```
 
 3. No phaser specified (uses default)
@@ -215,13 +228,13 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config, set_type="T")
 wildcards = types.SimpleNamespace(sample="sample1", type="T")
 config = {}
 
-bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
+res = get_input_haplotagged_bam(wildcards, config)
 
 # Returns
-(
-    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
-    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
-)
+{
+    "bam": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
+    "bai": "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
+}
 ```
 
 ## Customizing Phased BAM Paths
@@ -278,11 +291,11 @@ Both `get_input_aligned_bam` and `get_input_haplotagged_bam` support the `set_ty
 ```python
 rule my_rule:
     input:
-        tumor_bam = lambda wildcards: get_input_aligned_bam(
+        unpack(lambda wildcards: get_input_aligned_bam(
             wildcards, 
             config, 
             set_type="T"  # Always get tumor BAM
-        )[0]
+        ))
 ```
 
 **Example use case 2:** A rule requiring both tumor and normal BAM files for paired analysis:
@@ -290,19 +303,19 @@ rule my_rule:
 ```python
 rule somatic_variant_calling:
     input:
-        tumor_bam = lambda wildcards: get_input_aligned_bam(
+        unpack(lambda wildcards: get_input_aligned_bam(
             wildcards, 
             config, 
             set_type="T"  # Get tumor BAM
-        )[0],
-        normal_bam = lambda wildcards: get_input_aligned_bam(
+        ))
+        unpack(lambda wildcards: get_input_aligned_bam(
             wildcards, 
             config, 
             set_type="N"  # Get normal BAM
-        )[0]
+        ))
     output:
         vcf = "variants/{sample}.somatic.vcf"
     shell:
-        "variant_caller --tumor {input.tumor_bam} --normal {input.normal_bam} -o {output.vcf}"
+        "variant_caller --tumor {input.bam_t} --normal {input.bam_n} -o {output.vcf}"
 ```
 

@@ -119,7 +119,9 @@ def get_input_aligned_bam(wildcards, config, *, default_path="alignment/samtools
         default_path (str): Default path for BAM files if no specific configuration is provided.
 
     Returns:
-        tuple: A tuple containing the alignment BAM file path and its BAI index file path.
+        dict: A dictionary containing the alignment BAM file path and its BAI index file path.
+            Keys are 'bam' and 'bai' when wildcards.type is used.
+            When set_type is specified, keys are prefixed with the type (e.g., 'bam_t', 'bai_n').
     """
     # Validate set_type parameter
     if set_type is not None and set_type not in ['N', 'T', 'R']:
@@ -139,7 +141,14 @@ def get_input_aligned_bam(wildcards, config, *, default_path="alignment/samtools
         alignment_path = f"{default_path}/{wildcards.sample}_{sample_type}.bam"
         index_path = f"{alignment_path}.bai"
 
-    return alignment_path, index_path
+    if set_type is None:
+        return {"bam": alignment_path, "bai": index_path}
+    elif set_type == 'T':
+        return {"bam_t": alignment_path, "bai_t": index_path}
+    elif set_type == 'N':
+        return {"bam_n": alignment_path, "bai_n": index_path}
+    elif set_type == 'R':
+        return {"bam_r": alignment_path, "bai_r": index_path}
 
 
 def get_input_haplotagged_bam(wildcards, config, *, default_path="snv_indels/whatshap_haplotag", set_type=None):
@@ -157,7 +166,9 @@ def get_input_haplotagged_bam(wildcards, config, *, default_path="snv_indels/wha
         default_path (str): Default path for BAM files if no specific configuration is provided.
 
     Returns:
-        tuple: A tuple containing the haplotagged BAM file path and its BAI index file path.
+        dict: A dictionary containing the haplotagged BAM file path and its BAI index file path.
+            Keys are 'bam' and 'bai' when wildcards.type is used.
+            When set_type is specified, keys are prefixed with the type (e.g., 'bam_t', 'bai_n').
     """
     # Validate set_type parameter
     if set_type is not None and set_type not in ['N', 'T', 'R']:
@@ -176,4 +187,11 @@ def get_input_haplotagged_bam(wildcards, config, *, default_path="snv_indels/wha
     alignment_path = f"{path_prefix}/{wildcards.sample}_{sample_type}.haplotagged.bam"
     index_path = f"{alignment_path}.bai"
 
-    return alignment_path, index_path
+    if set_type is None:
+        return {"bam": alignment_path, "bai": index_path}
+    elif set_type == 'T':
+        return {"bam_t": alignment_path, "bai_t": index_path}
+    elif set_type == 'N':
+        return {"bam_n": alignment_path, "bai_n": index_path}
+    elif set_type == 'R':
+        return {"bam_r": alignment_path, "bai_r": index_path}

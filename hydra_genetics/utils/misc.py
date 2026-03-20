@@ -6,7 +6,7 @@ import os
 import yaml
 import re
 from datetime import datetime
-from snakemake.sourcecache import GithubFile, LocalGitFile, WorkflowError
+from snakemake.sourcecache import GithubFile, LocalGitFile
 
 
 # Dictionary mapping aligners to their path prefixes
@@ -17,6 +17,10 @@ ALIGNER_PATHS = {"minimap2": "alignment/minimap2_align",
                  "parabricks_fq2bam": "parabricks/pbrun_fq2bam",
                  "parabricks_fq2bam_recal": "parabricks/pbrun_fq2bam_recal",
                  "parabricks_rna_fq2bam": "parabricks/pbrun_rna_fq2bam"}
+
+# Dictionary mapping phasers to their path prefixes
+PHASED_BAM_PATHS = {"whatshap": "snv_indels/whatshap_haplotag",
+                    "hiphase": "snv_indels/hiphase"}
 
 
 def get_module_snakefile(config, repo, path, tag):
@@ -98,7 +102,7 @@ def export_config_as_file(config, output_file="config", directory="versions", da
         writer.write(yaml.dump(config))
 
 
-def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_merge_bam"):
+def get_input_aligned_bam(wildcards, config, *, default_path="alignment/samtools_merge_bam", set_type=None):
     """
     Compile the paths to input aligned BAM and BAI files for the workflow.
 
@@ -110,68 +114,66 @@ def get_input_aligned_bam(wildcards, config, default_path="alignment/samtools_me
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
         config (dict): Configuration dictionary with possible keys:
             - aligner (str or None): The aligner used for generating the BAM file.
+        set_type (str or None): Override the type from wildcards. Must be None, 'N', 'T', or 'R'.
+            If None (default), uses wildcards.type.
         default_path (str): Default path for BAM files if no specific configuration is provided.
 
     Returns:
         tuple: A tuple containing the alignment BAM file path and its BAI index file path.
     """
+    # Validate set_type parameter
+    if set_type is not None and set_type not in ['N', 'T', 'R']:
+        raise ValueError(f"set_type must be None, 'N', 'T', or 'R', got: {set_type}")
+
+    # Determine which type to use
+    sample_type = set_type if set_type is not None else wildcards.type
+
     if config.get("aligner") is not None:
         # Use aligner to compile the paths using ALIGNER_PATHS dictionary
         aligner = config.get("aligner")
         path_prefix = ALIGNER_PATHS.get(aligner, f"alignment/{aligner}_align")
-        alignment_path = f"{path_prefix}/{wildcards.sample}_{wildcards.type}.bam"
+        alignment_path = f"{path_prefix}/{wildcards.sample}_{sample_type}.bam"
         index_path = f"{alignment_path}.bai"
     else:
         # no aligner, use the default path
-        alignment_path = f"{default_path}/{wildcards.sample}_{wildcards.type}.bam"
+        alignment_path = f"{default_path}/{wildcards.sample}_{sample_type}.bam"
         index_path = f"{alignment_path}.bai"
 
     return alignment_path, index_path
 
 
-def get_input_haplotagged_bam(wildcards, config, default_path="alignment/samtools_merge_bam", suffix=None):
+def get_input_haplotagged_bam(wildcards, config, *, default_path="snv_indels/whatshap_haplotag", set_type=None):
     """
-    Compile paths to haplotagged BAM/BAI files (may be required for downstream analyses with e.g. cnvkit_batch)
-    This function determines the appropriate BAM file path based on the configuration. suffix can be provided
-    either as a function argument or in the config file under the key 'haplotag_suffix'.
-
-    For backward compatibility, if only wildcards and config are provided, the function will default to using the
-    default path and return 'alignment/samtools_merge_bam/{sample}_{type}.bam'.
+    Compile paths to haplotagged BAM/BAI files, required for some downstream analyses using phase information.
+    This function determines the appropriate BAM file path based on the configuration. Uses the PHASED_BAM_PATHS
+    dictionary to map phasers to their path prefixes.
 
     Args:
         wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
-        config (dict): config with or without 'haplotag_path' key.
+        config (dict): Configuration dictionary with possible keys:
+            - phaser (str): Name of phasing tool used (e.g., 'whatshap', 'hiphase')
+        set_type (str or None): Override the type from wildcards. Must be None, 'N', 'T', or 'R'.
+            If None (default), uses wildcards.type.
         default_path (str): Default path for BAM files if no specific configuration is provided.
-        suffix (str): Suffix to append to the BAM file name (default is None).
+
     Returns:
-        tuple: A tuple containing the alignment BAM file path and its BAI index file path.
-
+        tuple: A tuple containing the haplotagged BAM file path and its BAI index file path.
     """
-    try:
-        sample_name = getattr(wildcards, "sample")
-        sample_type = getattr(wildcards, "type")
-    except AttributeError as e:
-        raise WorkflowError(f"Missing required wildcards: {e}")
+    # Validate set_type parameter
+    if set_type is not None and set_type not in ['N', 'T', 'R']:
+        raise ValueError(f"set_type must be None, 'N', 'T', or 'R', got: {set_type}")
 
-    haplotag_path = config.get("haplotag_path", None)
-    if haplotag_path is not None:
-        path_to_input_bam = haplotag_path
-    elif config.get("aligner") is not None:
-        aligner = config.get("aligner")
-        path_to_input_bam = ALIGNER_PATHS.get(aligner, f"alignment/{aligner}_align")
+    # Determine which type to use
+    sample_type = set_type if set_type is not None else wildcards.type
+
+    # Determine the path prefix using PHASED_BAM_PATHS dictionary
+    if config.get("phaser") is not None:
+        phaser = config.get("phaser")
+        path_prefix = PHASED_BAM_PATHS.get(phaser, f"snv_indels/{phaser}")
     else:
-        path_to_input_bam = default_path
+        path_prefix = default_path
 
-    # check for suffix in the config
-    if suffix is None:
-        suffix = config.get("haplotag_suffix", None)
+    alignment_path = f"{path_prefix}/{wildcards.sample}_{sample_type}.haplotagged.bam"
+    index_path = f"{alignment_path}.bai"
 
-    if suffix:  # This will be False for None and ''
-        file_name = f"{sample_name}_{sample_type}.{suffix}.bam"
-    else:
-        file_name = f"{sample_name}_{sample_type}.bam"
-
-    bam_path = os.path.join(path_to_input_bam, file_name)
-    bai_path = f"{bam_path}.bai"
-
-    return bam_path, bai_path
+    return alignment_path, index_path

@@ -53,47 +53,47 @@ class TestGetInputAlignedBam(unittest.TestCase):
         """Test aligner that exists in ALIGNER_PATHS dictionary"""
         config = {"aligner": "minimap2"}
         wildcards = types.SimpleNamespace(sample="S1", type="T")
-        bam, bai = get_input_aligned_bam(wildcards, config)
-        self.assertEqual(bam, "alignment/minimap2_align/S1_T.bam")
-        self.assertEqual(bai, "alignment/minimap2_align/S1_T.bam.bai")
+        res = get_input_aligned_bam(wildcards, config)
+        self.assertEqual(res["bam"], "alignment/minimap2_align/S1_T.bam")
+        self.assertEqual(res["bai"], "alignment/minimap2_align/S1_T.bam.bai")
 
     def test_with_custom_aligner_path(self):
         """Test aligner with custom path in ALIGNER_PATHS"""
         config = {"aligner": "parabricks_fq2bam"}
         wildcards = types.SimpleNamespace(sample="S1", type="N")
-        bam, bai = get_input_aligned_bam(wildcards, config)
-        self.assertEqual(bam, "parabricks/pbrun_fq2bam/S1_N.bam")
-        self.assertEqual(bai, "parabricks/pbrun_fq2bam/S1_N.bam.bai")
+        res = get_input_aligned_bam(wildcards, config)
+        self.assertEqual(res["bam"], "parabricks/pbrun_fq2bam/S1_N.bam")
+        self.assertEqual(res["bai"], "parabricks/pbrun_fq2bam/S1_N.bam.bai")
 
     def test_with_aligner_not_in_dict(self):
         """Test aligner not in ALIGNER_PATHS uses default pattern"""
         config = {"aligner": "bwa-mem2"}
         wildcards = types.SimpleNamespace(sample="S1", type="T")
-        bam, bai = get_input_aligned_bam(wildcards, config)
-        self.assertEqual(bam, "alignment/bwa-mem2_align/S1_T.bam")
-        self.assertEqual(bai, "alignment/bwa-mem2_align/S1_T.bam.bai")
+        res = get_input_aligned_bam(wildcards, config)
+        self.assertEqual(res["bam"], "alignment/bwa-mem2_align/S1_T.bam")
+        self.assertEqual(res["bai"], "alignment/bwa-mem2_align/S1_T.bam.bai")
 
     def test_without_aligner(self):
         config = {}
         wildcards = types.SimpleNamespace(sample="S2", type="N")
-        bam, bai = get_input_aligned_bam(wildcards, config)
-        self.assertEqual(bam, "alignment/samtools_merge_bam/S2_N.bam")
-        self.assertEqual(bai, "alignment/samtools_merge_bam/S2_N.bam.bai")
+        res = get_input_aligned_bam(wildcards, config)
+        self.assertEqual(res["bam"], "alignment/samtools_merge_bam/S2_N.bam")
+        self.assertEqual(res["bai"], "alignment/samtools_merge_bam/S2_N.bam.bai")
 
     def test_custom_default_path(self):
         config = {}
         wildcards = types.SimpleNamespace(sample="S3", type="T")
-        bam, bai = get_input_aligned_bam(wildcards, config, default_path="custom/path")
-        self.assertEqual(bam, "custom/path/S3_T.bam")
-        self.assertEqual(bai, "custom/path/S3_T.bam.bai")
+        res = get_input_aligned_bam(wildcards, config, default_path="custom/path")
+        self.assertEqual(res["bam"], "custom/path/S3_T.bam")
+        self.assertEqual(res["bai"], "custom/path/S3_T.bam.bai")
 
     def test_aligner_none_uses_default(self):
         """Test explicit None aligner uses default path"""
         config = {"aligner": None}
         wildcards = types.SimpleNamespace(sample="S4", type="T")
-        bam, bai = get_input_aligned_bam(wildcards, config)
-        self.assertEqual(bam, "alignment/samtools_merge_bam/S4_T.bam")
-        self.assertEqual(bai, "alignment/samtools_merge_bam/S4_T.bam.bai")
+        res = get_input_aligned_bam(wildcards, config)
+        self.assertEqual(res["bam"], "alignment/samtools_merge_bam/S4_T.bam")
+        self.assertEqual(res["bai"], "alignment/samtools_merge_bam/S4_T.bam.bai")
 
     def test_missing_sample_key(self):
         config = {}
@@ -111,33 +111,33 @@ class TestGetInputAlignedBam(unittest.TestCase):
         """Test set_type='N' overrides wildcards.type"""
         config = {"aligner": "minimap2"}
         wildcards = types.SimpleNamespace(sample="S5", type="T")
-        bam, bai = get_input_aligned_bam(wildcards, config, set_type="N")
-        self.assertEqual(bam, "alignment/minimap2_align/S5_N.bam")
-        self.assertEqual(bai, "alignment/minimap2_align/S5_N.bam.bai")
+        res = get_input_aligned_bam(wildcards, config, set_type="N")
+        self.assertEqual(res["bam_n"], "alignment/minimap2_align/S5_N.bam")
+        self.assertEqual(res["bai_n"], "alignment/minimap2_align/S5_N.bam.bai")
 
     def test_set_type_override_T(self):
         """Test set_type='T' overrides wildcards.type"""
         config = {}
         wildcards = types.SimpleNamespace(sample="S6", type="N")
-        bam, bai = get_input_aligned_bam(wildcards, config, set_type="T")
-        self.assertEqual(bam, "alignment/samtools_merge_bam/S6_T.bam")
-        self.assertEqual(bai, "alignment/samtools_merge_bam/S6_T.bam.bai")
+        res = get_input_aligned_bam(wildcards, config, set_type="T")
+        self.assertEqual(res["bam_t"], "alignment/samtools_merge_bam/S6_T.bam")
+        self.assertEqual(res["bai_t"], "alignment/samtools_merge_bam/S6_T.bam.bai")
 
     def test_set_type_override_R(self):
         """Test set_type='R' overrides wildcards.type"""
         config = {"aligner": "pbmm2"}
         wildcards = types.SimpleNamespace(sample="S7", type="N")
-        bam, bai = get_input_aligned_bam(wildcards, config, set_type="R")
-        self.assertEqual(bam, "alignment/pbmm2_align/S7_R.bam")
-        self.assertEqual(bai, "alignment/pbmm2_align/S7_R.bam.bai")
+        res = get_input_aligned_bam(wildcards, config, set_type="R")
+        self.assertEqual(res["bam_r"], "alignment/pbmm2_align/S7_R.bam")
+        self.assertEqual(res["bai_r"], "alignment/pbmm2_align/S7_R.bam.bai")
 
     def test_set_type_none_uses_wildcard(self):
         """Test set_type=None uses wildcards.type"""
         config = {"aligner": "minimap2"}
         wildcards = types.SimpleNamespace(sample="S8", type="T")
-        bam, bai = get_input_aligned_bam(wildcards, config, set_type=None)
-        self.assertEqual(bam, "alignment/minimap2_align/S8_T.bam")
-        self.assertEqual(bai, "alignment/minimap2_align/S8_T.bam.bai")
+        res = get_input_aligned_bam(wildcards, config, set_type=None)
+        self.assertEqual(res["bam"], "alignment/minimap2_align/S8_T.bam")
+        self.assertEqual(res["bai"], "alignment/minimap2_align/S8_T.bam.bai")
 
     def test_set_type_invalid_value(self):
         """Test invalid set_type raises ValueError"""
@@ -160,13 +160,13 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
     def test_default_path_only(self):
         wildcards = types.SimpleNamespace(sample="S10", type="N")
         config = dict()
-        bam, bai = get_input_haplotagged_bam(
+        res = get_input_haplotagged_bam(
             wildcards,
             config,
             default_path="custom/default/path"
         )
-        self.assertEqual(bam, "custom/default/path/S10_N.haplotagged.bam")
-        self.assertEqual(bai, "custom/default/path/S10_N.haplotagged.bam.bai")
+        self.assertEqual(res["bam"], "custom/default/path/S10_N.haplotagged.bam")
+        self.assertEqual(res["bai"], "custom/default/path/S10_N.haplotagged.bam.bai")
 
     def test_missing_type_wildcard(self):
         wildcards = types.SimpleNamespace(sample="S11")
@@ -184,42 +184,42 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         """Test with empty phaser uses default path"""
         wildcards = types.SimpleNamespace(sample="S12", type="T")
         config = dict({})
-        bam, bai = get_input_haplotagged_bam(
+        res = get_input_haplotagged_bam(
             wildcards,
             config
         )
-        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S12_T.haplotagged.bam")
-        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S12_T.haplotagged.bam.bai")
+        self.assertEqual(res["bam"], "snv_indels/whatshap_haplotag/S12_T.haplotagged.bam")
+        self.assertEqual(res["bai"], "snv_indels/whatshap_haplotag/S12_T.haplotagged.bam.bai")
 
     def test_no_phaser_uses_default_path(self):
         """Test with no phaser config uses default path"""
         wildcards = types.SimpleNamespace(sample="S14", type="N")
         config = dict()
-        bam, bai = get_input_haplotagged_bam(
+        res = get_input_haplotagged_bam(
             wildcards,
             config
         )
-        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S14_N.haplotagged.bam")
-        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S14_N.haplotagged.bam.bai")
+        self.assertEqual(res["bam"], "snv_indels/whatshap_haplotag/S14_N.haplotagged.bam")
+        self.assertEqual(res["bai"], "snv_indels/whatshap_haplotag/S14_N.haplotagged.bam.bai")
 
     def test_default_values(self):
         wildcards = types.SimpleNamespace(sample="S13", type="N")
         config = dict()
-        bam, bai = get_input_haplotagged_bam(wildcards, config)
-        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S13_N.haplotagged.bam")
-        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S13_N.haplotagged.bam.bai")
+        res = get_input_haplotagged_bam(wildcards, config)
+        self.assertEqual(res["bam"], "snv_indels/whatshap_haplotag/S13_N.haplotagged.bam")
+        self.assertEqual(res["bai"], "snv_indels/whatshap_haplotag/S13_N.haplotagged.bam.bai")
 
     def test_set_type_override_haplotag(self):
         """Test set_type='R' overrides wildcards.type in haplotagged bams"""
         wildcards = types.SimpleNamespace(sample="S15", type="T")
         config = {"phaser": "whatshap"}
-        bam, bai = get_input_haplotagged_bam(
+        res = get_input_haplotagged_bam(
             wildcards,
             config,
             set_type="R"
         )
-        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S15_R.haplotagged.bam")
-        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S15_R.haplotagged.bam.bai")
+        self.assertEqual(res["bam_r"], "snv_indels/whatshap_haplotag/S15_R.haplotagged.bam")
+        self.assertEqual(res["bai_r"], "snv_indels/whatshap_haplotag/S15_R.haplotagged.bam.bai")
 
     def test_set_type_invalid_haplotag(self):
         """Test invalid set_type raises ValueError in haplotagged bam"""

@@ -163,7 +163,8 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         bam, bai = get_input_haplotagged_bam(
             wildcards,
             config,
-            default_path="custom/default/path"
+            default_path="custom/default/path",
+            suffix=""  # Use empty suffix to avoid default 'haplotagged.bam'
         )
         self.assertEqual(bam, "custom/default/path/S10_N.bam")
         self.assertEqual(bai, "custom/default/path/S10_N.bam.bai")
@@ -181,24 +182,28 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
             get_input_haplotagged_bam(wildcards, config)
 
     def test_empty_haplotag_path(self):
+        """Test with empty phaser uses default path"""
         wildcards = types.SimpleNamespace(sample="S12", type="T")
-        config = dict({'haplotag_path': ""})
+        config = dict({})
         bam, bai = get_input_haplotagged_bam(
             wildcards,
-            config
+            config,
+            suffix=""  # Use empty suffix to avoid default 'haplotagged.bam'
         )
-        self.assertEqual(bam, "S12_T.bam")
-        self.assertEqual(bai, "S12_T.bam.bai")
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S12_T.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S12_T.bam.bai")
 
     def test_missing_haplotag_path(self):
+        """Test with no phaser config uses default path"""
         wildcards = types.SimpleNamespace(sample="S14", type="N")
         config = dict()
         bam, bai = get_input_haplotagged_bam(
             wildcards,
-            config
+            config,
+            suffix=""  # Use empty suffix to avoid default 'haplotagged.bam'
         )
-        self.assertEqual(bam, "alignment/samtools_merge_bam/S14_N.bam")
-        self.assertEqual(bai, "alignment/samtools_merge_bam/S14_N.bam.bai")
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S14_N.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S14_N.bam.bai")
 
     def test_default_values(self):
         wildcards = types.SimpleNamespace(sample="S13", type="N")
@@ -209,7 +214,7 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
 
     def test_with_custom_suffix(self):
         wildcards = types.SimpleNamespace(sample="S5", type="T")
-        config = dict({"haplotag_path": "snv_indels/whatshap_haplotag"})
+        config = dict({"phaser": "whatshap"})
         bam, bai = get_input_haplotagged_bam(
             wildcards,
             config,
@@ -221,7 +226,7 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
     def test_with_suffix_in_config(self):
         wildcards = types.SimpleNamespace(sample="S7", type="N")
         config = dict({
-            "haplotag_path": "snv_indels/whatshap_haplotag",
+            "phaser": "whatshap",
             "haplotag_suffix": "from_config"
         })
         bam, bai = get_input_haplotagged_bam(
@@ -233,7 +238,7 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
 
     def test_with_empty_suffix(self):
         wildcards = types.SimpleNamespace(sample="S6", type="T")
-        config = dict({"haplotag_path": "snv_indels/whatshap_haplotag"})
+        config = dict({"phaser": "whatshap"})
         bam, bai = get_input_haplotagged_bam(
             wildcards,
             config,
@@ -244,26 +249,25 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
 
     def test_with_all_parameters(self):
         wildcards = types.SimpleNamespace(sample="S8", type="T")
-        config = dict({"haplotag_path": "custom/path"})
+        config = dict({"phaser": "whatshap"})
         bam, bai = get_input_haplotagged_bam(
             wildcards,
             config,
-            default_path="should/not/use",
             suffix="special"
         )
-        self.assertEqual(bam, "custom/path/S8_T.special.bam")
-        self.assertEqual(bai, "custom/path/S8_T.special.bam.bai")
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S8_T.special.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S8_T.special.bam.bai")
 
     def test_none_suffix(self):
         wildcards = types.SimpleNamespace(sample="S9", type="N")
-        config = dict({"haplotag_path": "custom/path"})
+        config = dict({"phaser": "whatshap"})
         bam, bai = get_input_haplotagged_bam(
             wildcards,
             config,
             suffix=None
         )
-        self.assertEqual(bam, "custom/path/S9_N.bam")
-        self.assertEqual(bai, "custom/path/S9_N.bam.bai")
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S9_N.haplotagged.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S9_N.haplotagged.bam.bai")
 
     def test_with_phaser_in_dict(self):
         """Test phaser in PHASED_BAM_PATHS uses custom path"""
@@ -287,19 +291,19 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         self.assertEqual(bam, "snv_indels/custom_tool/S1_T.haplotagged.bam")
         self.assertEqual(bai, "snv_indels/custom_tool/S1_T.haplotagged.bam.bai")
 
-    def test_haplotag_path_takes_precedence_over_phaser(self):
-        """Test haplotag_path overrides phaser config"""
+    def test_phaser_precedence(self):
+        """Test phaser config determines path"""
         wildcards = types.SimpleNamespace(sample="S1", type="T")
         config = {
-            "phaser": "whatshap",
-            "haplotag_path": "custom/haplotag/path"
+            "phaser": "whatshap"
         }
         bam, bai = get_input_haplotagged_bam(
             wildcards,
-            config
+            config,
+            suffix=""  # Use empty suffix to test path resolution
         )
-        self.assertEqual(bam, "custom/haplotag/path/S1_T.haplotagged.bam")
-        self.assertEqual(bai, "custom/haplotag/path/S1_T.haplotagged.bam.bai")
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S1_T.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S1_T.bam.bai")
 
     def test_set_type_override_haplotag(self):
         """Test set_type='R' overrides wildcards.type in haplotagged bams"""

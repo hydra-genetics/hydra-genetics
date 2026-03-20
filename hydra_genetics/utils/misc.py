@@ -177,13 +177,20 @@ def get_input_haplotagged_bam(wildcards, config, set_type=None, default_path="sn
         # No phaser specified, use default path
         path_prefix = default_path
 
-    # Check for suffix in the config if not provided as argument
+    # Set default suffix if not provided
     if suffix is None:
-        suffix = config.get("haplotag_suffix", None)
+        suffix = "haplotagged.bam"
+    # Allow config to override if explicitly set
+    if "haplotag_suffix" in config and config["haplotag_suffix"]:
+        suffix = config["haplotag_suffix"]
 
     # Construct the file name with or without suffix
     if suffix:  # This will be False for None and ''
-        file_name = f"{wildcards.sample}_{sample_type}.{suffix}"
+        # If suffix already ends with .bam, use as-is; otherwise add .bam
+        if suffix.endswith('.bam'):
+            file_name = f"{wildcards.sample}_{sample_type}.{suffix}"
+        else:
+            file_name = f"{wildcards.sample}_{sample_type}.{suffix}.bam"
     else:
         file_name = f"{wildcards.sample}_{sample_type}.bam"
 

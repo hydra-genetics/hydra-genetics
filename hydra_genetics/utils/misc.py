@@ -173,7 +173,7 @@ def get_input_haplotagged_bam(wildcards, config, *, default_path="snv_indels/wha
     else:
         path_prefix = default_path
 
-    alignment_path  = f"{path_prefix}/{wildcards.sample}_{sample_type}.haplotagged.bam"
+    alignment_path = f"{path_prefix}/{wildcards.sample}_{sample_type}.haplotagged.bam"
     index_path = f"{alignment_path}.bai"
 
     return alignment_path, index_path

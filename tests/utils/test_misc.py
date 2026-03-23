@@ -3,7 +3,6 @@
 import unittest
 import yaml
 import types
-from snakemake.sourcecache import WorkflowError
 from hydra_genetics.utils.misc import get_input_aligned_bam, get_input_haplotagged_bam
 
 

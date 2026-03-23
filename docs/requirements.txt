@@ -1,6 +1,6 @@
 
 jinja2>=3.1.2
-mkdocs==1.4.2
+mkdocs>=1.5.0
 pymdown-extensions==9.10
 mkdocs-schema-reader==0.11.1
 mkdocs-simple-hooks==0.1.5

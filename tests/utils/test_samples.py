@@ -2,7 +2,7 @@
 
 import unittest
 import pandas as pandas
-from snakemake.io import Wildcards
+from snakemake.io.container import Wildcards
 
 
 class TestSampleUtils(unittest.TestCase):

@@ -2,10 +2,11 @@
 
 import typing
 import pandas
-import snakemake
+
+from snakemake.io.container import Wildcards
 
 
-def get_sample(samples: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pandas.Series:
+def get_sample(samples: pandas.DataFrame, wildcards: Wildcards) -> pandas.Series:
     """
     function used to extract one sample(row) from sample.tsv
     Args:

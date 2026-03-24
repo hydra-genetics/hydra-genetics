@@ -11,7 +11,7 @@ license = {text = "GPL-3"}
 authors = [
     {name = "Patrik Smeds", email = "patrik.smeds@scilifelab.uu.se"},
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 keywords = [
     "hydra-genetics",
     "snakemake",

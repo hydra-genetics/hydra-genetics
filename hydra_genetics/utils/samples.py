@@ -1,6 +1,5 @@
 # coding: utf-8
 
-import typing
 import pandas
 
 from snakemake.io.container import Wildcards
@@ -22,7 +21,7 @@ def get_sample(samples: pandas.DataFrame, wildcards: Wildcards) -> pandas.Series
     return samples.loc[(wildcards.sample)].dropna()
 
 
-def get_samples(samples: pandas.DataFrame) -> typing.List[str]:
+def get_samples(samples: pandas.DataFrame) -> list[str]:
     """
     function used to extract all sample found in samples.tsv
     Args:

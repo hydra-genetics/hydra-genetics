@@ -71,15 +71,15 @@ def replace_dict_variables(config):
     '''
     def update_dict(temp_config):
         for k in temp_config:
-            if type(temp_config[k]) is dict:
+            if isinstance(temp_config[k], dict):
                 temp_config[k] = update_dict(temp_config[k])
-            elif type(temp_config[k]) is str:
+            elif isinstance(temp_config[k], str):
                 match = re.findall(r'\{\{([A-Za-z0-9_]+)\}\}', temp_config[k])
                 for m in match:
                     temp_config[k] = temp_config[k].replace("{{" + m + "}}", config[m])
-            elif type(temp_config[k]) is list:
+            elif isinstance(temp_config[k], list):
                 for i in range(len(temp_config[k])):
-                    if type(temp_config[k][i]) is str:
+                    if isinstance(temp_config[k][i], str):
                         match = re.findall(r'\{\{([A-Za-z0-9_]+)\}\}', temp_config[k][i])
                         for m in match:
                             temp_config[k][i] = temp_config[k][i].replace("{{" + m + "}}", config[m])
@@ -111,7 +111,7 @@ def get_input_aligned_bam(wildcards, config, *, default_path="alignment/samtools
     path prefixes.
 
     Args:
-        wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
+        wildcards (snakemake.io.container.Wildcards): Wildcards object containing sample and type information.
         config (dict): Configuration dictionary with possible keys:
             - aligner (str or None): The aligner used for generating the BAM file.
         set_type (str or None): Override the type from wildcards. Must be None, 'N', 'T', or 'R'.
@@ -149,7 +149,7 @@ def get_input_haplotagged_bam(wildcards, config, *, default_path="snv_indels/wha
     dictionary to map phasers to their path prefixes.
 
     Args:
-        wildcards (snakemake.io.Wildcards): Wildcards object containing sample and type information.
+        wildcards (snakemake.io.container.Wildcards): Wildcards object containing sample and type information.
         config (dict): Configuration dictionary with possible keys:
             - phaser (str): Name of phasing tool used (e.g., 'whatshap', 'hiphase')
         set_type (str or None): Override the type from wildcards. Must be None, 'N', 'T', or 'R'.

@@ -3,7 +3,7 @@
 import pandas
 import warnings
 
-from snakemake.io.container import Wildcards
+from snakemake.iocontainers import Wildcards
 
 
 def get_unit(units: pandas.DataFrame, wildcards: Wildcards) -> pandas.Series:

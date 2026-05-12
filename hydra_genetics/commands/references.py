@@ -222,6 +222,7 @@ def download(validation_file, output_dir, force):
     if len(failed_list) > 0:
         logging.error(f"Failed to retrieve {len(failed_list)}")
         logging.error(f"Failed: {', '.join(failed_list)}")
+        exit(1)
 
     if len(skipped_list) > 0:
         logging.info(f"Skipped {len(skipped_list)} since checksum didn't change")

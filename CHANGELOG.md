@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.1.0](https://github.com/hydra-genetics/hydra-genetics/compare/v4.0.0...v4.1.0) (2026-06-03)
+
+
+### Features
+
+* extract_chr now handles patterns (merge_chr and skip_chr in con… ([5f826c9](https://github.com/hydra-genetics/hydra-genetics/commit/5f826c9781cf37e1a917854f644a8b0626e125a3))
+* extract_chr now handles patterns (merge_chr and skip_chr in config) ([5cb19a2](https://github.com/hydra-genetics/hydra-genetics/commit/5cb19a259e62adba49324087bfcd25394868350f))
+
+
+### Bug Fixes
+
+* Add exit on failed retrieval in references.py ([87e3ef2](https://github.com/hydra-genetics/hydra-genetics/commit/87e3ef2b7d8f5e752fef221585ddf791471ef81c))
+* Add exit on failed retrieval in references.py ([9835ec6](https://github.com/hydra-genetics/hydra-genetics/commit/9835ec6e64cf76054c249c6ad727578677bc3402))
+
 ## [4.0.0](https://github.com/hydra-genetics/hydra-genetics/compare/v3.5.0...v4.0.0) (2026-03-20)
 
 

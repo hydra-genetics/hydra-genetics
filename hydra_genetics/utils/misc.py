@@ -54,11 +54,10 @@ def merge(dict1, dict2):
 
 
 def extract_chr(file, filter_out=["chrM"]):
-    chr = None
     if os.path.exists(file):
         with open(file) as lines:
-            chr = [line.split("\t")[0] for line in lines]
-        return [c for c in chr if c not in filter_out]
+            chrs = [line.split("\t")[0] for line in lines]
+        return [c for c in chrs if not any(re.fullmatch(pattern, c) for pattern in filter_out)]
     return [""]
 
 

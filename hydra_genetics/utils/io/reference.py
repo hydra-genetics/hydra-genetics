@@ -174,7 +174,11 @@ def fetch_url_content(url, content_holder, tmpdir):
 
     def copy_local_file(source_url, target_path):
         local_path = urlparse(source_url).path
-        shutil.copy2(local_path, target_path)
+        try:
+            shutil.copy2(local_path, target_path)
+        except OSError as e:
+            logging.error(f"failed to copy local file {local_path}: {e}")
+            return False
         return True
 
     if isinstance(url, dict):
@@ -184,7 +188,8 @@ def fetch_url_content(url, content_holder, tmpdir):
             temp_file = os.path.join(tmpdir, f"file{counter}")
             list_of_temp_files.append(temp_file)
             if urlparse(part_url).scheme == "file":
-                copy_local_file(part_url, temp_file)
+                if not copy_local_file(part_url, temp_file):
+                    return False
             elif not download_with_retry(part_url, temp_file):
                 return False
             if not checksum_validate_file(temp_file, part_checksum):

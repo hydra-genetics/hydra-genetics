@@ -33,8 +33,8 @@ class TestReference(unittest.TestCase):
                 "url": "https://github.com/Twist_Solid_pipeline_files/raw/v1.0.0/design/this-is-surely-not-a-file.txt",
             },
         }
-        fetched, links, failed, skipped = fetch_reference_data(validation_data, self.outdir,
-                                                                fetched=[], links=[], failed=[], skipped=[])
+        fetched, links, failed, skipped = fetch_reference_data(
+            validation_data, self.outdir, fetched=[], links=[], failed=[], skipped=[])
         self.assertEqual(len(fetched), 0)
         self.assertEqual(len(failed), 1)
         self.assertEqual(len(links), 0)
@@ -58,8 +58,8 @@ class TestReference(unittest.TestCase):
             },
         }
 
-        fetched, links, failed, skipped = fetch_reference_data(validation_data, self.outdir,
-                                                                fetched=[], links=[], failed=[], skipped=[])
+        fetched, links, failed, skipped = fetch_reference_data(
+            validation_data, self.outdir, fetched=[], links=[], failed=[], skipped=[])
 
         self.assertEqual(len(fetched), 1)
         self.assertEqual(len(failed), 0)

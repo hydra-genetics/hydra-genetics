@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.1.1](https://github.com/hydra-genetics/hydra-genetics/compare/v4.1.0...v4.1.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* support file:// URLs in fetch_url_content ([adaf911](https://github.com/hydra-genetics/hydra-genetics/commit/adaf911637941d80a1242d5df5736166724344c4))
+* support file:// URLs in fetch_url_content ([d5a61f1](https://github.com/hydra-genetics/hydra-genetics/commit/d5a61f153ca9afc2968f0583cc37c3e0c4f5ec82))
+
 ## [4.1.0](https://github.com/hydra-genetics/hydra-genetics/compare/v4.0.0...v4.1.0) (2026-06-03)
 
 

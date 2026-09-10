@@ -3,7 +3,6 @@
 import unittest
 import yaml
 import types
-from snakemake.sourcecache import WorkflowError
 from hydra_genetics.utils.misc import get_input_aligned_bam, get_input_haplotagged_bam
 
 
@@ -39,13 +38,30 @@ class TestResourcesUtils(unittest.TestCase):
     def test_variable_replacement(self):
         with open("tests/utils/files/config_variable_replacement.yaml") as f:
             config = yaml.load(f, Loader=yaml.loader.SafeLoader)
-        print(config)
         self.assertEqual(config,
                          {'PROJECT': 'MY variable', 'bwa_mem': {'extra': 'some settings {{PROJECT}}'}})
 
         from hydra_genetics.utils.misc import replace_dict_variables
         self.assertEqual(replace_dict_variables(config),
                          {'PROJECT': 'MY variable', 'bwa_mem': {'extra': 'some settings MY variable'}})
+
+    def test_variable_replacement_in_list(self):
+        from hydra_genetics.utils.misc import replace_dict_variables
+        config = {'VAR': 'hello', 'items': ['{{VAR}} world', 'no substitution']}
+        result = replace_dict_variables(config)
+        self.assertEqual(result['items'], ['hello world', 'no substitution'])
+
+    def test_variable_replacement_multiple_vars_in_string(self):
+        from hydra_genetics.utils.misc import replace_dict_variables
+        config = {'A': 'foo', 'B': 'bar', 'tool': {'extra': '{{A}}_{{B}}'}}
+        result = replace_dict_variables(config)
+        self.assertEqual(result['tool']['extra'], 'foo_bar')
+
+    def test_variable_replacement_undefined_variable_raises(self):
+        from hydra_genetics.utils.misc import replace_dict_variables
+        config = {'tool': {'extra': '{{UNDEFINED}}'}}
+        with self.assertRaises(KeyError):
+            replace_dict_variables(config)
 
 
 class TestGetInputAlignedBam(unittest.TestCase):
@@ -228,3 +244,27 @@ class TestGetInputHaplotaggedBam(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             get_input_haplotagged_bam(wildcards, config, set_type="X")
         self.assertIn("set_type must be None, 'N', 'T', or 'R'", str(context.exception))
+
+    def test_hiphase_phaser(self):
+        """Test hiphase phaser uses PHASED_BAM_PATHS lookup"""
+        wildcards = types.SimpleNamespace(sample="S18", type="T")
+        config = {"phaser": "hiphase"}
+        bam, bai = get_input_haplotagged_bam(wildcards, config)
+        self.assertEqual(bam, "snv_indels/hiphase/S18_T.haplotagged.bam")
+        self.assertEqual(bai, "snv_indels/hiphase/S18_T.haplotagged.bam.bai")
+
+    def test_unknown_phaser_fallback(self):
+        """Test unknown phaser falls back to snv_indels/{phaser}"""
+        wildcards = types.SimpleNamespace(sample="S19", type="N")
+        config = {"phaser": "custom_phaser"}
+        bam, bai = get_input_haplotagged_bam(wildcards, config)
+        self.assertEqual(bam, "snv_indels/custom_phaser/S19_N.haplotagged.bam")
+        self.assertEqual(bai, "snv_indels/custom_phaser/S19_N.haplotagged.bam.bai")
+
+    def test_explicit_phaser_none_uses_default(self):
+        """Test explicit phaser=None uses default_path"""
+        wildcards = types.SimpleNamespace(sample="S20", type="T")
+        config = {"phaser": None}
+        bam, bai = get_input_haplotagged_bam(wildcards, config)
+        self.assertEqual(bam, "snv_indels/whatshap_haplotag/S20_T.haplotagged.bam")
+        self.assertEqual(bai, "snv_indels/whatshap_haplotag/S20_T.haplotagged.bam.bai")

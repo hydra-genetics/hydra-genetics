@@ -390,6 +390,7 @@ class CreateInputFiles(object):
             dir_files_found = 0
             log.info(f"Dir: %s" % d)
             for f in glob.glob('%s/**/*.fastq.gz' % d, recursive=True):
+                f = collapse_duplicated_separators(f)
                 if "Undetermined" in f:
                     continue
                 temp_filename = os.path.basename(f)
@@ -634,6 +635,7 @@ class CreateLongReadInputFiles(object):
             dir_files_found = 0
             log.info(f"Dir: {d}")
             for f in glob.glob(f"{d}/**/*.bam", recursive=True):
+                f = f = collapse_duplicated_separators(f)
                 if "unclassified" in f or "unassigned" in f:
                     continue
                 file_list.append(f)
@@ -1087,3 +1089,6 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
                                 format(last_lane, lane))
             return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads - counter, warning_threshold))
         return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads - counter, warning_threshold))
+
+def collapse_duplicated_separators(path):
+    return re.sub(r"(?<=.)/{2,}", "/", path)

@@ -1111,5 +1111,6 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
             return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads - counter, warning_threshold))
         return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads - counter, warning_threshold))
 
+
 def collapse_duplicated_separators(path):
     return re.sub(r"(?<=.)/{2,}", "/", path)

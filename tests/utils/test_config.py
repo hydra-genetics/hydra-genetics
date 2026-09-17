@@ -16,6 +16,10 @@ class TestConfigUtils(unittest.TestCase):
                 "blank": "",
                 "whitespace": "   ",
             },
+            "purecn": {
+                "interval_padding": 100,
+                "enabled": True,
+            },
             "deeptrio_call_variants": {
                 "model": {"child": "child.ckpt", "parent": "parent.ckpt"},
             },
@@ -58,10 +62,16 @@ class TestConfigUtils(unittest.TestCase):
             get_config_value(self.config, "not_a_section", "fasta")
         self.assertIn("missing config entry 'not_a_section:fasta'", str(ctx.exception))
 
-    def test_non_string_is_rejected_by_default(self):
-        with self.assertRaises(WorkflowError) as ctx:
-            get_config_value(self.config, "reference", "skip_contigs")
-        self.assertIn("must be a non-empty string", str(ctx.exception))
+    def test_non_string_is_returned_with_its_own_type(self):
+        # the config schema declares the type; the accessor must not override it
+        self.assertEqual(get_config_value(self.config, "purecn", "interval_padding"), 100)
+        self.assertIsInstance(get_config_value(self.config, "purecn", "interval_padding"), int)
+
+    def test_bool_is_returned_with_its_own_type(self):
+        self.assertIs(get_config_value(self.config, "purecn", "enabled"), True)
+
+    def test_list_is_returned_without_an_expect(self):
+        self.assertEqual(get_config_value(self.config, "reference", "skip_contigs"), ["chrM"])
 
     # --- optional entries -------------------------------------------------
 
@@ -103,8 +113,28 @@ class TestConfigUtils(unittest.TestCase):
     def test_expect_none_skips_the_type_check(self):
         self.assertEqual(get_config_value(self.config, "reference", "skip_contigs", expect=None), ["chrM"])
 
-    def test_expect_with_default_falls_back_on_type_mismatch(self):
-        self.assertEqual(get_config_value(self.config, "reference", "fasta", expect=list, default=[]), [])
+    def test_expect_raises_even_when_a_default_is_given(self):
+        # a configured value of the wrong type is a config error, not an absent entry
+        with self.assertRaises(WorkflowError) as ctx:
+            get_config_value(self.config, "reference", "fasta", expect=list, default=[])
+        self.assertIn("must be of type list", str(ctx.exception))
+
+    def test_expect_is_skipped_for_an_absent_entry_with_a_default(self):
+        self.assertEqual(get_config_value(self.config, "reference", "absent", expect=list, default=[]), [])
+
+    def test_expect_str_still_rejects_a_number(self):
+        with self.assertRaises(WorkflowError) as ctx:
+            get_config_value(self.config, "purecn", "interval_padding", expect=str)
+        self.assertIn("must be of type str", str(ctx.exception))
+
+    def test_expect_int_rejects_a_bool(self):
+        # bool is a subclass of int, but a YAML true is not a number
+        with self.assertRaises(WorkflowError) as ctx:
+            get_config_value(self.config, "purecn", "enabled", expect=int)
+        self.assertIn("must be of type int", str(ctx.exception))
+
+    def test_expect_int_accepts_an_int(self):
+        self.assertEqual(get_config_value(self.config, "purecn", "interval_padding", expect=int), 100)
 
     # --- module tag --------------------------------------------------------
 

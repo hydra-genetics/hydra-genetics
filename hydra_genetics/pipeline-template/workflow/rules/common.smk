@@ -7,6 +7,7 @@ import itertools
 import numpy as np
 import pathlib
 import pandas as pd
+import re
 import yaml
 from datetime import datetime
 from snakemake.utils import validate
@@ -109,7 +110,7 @@ validate(output_spec, schema="../schemas/output_files.schema.yaml")
 
 ### Set wildcard constraints
 wildcard_constraints:
-    sample="|".join(samples.index),
+    sample="|".join(re.escape(s) for s in samples.index),
     type="N|T|R",
 
 

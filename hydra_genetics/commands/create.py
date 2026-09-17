@@ -22,6 +22,25 @@ import hydra_genetics
 log = logging.getLogger(__name__)
 
 
+def collapse_duplicated_separators(path):
+    """
+    collapse duplicated separators in a path, ex /proj/data//fastq -> /proj/data/fastq
+
+    Duplicated separators are harmless to the OS, but snakemake compares file paths as
+    strings, so the same file spelled in two ways will be treated as two different files.
+
+    Note that only separators are collapsed, '..' is left as is since resolving it
+    textually can point at a different file when the path contains symlinks.
+
+    :param path: path that should be cleaned
+    :type path: string
+
+    :return: path without duplicated separators
+    :rtype: string
+    """
+    return re.sub(r"(?<=.)/{2,}", "/", path)
+
+
 class PipelineCreate(object):
     """Creates a hydra-genetics pipeline.
     Args:
@@ -388,8 +407,10 @@ class CreateInputFiles(object):
             log.error("Both --data-json and --data-columns need to be specified at the same time, not only one of them.")
         for d in self.directory:
             dir_files_found = 0
+            d = collapse_duplicated_separators(d)
             log.info(f"Dir: %s" % d)
             for f in glob.glob('%s/**/*.fastq.gz' % d, recursive=True):
+                f = collapse_duplicated_separators(f)
                 if "Undetermined" in f:
                     continue
                 temp_filename = os.path.basename(f)
@@ -632,8 +653,10 @@ class CreateLongReadInputFiles(object):
         file_list = []
         for d in self.directory:
             dir_files_found = 0
+            d = collapse_duplicated_separators(d)
             log.info(f"Dir: {d}")
             for f in glob.glob(f"{d}/**/*.bam", recursive=True):
+                f = f = collapse_duplicated_separators(f)
                 if "unclassified" in f or "unassigned" in f:
                     continue
                 file_list.append(f)
@@ -1087,3 +1110,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
                                 format(last_lane, lane))
             return (last_machine_id, last_flowcell_id, "0", create_barcode(data, length, number_of_reads - counter, warning_threshold))
         return (machine_id, flowcell_id, lane, create_barcode(data, length, number_of_reads - counter, warning_threshold))
+
+
+def collapse_duplicated_separators(path):
+    return re.sub(r"(?<=.)/{2,}", "/", path)

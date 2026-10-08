@@ -427,6 +427,14 @@ class CreateInputFiles(object):
             else:
                 log.info("{} fastq files found".format(dir_files_found))
 
+        # Validate file pairing for every discovered sample before any size-based exclusion, so a
+        # structurally broken sample (e.g. a missing R2) is always surfaced as an error rather than
+        # silently dropped because it also happens to be small.
+        for sample in file_dict:
+            for files in file_dict[sample]:
+                if len(file_dict[sample][files]) % 2 != 0:
+                    raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
+
         excluded_samples = []
         if self.min_file_size is not None:
             for sample in list(file_dict):
@@ -441,6 +449,10 @@ class CreateInputFiles(object):
                             sample, total_size, self.min_file_size))
                     excluded_samples.append((sample, total_size))
                     del file_dict[sample]
+            if len(file_dict) == 0:
+                log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
+                          format(self.min_file_size))
+                exit(1)
 
         result_dict = {}
         if self.validate_run_information:
@@ -593,31 +605,47 @@ class CreateInputFiles(object):
             excluded_samples_file_name = "excluded_samples_mqc.tsv"
             if self.post_file_modifier is not None:
                 excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(self.post_file_modifier)
+            if os.path.isfile(excluded_samples_file_name):
+                if not self.force:
+                    log.warning("File exists {} and force wasn't used".format(excluded_samples_file_name))
+                    exit(1)
+                else:
+                    log.warning("File exists {} overwriting!!!".format(excluded_samples_file_name))
             with open(excluded_samples_file_name, "w") as output:
+                # Note: "reason" is a non-numeric column, kept deliberately -- MultiQC's custom-content
+                # parser silently overrides an explicit "plot_type: table" with a bar plot when every
+                # data column is numeric, so this is required for the table to render as intended, not
+                # just descriptive. Verified against a real MultiQC run, not assumed.
                 output.write(
                     "# excluded_samples:\n"
-                    "#   description: Samples excluded by create-input-files because their total fastq size "
-                    "was below --min-file-size\n"
+                    '#   description: "Samples excluded by create-input-files because their total fastq size '
+                    'was below --min-file-size"\n'
                     "#   format: tsv\n"
                     "#   headers:\n"
+                    "#     reason:\n"
+                    '#       description: "why the sample was excluded"\n'
+                    '#       title: "reason"\n'
                     "#     total_fastq_bytes:\n"
-                    "#       description: total size, in bytes, of all fastq files found for this sample\n"
-                    "#       title: total fastq bytes\n"
+                    '#       description: "total size, in bytes, of all fastq files found for this sample"\n'
+                    '#       title: "total fastq bytes"\n'
                     "#     min_file_size:\n"
-                    "#       description: the --min-file-size threshold that was in effect\n"
-                    "#       title: min file size\n"
+                    '#       description: "the --min-file-size threshold that was in effect"\n'
+                    '#       title: "min file size"\n'
                     "#   id: excluded_samples_table\n"
-                    "#   parent_description: Samples excluded before the pipeline started due to insufficient data\n"
+                    '#   parent_description: "Samples excluded before the pipeline started due to insufficient data"\n'
                     "#   parent_id: excluded_samples_section\n"
-                    "#   parent_name: Excluded samples\n"
+                    '#   parent_name: "Excluded samples"\n'
                     "#   pconfig:\n"
-                    "#     namespace: Cust Data\n"
+                    '#     namespace: "Cust Data"\n'
                     "#   plot_type: table\n"
-                    "#   section_name: Excluded samples\n"
-                    "Sample\ttotal_fastq_bytes\tmin_file_size"
+                    '#   section_name: "Excluded samples"\n'
+                    "Sample\treason\ttotal_fastq_bytes\tmin_file_size\n"
                 )
-                for sample, total_size in sorted(excluded_samples):
-                    output.write("\n{}\t{}\t{}".format(sample, total_size, self.min_file_size))
+                output.write("\n".join(
+                    "{}\ttoo_small\t{}\t{}".format(sample, total_size, self.min_file_size)
+                    for sample, total_size in sorted(excluded_samples)
+                ))
+                output.write("\n")
 
 
 class CreateLongReadInputFiles(object):

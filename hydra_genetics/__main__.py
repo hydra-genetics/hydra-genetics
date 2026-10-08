@@ -285,10 +285,11 @@ def default_adapter(platform):
         default=1000)
 @click.option(
         "--min-file-size",
-        help="minimum total fastq file size (bytes, summed across all of a sample's fastq files) for a sample "
-             "to be included in samples.tsv/units.tsv. Samples below this are left out and instead listed, with "
-             "their observed size, in excluded_samples_mqc.tsv (a MultiQC custom-content file; always written, "
-             "header-only if nothing was excluded) so they are visibly flagged rather than silently missing. "
+        help="minimum total compressed fastq.gz size on disk (bytes, summed across all of a sample's fastq "
+             "files) for a sample to be included in samples.tsv/units.tsv. Samples below this are left out and "
+             "instead listed, with their observed size, in excluded_samples_mqc.tsv (a MultiQC custom-content "
+             "file; always written, header-only if nothing was excluded) so they are visibly flagged rather "
+             "than silently missing. Only supported for Illumina fastq input, not PACBIO/ONT. "
              "Default: disabled, matches previous behaviour.",
         type=int,
         default=None)
@@ -302,6 +303,10 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
     PACBIO and ONT inputs do not use this threshold.
     """
     if platform in ['PACBIO', 'ONT']:
+        if min_file_size is not None:
+            log.error("--min-file-size is not supported for platform {}, it is not applied to BAM input.".
+                      format(platform))
+            sys.exit(1)
         input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
                                                adapters, data_json, data_columns, tc, force, default_barcode)
     else:

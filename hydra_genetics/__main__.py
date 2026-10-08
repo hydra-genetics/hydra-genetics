@@ -283,16 +283,25 @@ def default_adapter(platform):
         help="select every N reads for validation.",
         type=int,
         default=1000)
+@click.option(
+        "--min-file-size",
+        help="minimum total fastq file size (bytes, summed across all of a sample's fastq files) for a sample "
+             "to be included in samples.tsv/units.tsv. Samples below this are left out and instead listed, with "
+             "their observed size, in excluded_samples_mqc.tsv (a MultiQC custom-content file; always written, "
+             "header-only if nothing was excluded) so they are visibly flagged rather than silently missing. "
+             "Default: disabled, matches previous behaviour.",
+        type=int,
+        default=None)
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
                        sample_regex, read_number_regex, adapters, data_json, data_columns,
-                       tc, force, default_barcode, validate, ask, th, nreads, every):
+                       tc, force, default_barcode, validate, ask, th, nreads, every, min_file_size):
     if platform in ['PACBIO', 'ONT']:
         input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
                                                adapters, data_json, data_columns, tc, force, default_barcode)
     else:
         input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
                                        sample_regex, read_number_regex, adapters, data_json, data_columns,
-                                       tc, force, default_barcode, validate, ask, th, nreads, every)
+                                       tc, force, default_barcode, validate, ask, th, nreads, every, min_file_size)
     input_files.init()
 
 

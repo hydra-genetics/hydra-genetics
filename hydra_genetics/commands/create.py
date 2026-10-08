@@ -344,7 +344,8 @@ class CreateInputFiles(object):
                  ask_for_input=False,
                  occurrences_warning_th=0.9,
                  number_of_reads=200,
-                 every_n_reads=1000):
+                 every_n_reads=1000,
+                 min_file_size=None):
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier
@@ -363,6 +364,7 @@ class CreateInputFiles(object):
         self.occurrences_warning_th = occurrences_warning_th
         self.number_of_reads = number_of_reads
         self.every_n_reads = every_n_reads
+        self.min_file_size = min_file_size
 
         if not self.outdir:
             self.outdir = os.getcwd()
@@ -418,6 +420,22 @@ class CreateInputFiles(object):
                 exit(1)
             else:
                 log.info("{} fastq files found".format(dir_files_found))
+
+        excluded_samples = []
+        if self.min_file_size is not None:
+            for sample in list(file_dict):
+                total_size = sum(
+                    os.path.getsize(f)
+                    for files in file_dict[sample].values()
+                    for f in files.values()
+                )
+                if total_size < self.min_file_size:
+                    log.warning(
+                        "Excluding sample {}: total fastq size {} bytes is below --min-file-size {}".format(
+                            sample, total_size, self.min_file_size))
+                    excluded_samples.append((sample, total_size))
+                    del file_dict[sample]
+
         result_dict = {}
         if self.validate_run_information:
             log.info("NOTE: fastq file will be parsed until end, could take some time for big files")
@@ -564,6 +582,36 @@ class CreateInputFiles(object):
                                                          str(data['reads']["1"]),
                                                          str(data['reads']["2"]),
                                                          s_adapters] + extra_data))
+
+        if self.min_file_size is not None:
+            excluded_samples_file_name = "excluded_samples_mqc.tsv"
+            if self.post_file_modifier is not None:
+                excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(self.post_file_modifier)
+            with open(excluded_samples_file_name, "w") as output:
+                output.write(
+                    "# excluded_samples:\n"
+                    "#   description: Samples excluded by create-input-files because their total fastq size "
+                    "was below --min-file-size\n"
+                    "#   format: tsv\n"
+                    "#   headers:\n"
+                    "#     total_fastq_bytes:\n"
+                    "#       description: total size, in bytes, of all fastq files found for this sample\n"
+                    "#       title: total fastq bytes\n"
+                    "#     min_file_size:\n"
+                    "#       description: the --min-file-size threshold that was in effect\n"
+                    "#       title: min file size\n"
+                    "#   id: excluded_samples_table\n"
+                    "#   parent_description: Samples excluded before the pipeline started due to insufficient data\n"
+                    "#   parent_id: excluded_samples_section\n"
+                    "#   parent_name: Excluded samples\n"
+                    "#   pconfig:\n"
+                    "#     namespace: Cust Data\n"
+                    "#   plot_type: table\n"
+                    "#   section_name: Excluded samples\n"
+                    "Sample\ttotal_fastq_bytes\tmin_file_size"
+                )
+                for sample, total_size in sorted(excluded_samples):
+                    output.write("\n{}\t{}\t{}".format(sample, total_size, self.min_file_size))
 
 
 class CreateLongReadInputFiles(object):

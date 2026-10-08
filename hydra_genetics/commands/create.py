@@ -346,6 +346,12 @@ class CreateInputFiles(object):
                  number_of_reads=200,
                  every_n_reads=1000,
                  min_file_size=None):
+        """Configure input-file generation from short-read FASTQ directories.
+
+        min_file_size is the minimum total FASTQ size in bytes per sample.
+        None disables size filtering and the excluded-samples MultiQC report.
+        Call init() to discover FASTQ files and write the output tables.
+        """
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier

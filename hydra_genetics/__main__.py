@@ -295,6 +295,12 @@ def default_adapter(platform):
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
                        sample_regex, read_number_regex, adapters, data_json, data_columns,
                        tc, force, default_barcode, validate, ask, th, nreads, every, min_file_size):
+    """Create samples.tsv and units.tsv for the selected sequencing platform.
+
+    For short reads, min_file_size optionally excludes samples whose total
+    FASTQ size in bytes is below the threshold and enables a MultiQC report.
+    PACBIO and ONT inputs do not use this threshold.
+    """
     if platform in ['PACBIO', 'ONT']:
         input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
                                                adapters, data_json, data_columns, tc, force, default_barcode)

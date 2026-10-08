@@ -449,6 +449,10 @@ class CreateInputFiles(object):
                             sample, total_size, self.min_file_size))
                     excluded_samples.append((sample, total_size))
                     del file_dict[sample]
+            # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
+            # so a pre-existing-file conflict here fails fast without having already modified other outputs,
+            # and so the file always exists afterwards -- including when every sample gets excluded below.
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
             if len(file_dict) == 0:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -460,8 +464,8 @@ class CreateInputFiles(object):
         log.info("Processing  found files, extracting run information and validation number of found reads:".format(str(f)))
         for sample in file_dict:
             for files in file_dict[sample]:
-                if len(file_dict[sample][files]) % 2 != 0:
-                    raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
+                # Pairing is already validated upfront, before size-based exclusion, for every discovered
+                # sample -- no need to repeat it here for whatever subset of samples survived that filter.
                 for read_number, f in file_dict[sample][files].items():
                     log.info("\t - {} for run information".format(str(f)))
                     machine_id, flowcell, lane_id, barcode = extract_run_information(f,
@@ -601,9 +605,6 @@ class CreateInputFiles(object):
                                                          str(data['reads']["2"]),
                                                          s_adapters] + extra_data))
 
-        if self.min_file_size is not None:
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
-
 
 def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifier=None, force=False):
     """
@@ -656,11 +657,13 @@ def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifi
             '#   section_name: "Excluded samples"\n'
             "Sample\treason\ttotal_bytes\tmin_file_size\n"
         )
-        output.write("\n".join(
+        rows = [
             "{}\ttoo_small\t{}\t{}".format(sample, total_size, min_file_size)
             for sample, total_size in sorted(excluded_samples)
-        ))
-        output.write("\n")
+        ]
+        if rows:
+            output.write("\n".join(rows))
+            output.write("\n")
 
 
 class CreateLongReadInputFiles(object):
@@ -806,6 +809,10 @@ class CreateLongReadInputFiles(object):
                 excluded_samples.append((sample, int(total_size)))
             if len(excluded) > 0:
                 units_df = units_df[~units_df["sample"].isin(excluded.index)].reset_index(drop=True)
+            # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
+            # so a pre-existing-file conflict here fails fast without having already modified other outputs,
+            # and so the file always exists afterwards -- including when every sample gets excluded below.
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
             if units_df.empty:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -903,9 +910,6 @@ class CreateLongReadInputFiles(object):
 
         units_df.sort_values(by="sample", inplace=True)
         units_df.to_csv(units_file_name, index=False, sep='\t', na_rep='NA')
-
-        if self.min_file_size is not None:
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
 
 
 def extract_value(field, default, data):

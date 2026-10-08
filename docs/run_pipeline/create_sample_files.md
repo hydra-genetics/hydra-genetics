@@ -33,13 +33,14 @@ hydra-genetics create-input-files -d path/to/fastq-files/
 | --th FLOAT | If occurences of a concesuns base in barcode is below this value a warning will be printed |
 | --nreads INTEGER | Number of reads that will be used to generate consensus barcode. |
 | --every INTEGER | Select every N reads for validation. |
-| --min-file-size INTEGER | Minimum total compressed fastq.gz size (bytes, summed across all of a sample's fastq files) for a sample to be included. Samples below this are left out of `samples.tsv`/`units.tsv` and instead reported in `excluded_samples_mqc.tsv` (see below). Illumina input only, not supported for `--platform PACBIO`/`ONT`. Default: disabled. |
+| --min-file-size INTEGER | Minimum total input file size on disk, in bytes, summed per sample (compressed fastq.gz files for Illumina, BAM files for `--platform PACBIO`/`ONT`) for a sample to be included. Samples below this are left out of `samples.tsv`/`units.tsv` and instead reported in `excluded_samples_mqc.tsv` (see below). Default: disabled. |
 | --help | Show help message and exit. |
 
 ## Flagging excluded samples in MultiQC
-When `--min-file-size` is set, any sample whose fastq files are too small to be worth running through the
-pipeline is left out of `samples.tsv`/`units.tsv` entirely — it never enters the Snakemake DAG, so there's no
-risk of some downstream rule crashing on a near-empty BAM/VCF further down the line.
+When `--min-file-size` is set, any sample whose input files (fastq.gz for Illumina, BAM for PACBIO/ONT) are
+too small to be worth running through the pipeline is left out of `samples.tsv`/`units.tsv` entirely — it
+never enters the Snakemake DAG, so there's no risk of some downstream rule crashing on a near-empty BAM/VCF
+further down the line.
 
 That sample isn't just silently missing, though: it's written to `excluded_samples_mqc.tsv`
 (or `excluded_samples_<post_file_modifier>_mqc.tsv` if `--post-file-modifier` is used), in the file in the
@@ -47,15 +48,25 @@ current directory (or wherever your pipeline run looks for input files alongside
 This file is always written once `--min-file-size` is set, even when nothing was excluded (header only) — so
 its presence/absence isn't itself a signal, but its *content* is.
 
-It's formatted as a [MultiQC custom-content](https://docs.seqera.io/multiqc/custom_content) file,
-auto-detected by its `_mqc.tsv` suffix — no extra MultiQC configuration is required. Just make sure
-MultiQC's search path includes the directory this file was written to (typically the same directory you ran
-`create-input-files` from), for example:
-```
-multiqc . 
-```
-or, if your pipeline's own MultiQC rule only searches specific result directories, copy/symlink
-`excluded_samples_mqc.tsv` into one of them before running MultiQC. It will then show up as its own
-"Excluded samples" section in the report, listing each excluded sample, why it was excluded, its observed
-total fastq size, and the threshold that was in effect — visible to anyone reviewing the report, without
-ever causing the pipeline run itself to fail.
+It's formatted as a [MultiQC custom-content](https://docs.seqera.io/multiqc/custom_content) file, detected by
+its `_mqc.tsv` suffix — but whether that happens *automatically* depends on how your pipeline invokes MultiQC:
+
+- **Plain `multiqc <directory>` invocations** (or MultiQC's Snakemake wrapper with
+  `use_input_files_only: false`, the wrapper's own default): MultiQC recursively scans the given directory and
+  will pick up `excluded_samples_mqc.tsv` on its own, no configuration needed, as long as that directory is in
+  its search path (typically the same directory you ran `create-input-files` from):
+  ```
+  multiqc .
+  ```
+
+- **hydra-genetics pipelines using the `qc` module's `multiqc`/`multiqc_longread` rules — the common case**:
+  these explicitly set `use_input_files_only: true`. With that set, MultiQC is only ever given the literal set
+  of files listed in `snakemake.input` (built from `config["multiqc"]["reports"][<report>]["qc_files"]`), not
+  a directory to scan — so nothing is auto-detected, no matter the filename suffix. For this file to show up,
+  add its path to the relevant report's `qc_files` entry in your pipeline's config *and* make sure it's wired
+  as a real Snakemake `input:` to that `multiqc` rule instance (config alone doesn't make Snakemake treat it as
+  a dependency) — check your specific pipeline for how that report's rule is defined.
+
+Once it does reach MultiQC, it shows up as its own "Excluded samples" section in the report, listing each
+excluded sample, why it was excluded, its observed total size, and the threshold that was in effect — visible
+to anyone reviewing the report, without ever causing the pipeline run itself to fail.

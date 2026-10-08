@@ -602,50 +602,65 @@ class CreateInputFiles(object):
                                                          s_adapters] + extra_data))
 
         if self.min_file_size is not None:
-            excluded_samples_file_name = "excluded_samples_mqc.tsv"
-            if self.post_file_modifier is not None:
-                excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(self.post_file_modifier)
-            if os.path.isfile(excluded_samples_file_name):
-                if not self.force:
-                    log.warning("File exists {} and force wasn't used".format(excluded_samples_file_name))
-                    exit(1)
-                else:
-                    log.warning("File exists {} overwriting!!!".format(excluded_samples_file_name))
-            with open(excluded_samples_file_name, "w") as output:
-                # Note: "reason" is a non-numeric column, kept deliberately -- MultiQC's custom-content
-                # parser silently overrides an explicit "plot_type: table" with a bar plot when every
-                # data column is numeric, so this is required for the table to render as intended, not
-                # just descriptive. Verified against a real MultiQC run, not assumed.
-                output.write(
-                    "# excluded_samples:\n"
-                    '#   description: "Samples excluded by create-input-files because their total fastq size '
-                    'was below --min-file-size"\n'
-                    "#   format: tsv\n"
-                    "#   headers:\n"
-                    "#     reason:\n"
-                    '#       description: "why the sample was excluded"\n'
-                    '#       title: "reason"\n'
-                    "#     total_fastq_bytes:\n"
-                    '#       description: "total size, in bytes, of all fastq files found for this sample"\n'
-                    '#       title: "total fastq bytes"\n'
-                    "#     min_file_size:\n"
-                    '#       description: "the --min-file-size threshold that was in effect"\n'
-                    '#       title: "min file size"\n'
-                    "#   id: excluded_samples_table\n"
-                    '#   parent_description: "Samples excluded before the pipeline started due to insufficient data"\n'
-                    "#   parent_id: excluded_samples_section\n"
-                    '#   parent_name: "Excluded samples"\n'
-                    "#   pconfig:\n"
-                    '#     namespace: "Cust Data"\n'
-                    "#   plot_type: table\n"
-                    '#   section_name: "Excluded samples"\n'
-                    "Sample\treason\ttotal_fastq_bytes\tmin_file_size\n"
-                )
-                output.write("\n".join(
-                    "{}\ttoo_small\t{}\t{}".format(sample, total_size, self.min_file_size)
-                    for sample, total_size in sorted(excluded_samples)
-                ))
-                output.write("\n")
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
+
+
+def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifier=None, force=False):
+    """
+    Writes a MultiQC custom-content file listing samples excluded by --min-file-size, shared by
+    CreateInputFiles (fastq, size summed per sample) and CreateLongReadInputFiles (BAM, same idea).
+    Always writes the file (header-only if excluded_samples is empty) so its presence doesn't itself
+    signal anything -- only its content does.
+
+    :param excluded_samples: list of (sample, total_size_bytes) tuples
+    :param min_file_size: the --min-file-size threshold that was in effect
+    :param post_file_modifier: optional string appended to the output filename, matches samples.tsv/units.tsv
+    :param force: overwrite an existing file instead of refusing
+    """
+    excluded_samples_file_name = "excluded_samples_mqc.tsv"
+    if post_file_modifier is not None:
+        excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(post_file_modifier)
+    if os.path.isfile(excluded_samples_file_name):
+        if not force:
+            log.warning("File exists {} and force wasn't used".format(excluded_samples_file_name))
+            exit(1)
+        else:
+            log.warning("File exists {} overwriting!!!".format(excluded_samples_file_name))
+    with open(excluded_samples_file_name, "w") as output:
+        # Note: "reason" is a non-numeric column, kept deliberately -- MultiQC's custom-content
+        # parser silently overrides an explicit "plot_type: table" with a bar plot when every
+        # data column is numeric, so this is required for the table to render as intended, not
+        # just descriptive. Verified against a real MultiQC run, not assumed.
+        output.write(
+            "# excluded_samples:\n"
+            '#   description: "Samples excluded by create-input-files because their total input file size '
+            'was below --min-file-size"\n'
+            "#   format: tsv\n"
+            "#   headers:\n"
+            "#     reason:\n"
+            '#       description: "why the sample was excluded"\n'
+            '#       title: "reason"\n'
+            "#     total_bytes:\n"
+            '#       description: "total size, in bytes, of all input files found for this sample"\n'
+            '#       title: "total input bytes"\n'
+            "#     min_file_size:\n"
+            '#       description: "the --min-file-size threshold that was in effect"\n'
+            '#       title: "min file size"\n'
+            "#   id: excluded_samples_table\n"
+            '#   parent_description: "Samples excluded before the pipeline started due to insufficient data"\n'
+            "#   parent_id: excluded_samples_section\n"
+            '#   parent_name: "Excluded samples"\n'
+            "#   pconfig:\n"
+            '#     namespace: "Cust Data"\n'
+            "#   plot_type: table\n"
+            '#   section_name: "Excluded samples"\n'
+            "Sample\treason\ttotal_bytes\tmin_file_size\n"
+        )
+        output.write("\n".join(
+            "{}\ttoo_small\t{}\t{}".format(sample, total_size, min_file_size)
+            for sample, total_size in sorted(excluded_samples)
+        ))
+        output.write("\n")
 
 
 class CreateLongReadInputFiles(object):
@@ -666,7 +681,8 @@ class CreateLongReadInputFiles(object):
                  data_columns=None,
                  tc=None,
                  force=False,
-                 default_barcode=None):
+                 default_barcode=None,
+                 min_file_size=None):
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier
@@ -678,6 +694,7 @@ class CreateLongReadInputFiles(object):
         self.tc = tc
         self.force = force
         self.default_barcode = default_barcode
+        self.min_file_size = min_file_size
 
         if not self.outdir:
             self.outdir = os.getcwd()
@@ -778,6 +795,22 @@ class CreateLongReadInputFiles(object):
 
         units_df = pd.DataFrame(units_dict)
 
+        excluded_samples = []
+        if self.min_file_size is not None:
+            total_size_by_sample = units_df["bam"].map(os.path.getsize).groupby(units_df["sample"]).sum()
+            excluded = total_size_by_sample[total_size_by_sample < self.min_file_size]
+            for sample, total_size in excluded.items():
+                log.warning(
+                    "Excluding sample {}: total bam size {} bytes is below --min-file-size {}".format(
+                        sample, total_size, self.min_file_size))
+                excluded_samples.append((sample, int(total_size)))
+            if len(excluded) > 0:
+                units_df = units_df[~units_df["sample"].isin(excluded.index)].reset_index(drop=True)
+            if units_df.empty:
+                log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
+                          format(self.min_file_size))
+                exit(1)
+
         # Check for duplicated rows which indicate bam files with the same read group info
         # This triggers a warning that these bam files with the same could be merged
         if platform == 'ONT':
@@ -870,6 +903,9 @@ class CreateLongReadInputFiles(object):
 
         units_df.sort_values(by="sample", inplace=True)
         units_df.to_csv(units_file_name, index=False, sep='\t', na_rep='NA')
+
+        if self.min_file_size is not None:
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
 
 
 def extract_value(field, default, data):

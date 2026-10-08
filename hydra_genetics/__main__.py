@@ -298,9 +298,10 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
                        tc, force, default_barcode, validate, ask, th, nreads, every, min_file_size):
     """Create samples.tsv and units.tsv for the selected sequencing platform.
 
-    For short reads, min_file_size optionally excludes samples whose total
-    FASTQ size in bytes is below the threshold and enables a MultiQC report.
-    PACBIO and ONT inputs do not use this threshold.
+    min_file_size optionally excludes samples whose total input file size in
+    bytes (summed fastq.gz for short reads, summed BAM for PACBIO/ONT) is
+    below the threshold, and enables the excluded_samples_mqc.tsv MultiQC
+    report. Supported for all platforms.
     """
     if platform in ['PACBIO', 'ONT']:
         input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform, sample_type,

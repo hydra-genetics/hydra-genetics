@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.2.0](https://github.com/hydra-genetics/hydra-genetics/compare/v4.1.1...v4.2.0) (2026-10-09)
+
+
+### Features
+
+* --min-file-size flag to skip samples with no data. ([453ea1b](https://github.com/hydra-genetics/hydra-genetics/commit/453ea1b7d3e894cd0a57023883001b6fd97adfe1))
+* --min-file-size flag to skip samples with no data. Write excluded_samples_mqc.tsv that can be input to MultiQC. ([50e7838](https://github.com/hydra-genetics/hydra-genetics/commit/50e7838308bc2a5d3ba2f568cbb1924b8416a6db))
+* added so that the flag also handles long read data ([ee5bf46](https://github.com/hydra-genetics/hydra-genetics/commit/ee5bf463917c8715483fde62c292ccd82fb93eac))
+
+
+### Bug Fixes
+
+* code review - no sample no file, force handling, tests, duplicate code ([10c9a8f](https://github.com/hydra-genetics/hydra-genetics/commit/10c9a8fc3265d81d3b4d78d1f5a5149fce90d62e))
+* review comments - documentation, silent long read error, force, no samples, r1 and 2r, help text, MultiQC tested ([8da3841](https://github.com/hydra-genetics/hydra-genetics/commit/8da38416c48da5bb4d8a9b9652a94a4914055df7))
+
+
+### Documentation
+
+* docstring fix ([f9cff99](https://github.com/hydra-genetics/hydra-genetics/commit/f9cff992a3160ee5b7335c222739afeb0dc9ce4f))
+* Document input generation and minimum FASTQ size filtering ([f4c0447](https://github.com/hydra-genetics/hydra-genetics/commit/f4c0447909f2f82347619148e349a9ab63528ce8))
+
 ## [4.1.1](https://github.com/hydra-genetics/hydra-genetics/compare/v4.1.0...v4.1.1) (2026-06-04)
 
 

@@ -283,16 +283,34 @@ def default_adapter(platform):
         help="select every N reads for validation.",
         type=int,
         default=1000)
+@click.option(
+        "--min-file-size",
+        help="minimum total input file size on disk, in bytes, summed per sample (compressed fastq.gz files "
+             "for Illumina, BAM files for PACBIO/ONT) for a sample to be included in samples.tsv/units.tsv. "
+             "Samples below this are left out and instead listed, with their observed size, in "
+             "excluded_samples_mqc.tsv (a MultiQC custom-content file; always written, header-only if nothing "
+             "was excluded) so they are visibly flagged rather than silently missing. "
+             "Default: disabled, matches previous behaviour.",
+        type=int,
+        default=None)
 def create_input_files(directory, outdir, post_file_modifier, platform, sample_type,
                        sample_regex, read_number_regex, adapters, data_json, data_columns,
-                       tc, force, default_barcode, validate, ask, th, nreads, every):
+                       tc, force, default_barcode, validate, ask, th, nreads, every, min_file_size):
+    """Create samples.tsv and units.tsv for the selected sequencing platform.
+
+    min_file_size optionally excludes samples whose total input file size in
+    bytes (summed fastq.gz for short reads, summed BAM for PACBIO/ONT) is
+    below the threshold, and enables the excluded_samples_mqc.tsv MultiQC
+    report. Supported for all platforms.
+    """
     if platform in ['PACBIO', 'ONT']:
         input_files = CreateLongReadInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
-                                               adapters, data_json, data_columns, tc, force, default_barcode)
+                                               adapters, data_json, data_columns, tc, force, default_barcode,
+                                               min_file_size)
     else:
         input_files = CreateInputFiles(directory, outdir, post_file_modifier, platform, sample_type,
                                        sample_regex, read_number_regex, adapters, data_json, data_columns,
-                                       tc, force, default_barcode, validate, ask, th, nreads, every)
+                                       tc, force, default_barcode, validate, ask, th, nreads, every, min_file_size)
     input_files.init()
 
 

@@ -344,7 +344,14 @@ class CreateInputFiles(object):
                  ask_for_input=False,
                  occurrences_warning_th=0.9,
                  number_of_reads=200,
-                 every_n_reads=1000):
+                 every_n_reads=1000,
+                 min_file_size=None):
+        """Configure input-file generation from short-read FASTQ directories.
+
+        min_file_size is the minimum total FASTQ size in bytes per sample.
+        None disables size filtering and the excluded-samples MultiQC report.
+        Call init() to discover FASTQ files and write the output tables.
+        """
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier
@@ -363,6 +370,7 @@ class CreateInputFiles(object):
         self.occurrences_warning_th = occurrences_warning_th
         self.number_of_reads = number_of_reads
         self.every_n_reads = every_n_reads
+        self.min_file_size = min_file_size
 
         if not self.outdir:
             self.outdir = os.getcwd()
@@ -418,14 +426,46 @@ class CreateInputFiles(object):
                 exit(1)
             else:
                 log.info("{} fastq files found".format(dir_files_found))
+
+        # Validate file pairing for every discovered sample before any size-based exclusion, so a
+        # structurally broken sample (e.g. a missing R2) is always surfaced as an error rather than
+        # silently dropped because it also happens to be small.
+        for sample in file_dict:
+            for files in file_dict[sample]:
+                if len(file_dict[sample][files]) % 2 != 0:
+                    raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
+
+        excluded_samples = []
+        if self.min_file_size is not None:
+            for sample in list(file_dict):
+                total_size = sum(
+                    os.path.getsize(f)
+                    for files in file_dict[sample].values()
+                    for f in files.values()
+                )
+                if total_size < self.min_file_size:
+                    log.warning(
+                        "Excluding sample {}: total fastq size {} bytes is below --min-file-size {}".format(
+                            sample, total_size, self.min_file_size))
+                    excluded_samples.append((sample, total_size))
+                    del file_dict[sample]
+            # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
+            # so a pre-existing-file conflict here fails fast without having already modified other outputs,
+            # and so the file always exists afterwards -- including when every sample gets excluded below.
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
+            if len(file_dict) == 0:
+                log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
+                          format(self.min_file_size))
+                exit(1)
+
         result_dict = {}
         if self.validate_run_information:
             log.info("NOTE: fastq file will be parsed until end, could take some time for big files")
         log.info("Processing  found files, extracting run information and validation number of found reads:".format(str(f)))
         for sample in file_dict:
             for files in file_dict[sample]:
-                if len(file_dict[sample][files]) % 2 != 0:
-                    raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
+                # Pairing is already validated upfront, before size-based exclusion, for every discovered
+                # sample -- no need to repeat it here for whatever subset of samples survived that filter.
                 for read_number, f in file_dict[sample][files].items():
                     log.info("\t - {} for run information".format(str(f)))
                     machine_id, flowcell, lane_id, barcode = extract_run_information(f,
@@ -566,6 +606,66 @@ class CreateInputFiles(object):
                                                          s_adapters] + extra_data))
 
 
+def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifier=None, force=False):
+    """
+    Writes a MultiQC custom-content file listing samples excluded by --min-file-size, shared by
+    CreateInputFiles (fastq, size summed per sample) and CreateLongReadInputFiles (BAM, same idea).
+    Always writes the file (header-only if excluded_samples is empty) so its presence doesn't itself
+    signal anything -- only its content does.
+
+    :param excluded_samples: list of (sample, total_size_bytes) tuples
+    :param min_file_size: the --min-file-size threshold that was in effect
+    :param post_file_modifier: optional string appended to the output filename, matches samples.tsv/units.tsv
+    :param force: overwrite an existing file instead of refusing
+    """
+    excluded_samples_file_name = "excluded_samples_mqc.tsv"
+    if post_file_modifier is not None:
+        excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(post_file_modifier)
+    if os.path.isfile(excluded_samples_file_name):
+        if not force:
+            log.warning("File exists {} and force wasn't used".format(excluded_samples_file_name))
+            exit(1)
+        else:
+            log.warning("File exists {} overwriting!!!".format(excluded_samples_file_name))
+    with open(excluded_samples_file_name, "w") as output:
+        # Note: "reason" is a non-numeric column, kept deliberately -- MultiQC's custom-content
+        # parser silently overrides an explicit "plot_type: table" with a bar plot when every
+        # data column is numeric, so this is required for the table to render as intended, not
+        # just descriptive. Verified against a real MultiQC run, not assumed.
+        output.write(
+            "# excluded_samples:\n"
+            '#   description: "Samples excluded by create-input-files because their total input file size '
+            'was below --min-file-size"\n'
+            "#   format: tsv\n"
+            "#   headers:\n"
+            "#     reason:\n"
+            '#       description: "why the sample was excluded"\n'
+            '#       title: "reason"\n'
+            "#     total_bytes:\n"
+            '#       description: "total size, in bytes, of all input files found for this sample"\n'
+            '#       title: "total input bytes"\n'
+            "#     min_file_size:\n"
+            '#       description: "the --min-file-size threshold that was in effect"\n'
+            '#       title: "min file size"\n'
+            "#   id: excluded_samples_table\n"
+            '#   parent_description: "Samples excluded before the pipeline started due to insufficient data"\n'
+            "#   parent_id: excluded_samples_section\n"
+            '#   parent_name: "Excluded samples"\n'
+            "#   pconfig:\n"
+            '#     namespace: "Cust Data"\n'
+            "#   plot_type: table\n"
+            '#   section_name: "Excluded samples"\n'
+            "Sample\treason\ttotal_bytes\tmin_file_size\n"
+        )
+        rows = [
+            "{}\ttoo_small\t{}\t{}".format(sample, total_size, min_file_size)
+            for sample, total_size in sorted(excluded_samples)
+        ]
+        if rows:
+            output.write("\n".join(rows))
+            output.write("\n")
+
+
 class CreateLongReadInputFiles(object):
     """Creates a hydra-genetics input files samples.tsv and units.tsv from
     unmapped BAM files containing long read sequence data.
@@ -584,7 +684,8 @@ class CreateLongReadInputFiles(object):
                  data_columns=None,
                  tc=None,
                  force=False,
-                 default_barcode=None):
+                 default_barcode=None,
+                 min_file_size=None):
         self.directory = directory
         self.outdir = outdir
         self.post_file_modifier = post_file_modifier
@@ -596,6 +697,7 @@ class CreateLongReadInputFiles(object):
         self.tc = tc
         self.force = force
         self.default_barcode = default_barcode
+        self.min_file_size = min_file_size
 
         if not self.outdir:
             self.outdir = os.getcwd()
@@ -695,6 +797,26 @@ class CreateLongReadInputFiles(object):
                 units_dict["run_id"].append(rg_dict["run_id"])
 
         units_df = pd.DataFrame(units_dict)
+
+        excluded_samples = []
+        if self.min_file_size is not None:
+            total_size_by_sample = units_df["bam"].map(os.path.getsize).groupby(units_df["sample"]).sum()
+            excluded = total_size_by_sample[total_size_by_sample < self.min_file_size]
+            for sample, total_size in excluded.items():
+                log.warning(
+                    "Excluding sample {}: total bam size {} bytes is below --min-file-size {}".format(
+                        sample, total_size, self.min_file_size))
+                excluded_samples.append((sample, int(total_size)))
+            if len(excluded) > 0:
+                units_df = units_df[~units_df["sample"].isin(excluded.index)].reset_index(drop=True)
+            # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
+            # so a pre-existing-file conflict here fails fast without having already modified other outputs,
+            # and so the file always exists afterwards -- including when every sample gets excluded below.
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
+            if units_df.empty:
+                log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
+                          format(self.min_file_size))
+                exit(1)
 
         # Check for duplicated rows which indicate bam files with the same read group info
         # This triggers a warning that these bam files with the same could be merged

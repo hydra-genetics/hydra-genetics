@@ -76,6 +76,63 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
         finally:
             os.chdir(original_cwd)
 
+    def test_init_pacbio_bams_with_min_file_size(self):
+        # Three distinct real samples/sizes: HG004 (120107 bytes), HG003 (132982 bytes), HG002 (149507 bytes)
+        multi_sample_dir = os.path.join(self.test_dir, "pacbio_multi")
+        os.makedirs(multi_sample_dir)
+        for file_name in ["m84010_220919_232145_s1.hifi_reads.bam",   # HG004, 120107 bytes
+                          "m84010_220919_235306_s2.hifi_reads.bam",   # HG003, 132982 bytes
+                          "m84011_220902_175841_s1.hifi_reads.bam"]:  # HG002, 149507 bytes
+            shutil.copy(os.path.join(self.src_pacbio_bam_dir, file_name), multi_sample_dir)
+
+        original_cwd = os.getcwd()
+        os.chdir(self.out_dir)
+        try:
+            creator = CreateLongReadInputFiles(
+                directory=[multi_sample_dir],
+                outdir=self.out_dir,
+                platform="PACBIO",
+                min_file_size=140000,  # excludes HG004 and HG003, keeps HG002
+            )
+            creator.init()
+
+            samples_df = pd.read_csv("samples.tsv", sep="\t")
+            self.assertEqual(sorted(samples_df["sample"].values), ["HG002"])
+
+            units_df = pd.read_csv("units.tsv", sep="\t")
+            self.assertEqual(len(units_df), 1)
+            self.assertIn("HG002", units_df["sample"].values)
+
+            self.assertTrue(os.path.exists("excluded_samples_mqc.tsv"))
+            with open("excluded_samples_mqc.tsv") as fh:
+                content = fh.read()
+            self.assertIn("HG004", content)
+            self.assertIn("HG003", content)
+            self.assertNotIn("HG002\t", content)
+        finally:
+            os.chdir(original_cwd)
+
+    def test_init_pacbio_bams_min_file_size_excludes_all(self):
+        multi_sample_dir = os.path.join(self.test_dir, "pacbio_all_excluded")
+        os.makedirs(multi_sample_dir)
+        shutil.copy(
+            os.path.join(self.src_pacbio_bam_dir, "m84010_220919_232145_s1.hifi_reads.bam"), multi_sample_dir)
+
+        original_cwd = os.getcwd()
+        os.chdir(self.out_dir)
+        try:
+            creator = CreateLongReadInputFiles(
+                directory=[multi_sample_dir],
+                outdir=self.out_dir,
+                platform="PACBIO",
+                min_file_size=999999999,
+            )
+            with self.assertRaises(SystemExit):
+                creator.init()
+            self.assertFalse(os.path.exists("samples.tsv"))
+        finally:
+            os.chdir(original_cwd)
+
     def test_init_pacbio_bams(self):
         # Change working directory to out_dir to avoid polluting the workspace
         original_cwd = os.getcwd()

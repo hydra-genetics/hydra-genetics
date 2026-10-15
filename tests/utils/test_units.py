@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import pytest
 import pandas
 from pandas.testing import assert_series_equal, assert_frame_equal
-from snakemake.io import Wildcards
+from snakemake.iocontainers import Wildcards
 
 
 class TestUnitUtils(unittest.TestCase):

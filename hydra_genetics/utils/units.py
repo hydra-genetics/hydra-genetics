@@ -1,11 +1,12 @@
 # coding: utf-8
 
 import pandas
-import snakemake
 import warnings
 
+from snakemake.iocontainers import Wildcards
 
-def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pandas.Series:
+
+def get_unit(units: pandas.DataFrame, wildcards: Wildcards) -> pandas.Series:
     """
     function used to extract one unit(row) from units.tsv
     Args:
@@ -22,7 +23,7 @@ def get_unit(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> pand
     return unit
 
 
-def get_fastq_file(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, read_pair: str = "fastq1") -> str:
+def get_fastq_file(units: pandas.DataFrame, wildcards: Wildcards, read_pair: str = "fastq1") -> str:
     """
     function used to extract path for one unit(row) from units.tsv
     Args:
@@ -42,7 +43,7 @@ def get_fastq_file(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, r
     return unit[read_pair]
 
 
-def get_fastq_adapter(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+def get_fastq_adapter(units: pandas.DataFrame, wildcards: Wildcards) -> str:
     """
     function used to extract adapters for one unit(row) from units.tsv
     Args:
@@ -59,7 +60,7 @@ def get_fastq_adapter(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     return unit["adapter"]
 
 
-def get_unit_barcodes(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+def get_unit_barcodes(units: pandas.DataFrame, wildcards: Wildcards) -> str:
     """
     function used to extract barcode for one unit(row) from units.tsv
     Args:
@@ -79,7 +80,7 @@ def get_unit_barcodes(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     ].itertuples()])
 
 
-def get_unit_machine(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+def get_unit_machine(units: pandas.DataFrame, wildcards: Wildcards) -> str:
     """
     function used to extract machine for one unit(row) from units.tsv
     Args:
@@ -96,7 +97,7 @@ def get_unit_machine(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards)
     return unit["machine"]
 
 
-def get_unit_platform(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+def get_unit_platform(units: pandas.DataFrame, wildcards: Wildcards) -> str:
     """
     function used to extract platform for one unit(row) from units.tsv
     Args:
@@ -113,7 +114,7 @@ def get_unit_platform(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     return unit["platform"]
 
 
-def get_unit_flowcell(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> str:
+def get_unit_flowcell(units: pandas.DataFrame, wildcards: Wildcards) -> str:
     """
     function used to extract flowcell for one unit(row) from units.tsv
     Args:
@@ -130,7 +131,7 @@ def get_unit_flowcell(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards
     return unit["flowcell"]
 
 
-def get_units(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: str = None) -> pandas.DataFrame:
+def get_units(units: pandas.DataFrame, wildcards: Wildcards, type: str = None) -> pandas.DataFrame:
     """
     function used to extract one or more units from units.tsv
     Args:
@@ -156,7 +157,7 @@ def get_units(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: 
     return [file for file in files.itertuples()]
 
 
-def get_fastq_files(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, type: str = None):
+def get_fastq_files(units: pandas.DataFrame, wildcards: Wildcards, type: str = None):
     """
     function used to extract all fastq files for a sample with a sepecific type
     Args:
@@ -174,7 +175,7 @@ def get_fastq_files(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards, 
     return [getattr(file, wildcards.read) for file in get_units(units, wildcards, type)]
 
 
-def get_platforms(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) -> set:
+def get_platforms(units: pandas.DataFrame, wildcards: Wildcards) -> set:
     """
     function used to extract all uniq platform values for a sample and type combination found in units.tsv
     Args:
@@ -206,7 +207,7 @@ def get_unit_types(units: pandas.DataFrame, sample: str) -> set:
     return set([u.type for u in units.loc[(sample,)].itertuples()])
 
 
-def get_units_per_flowcell(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards):
+def get_units_per_flowcell(units: pandas.DataFrame, wildcards: Wildcards):
     """
     function used to extract all sample and type combinations for one sequencing flowcell
     Args:

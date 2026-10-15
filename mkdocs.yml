@@ -27,7 +27,6 @@ nav:
 
 theme: readthedocs
 extra_css: [extra.css]
-theme: readthedocs
 extra_css: [extra.css]
 markdown_extensions:
   - abbr
@@ -40,6 +39,3 @@ markdown_extensions:
       url_download: "True"
   - mdx_spanner
   - admonition
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg

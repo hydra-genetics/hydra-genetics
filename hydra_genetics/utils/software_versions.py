@@ -53,21 +53,10 @@ def get_container_prefix(workflow):
     """
     Function used to fetch singularity cache location
     """
-
-    if hasattr(workflow, "use_singularity"):
-        # Fetch singularity prefix for snakemake version with version less
-        # then 8
-        if hasattr(workflow, "singularity_prefix"):
-            return workflow.singularity_prefix
-        else:
-            return ".snakemake/singularity"
-    elif hasattr(workflow, "deployment_settings"):
-        # Fetch singularity prefix for snakemake version with equal to 8.0 or newer
-        if workflow.deployment_settings.apptainer_prefix is None:
-            return ".snakemake/singularity"
-        else:
-            return workflow.deployment_settings.apptainer_prefix
-    return None
+    if workflow.deployment_settings.apptainer_prefix is None:
+        return ".snakemake/singularity"
+    else:
+        return workflow.deployment_settings.apptainer_prefix
 
 
 def get_software_version_from_labels(image_path):
@@ -152,19 +141,11 @@ def use_container(workflow):
     """
     Function used to check if containers are used,
     """
-    if hasattr(workflow, "use_singularity"):
-        # For snakemake with version less then 8
-        return True
-    elif hasattr(workflow, "deployment_settings") and workflow.deployment_settings.deployment_method:
-        # For snakemake with version 8 or newer
-        from snakemake.settings import DeploymentMethod
+    from snakemake.settings.types import DeploymentMethod
 
-        if DeploymentMethod.APPTAINER in workflow.deployment_settings.deployment_method:
-            return True
-        else:
-            return False
-    else:
-        return False
+    if workflow.deployment_settings.deployment_method:
+        return DeploymentMethod.APPTAINER in workflow.deployment_settings.deployment_method
+    return False
 
 
 def add_software_version_to_config(config, workflow, fail_missing_versions=True):

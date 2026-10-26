@@ -144,19 +144,17 @@ def fetch_url_content(url, content_holder, tmpdir):
     has the correct md5 value.
     """
     def download_with_retry(target_url, target_path):
-        parsed_url = urlparse(target_url)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Referer": base_url,
-            "Accept": "*/*"
-        }
         with requests.Session() as s:
-            s.headers.update(headers)
             for i in range(10):
                 r = s.get(target_url, stream=True, allow_redirects=True, timeout=60)
+                # A bot challenge (e.g. figshare) can't be passed by a script, retrying won't help
+                if "x-amzn-waf-action" in r.headers:
+                    r.close()
+                    logging.error(f"{target_url} is blocked by a bot challenge ({r.status_code}), "
+                                  "download it with a browser and place it at the entry's path")
+                    return False
                 if r.status_code == 202:
-                    logging.info(f"Figshare is preparing file (202). Waiting 10s... (Attempt {i+1})")
+                    logging.info(f"Server is preparing file (202). Waiting 10s... (Attempt {i+1})")
                     r.close()
                     time.sleep(10)
                     continue

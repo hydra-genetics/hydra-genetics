@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.2.1](https://github.com/hydra-genetics/hydra-genetics/compare/v4.2.0...v4.2.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* download references without browser headers and fail fast on bot challenges ([2e44926](https://github.com/hydra-genetics/hydra-genetics/commit/2e449269b73f9c529b29fc9eacc963194c3fa4b1))
+* download references without browser headers and fail fast on bot… ([af52320](https://github.com/hydra-genetics/hydra-genetics/commit/af52320e5df70b9afb8be0553287f73d3822ae11))
+
 ## [4.2.0](https://github.com/hydra-genetics/hydra-genetics/compare/v4.1.1...v4.2.0) (2026-10-09)
 
 

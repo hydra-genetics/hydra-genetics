@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from requests import HTTPError
 
 from hydra_genetics.utils.io.reference import fetch_reference_data, fetch_url_content
@@ -24,6 +25,32 @@ class TestReference(unittest.TestCase):
         with self.assertRaises(HTTPError) as e:
             fetch_url_content(url, self.outdir, self.tmpdir)
         self.assertEqual(e.exception.status, 404)
+
+    @mock.patch("hydra_genetics.utils.io.reference.requests.Session.get")
+    def test_fetch_url_content_bot_challenge(self, mock_get):
+        mock_get.return_value = mock.Mock(status_code=202, headers={"x-amzn-waf-action": "challenge"})
+        target = os.path.join(self.tmpdir, "file")
+        self.assertFalse(fetch_url_content("https://ndownloader.figshare.com/files/1", target, self.tmpdir))
+        # Fails at once instead of retrying
+        self.assertEqual(mock_get.call_count, 1)
+        self.assertFalse(os.path.exists(target))
+
+    @mock.patch("hydra_genetics.utils.io.reference.requests.Session.get", autospec=True)
+    def test_fetch_url_content_default_user_agent(self, mock_get):
+        response = mock.Mock(status_code=200, headers={})
+        response.iter_content.return_value = [b"content"]
+        user_agents = []
+
+        def get(session, url, **kwargs):
+            user_agents.append(session.headers["User-Agent"])
+            return response
+        mock_get.side_effect = get
+        target = os.path.join(self.tmpdir, "file")
+        self.assertTrue(fetch_url_content("https://example.org/file", target, self.tmpdir))
+        # requests' own User-Agent, not a browser's
+        self.assertTrue(user_agents[0].startswith("python-requests/"))
+        with open(target, "rb") as f:
+            self.assertEqual(f.read(), b"content")
 
     def test_fetch_reference_data_404(self):
         validation_data = {

@@ -85,7 +85,7 @@ date_string = datetime.now().strftime('%Y%m%d')
 # This will create a (empty) version files that can be defined as input to
 # multiqc, will be populated with version during onstart (before the pipeline starts)
 if use_container(workflow):
-    version_files = touch_software_version_file(config, date_string=date_string, directory="results/versions/software_version")
+    version_files = [touch_software_version_file(config, date_string=date_string, directory="results/versions/software_version")]
     add_version_files_to_multiqc(config, version_files)
 
 # Use onstart to make sure that containers have been downloaded

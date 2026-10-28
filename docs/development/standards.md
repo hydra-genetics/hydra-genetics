@@ -233,8 +233,10 @@ allOf:
         platform:
           enum:
             - Illumina
+            - ILLUMINA
             - NextSeq
             - NovaSeq
+            - MiSeq
     then:
       required:
         - flowcell

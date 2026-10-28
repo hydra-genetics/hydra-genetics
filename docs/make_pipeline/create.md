@@ -5,7 +5,7 @@ Note, hydra-genetics modules are created in the exact same way.
 Install hydra-genetics as described in [Installation](../installation.md).
 ## Make a pipeline skeleton
 The hydra-genetics tools will set up a folder structure following the hydra-genetics standard
-as well as ready made code testing for github.
+as well as ready-made code testing for GitHub.
 ```
 hydra-genetics create-pipeline -n new_pipeline_name -d "solid cancer" -a "Your Name" -e name@email.com -g git_username [OPTIONS]
 ```
@@ -32,7 +32,7 @@ git push --all origin
 ```
 ## Folder structure
 The folder structure is listed below.
-Code testing using github actions is set up in `.github`.
+Code testing using GitHub Actions is set up in `.github`.
 In `.tests` small datasets are run through the pipeline.
 The `config` folder holds all configuration files.
 The `workflow` folder contains the actual pipeline with all the rules, scripts, schemas and so on.

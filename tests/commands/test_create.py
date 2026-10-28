@@ -98,6 +98,24 @@ class TestCreateInputFiles(unittest.TestCase):
         # Header row only, no excluded-sample data rows
         self.assertEqual(len(lines), 1)
 
+    def test_init_writes_files_to_outdir_not_cwd(self):
+        original_cwd = os.getcwd()
+        cwd_dir = tempfile.mkdtemp()
+        os.chdir(cwd_dir)
+        try:
+            creator = CreateInputFiles(
+                directory=[self.fastq_dir], outdir=self.out_dir, read_number_regex=r"_R([12]{1})[_.]",
+                min_file_size=10000)
+            creator.init()
+        finally:
+            os.chdir(original_cwd)
+        try:
+            for file_name in ["samples.tsv", "units.tsv", "excluded_samples_mqc.tsv"]:
+                self.assertTrue(os.path.exists(os.path.join(self.out_dir, file_name)), file_name)
+            self.assertEqual(os.listdir(cwd_dir), [])
+        finally:
+            shutil.rmtree(cwd_dir)
+
     def test_init_min_file_size_excludes_all_hard_fails_and_writes_mqc(self):
         original_cwd = os.getcwd()
         os.chdir(self.out_dir)

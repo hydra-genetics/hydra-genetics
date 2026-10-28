@@ -4,11 +4,11 @@ A command-line tool that helps you create modules and pipelines, or add rules to
 
 Full documentation is available at [hydra-genetics.readthedocs.io](https://hydra-genetics.readthedocs.io/en/latest/).
 
-[![Lint and Test](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/main.yaml/badge.svg?branch=develop)](https://github.com/hydra-genetics/tools/actions/workflows/main.yaml)
+[![Lint and Test](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/main.yaml/badge.svg?branch=develop)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/main.yaml)
 
 [![build mkdocs](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml/badge.svg)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml)
 
-![python](https://img.shields.io/badge/python-%3E%3D3.8-blue)
+![python](https://img.shields.io/badge/python-%3E%3D3.8%2C%3C%3D3.11-blue)
 
 ## Installation
 

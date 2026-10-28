@@ -59,6 +59,8 @@ add_version_files_to_multiqc(config, version_files)
 
 onstart:
     export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/software")
+    # Without containers there is no software info to add, export the config as is
+    update_config = config
     # Make sure that the user have the requested containers to be used
     if use_container(workflow):
         # From the config retrieve all dockers used and parse labels for software versions. Add
@@ -68,7 +70,7 @@ onstart:
         # - directory, default value: software_versions
         # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_software_version_as_files(software_info, date_string=date_string, directory="results/versions/software")
+        export_software_version_as_file(software_info, date_string=date_string, directory="results/versions/software")
     # print config dict as a file. Additional parameters that can be set
     # output_file, default config
     # output_directory, default = None, i.e no folder

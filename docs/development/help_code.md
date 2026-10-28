@@ -76,7 +76,7 @@ To log the versions of the software used during the analysis of the samples, mul
 from datetime import datetime
 from hydra_genetics.utils.software_versions import add_version_file_to_multiqc
 from hydra_genetics.utils.software_versions import add_software_version_to_config
-from hydra_genetics.utils.software_versions import export_software_version_as_files
+from hydra_genetics.utils.software_versions import export_software_version_as_file
 from hydra_genetics.utils.software_versions import use_container
 from hydra_genetics.utils.software_versions import touch_software_version_file
 
@@ -101,7 +101,7 @@ onstart:
         # - directory, default value: versions/software
         # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_software_version_as_files(software_info, date_string=date_string)       
+        export_software_version_as_file(software_info, date_string=date_string)       
 ```
 
 **Folder and file structure**

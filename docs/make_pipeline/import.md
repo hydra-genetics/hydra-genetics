@@ -1,6 +1,6 @@
 # Importing (`Snakefile`)
 Importing modules and rules into the pipeline is done in the `Snakefile` file.
-## Importing pipeline specific rules
+## Importing pipeline-specific rules
 ```
 include: "rules/common.smk"
 ```

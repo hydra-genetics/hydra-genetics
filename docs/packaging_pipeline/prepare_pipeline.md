@@ -85,11 +85,11 @@ cp config/resources.yaml config/resources.miarka.yaml
 
 Miarka has 6144 Mb per core on the CPU nodes so update all memory requirements to match this. 
 
-If GPU is used change partition to **gpu** and memory_per_cpu to 5000 Mb and the gres command to either:
+If GPU is used change partition to **gpu** and mem_per_cpu to 5000 Mb and the gres command to either:
 
-    * --gres=gpu:2            # 2 GPUs on either GPU node
-    * --gres=gpu:l40s:2       # 2 GPUs on the node with l40 cards
-    * --gres=gpu:a100:2       # 2 GPUs on the node with a100 cards
+* --gres=gpu:2            # 2 GPUs on either GPU node
+* --gres=gpu:l40s:2       # 2 GPUs on the node with l40 cards
+* --gres=gpu:a100:2       # 2 GPUs on the node with a100 cards
 
 ```yaml
 default_resources:
@@ -119,6 +119,9 @@ Make a new config file where all file paths point to the reference directory. Ex
 # Add the following line at the top with the actual absolute path (example /proj/ngi2024001/nobackup/bin/wp1_gms560/design_and_ref_files)
 REFERENCE_DATA: "<EXTRACT_PATH>/<PIPELINE_SHORT_NAME>/design_and_ref_files"
 
+# Use the cluster specific resources file created above, it is loaded by common.smk
+resources: "config/resources.miarka.yaml"
+
 # Adjust config so that all reference files have the {{REFERENCE_DATA}} variable
 # Add potential subfolder so that they match the paths found in the reference yaml files
 reference:
@@ -135,11 +138,12 @@ hydra_local_path: "<EXTRACT_PATH>/<PIPELINE_SHORT_NAME>/<TAG_OR_BRANCH>/hydra-ge
 Add path to local singularity images in the main config.yaml file 
 ```bash
 # config/config.yaml
-# Build new python environment if needed and install requirements
+# Build new python environment if needed
 python3.11 -m venv python_venv/
-pip install -r requirements.txt
 # Activate python environment if not already active
 source python_venv/bin/activate
+# Install requirements
+pip install -r requirements.txt
 cp config/config.yaml config/config.yaml.copy
 hydra-genetics prepare-environment container-path-update -c config/config.yaml.copy -n config/config.yaml -p ${PATH_TO_apptainer_cache}
 ```

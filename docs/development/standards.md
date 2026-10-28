@@ -26,7 +26,7 @@ Each module and pipeline are recommended to have a more in depth documentation u
 * Input and Output files/directories should get a reasonable tag (specific suffix, e.g. vcf, bam, is preferred), such as:
 ```
 input:
-    vcf=”module/input_rule/{sample}.vcf”,
+    vcf="module/input_rule/{sample}.vcf",
 ```
 * The name of the main output file (e.g. .bam, .vcf) will also be used for naming the log and benchmark files of a rule, only adding .log and .benchmark.tsv in the end, respectively.
 * Output files should be marked with the temp() directive in order to save space. Use a rule that copies final results files to a results folder.
@@ -62,25 +62,29 @@ validate(config, schema="../schemas/resources.schema.yaml")
 samples = pd.read_table(config["samples"], dtype=str).set_index("sample", drop=False)
 validate(samples, schema="../schemas/samples.schema.yaml")
 
-units = pandas.read_table(config["units"], dtype=str).set_index(["sample", "type", "run", "lane"], drop=False).sort_index()
+units = (
+    pd.read_table(config["units"], dtype=str)
+    .set_index(["sample", "type", "flowcell", "lane", "barcode"], drop=False)
+    .sort_index()
+)
 validate(units, schema="../schemas/units.schema.yaml")
 
 wildcard_constraints:
     sample="|".join(samples.index),
-    unit="N|T|R",
+    type="N|T|R",
 ```
 ### Functions
-The next part should comprise necessary functions used by rules, input or parameters. There are a number of functions available in hydra-genetics/tools which should be used where possible.
+The next part should comprise necessary functions used by rules, input or parameters. There are a number of functions available in hydra-genetics (`hydra_genetics.utils`) which should be used where possible.
 ### Output
-The bottom should be the function compile_output_list which programmatically generates a list of all necessary output files for the module to be targeted in the all rule defined in the `Snakemake` file. See further [Result files](results.md).
+The bottom should be the function `compile_output_file_list` which programmatically generates a list of all necessary output files, specified in `config/output_files.yaml`, to be targeted in the all rule defined in the `Snakefile`. See further [Result files](../make_pipeline/results.md).
 
 ## Scripts
-* Scripts in python (at least 3.8.0) or R (at 4.0.0) should be placed in the scripts directory.
+* Scripts in python (at least 3.8.0) or R (at least 4.0.0) should be placed in the scripts directory.
 * Try to keep your names concise and use only lowercase and underscores.
 * Scripts should comprise of functions (DRY) which are called in your main function like so:
 ```python
-	if __name__ == "__main__":
-		…
+if __name__ == "__main__":
+    ...
 ```
 * Logging is to be included - anything from info to warnings and errors to make troubleshooting easier.
 * Unit tests are mandatory, putting them in scriptname_test.py files. Refer to the section unit tests for details.
@@ -93,39 +97,38 @@ import unittest
 from dataclasses import dataclass
 from my_script import my_function
 
-class TestInsertSize(unittest.TestCase):
-	def test_my_function(self):
-		@dataclass
-        	class TestCase:
-            		name: str
-            		input: str
-            		expected: str
 
-        		testcases = [
-                		TestCase(
-                    			name="Successful test",
-                    			input=”input string”,
-                    			expected="expected string",
-                		),
-        		]
+class TestMyFunction(unittest.TestCase):
+    def test_my_function(self):
+        @dataclass
+        class TestCase:
+            name: str
+            input: str
+            expected: str
 
-        	for case in testcases:
-            		actual = my_function(case.input)
-            		self.assertEqual(
-                		case.expected,
-                		actual,
-                		"failed test '{}': expected {}, got {}".format(
-                    			case.name, case.expected, actual
-                		),
-            		)
+        testcases = [
+            TestCase(
+                name="Successful test",
+                input="input string",
+                expected="expected string",
+            ),
+        ]
+
+        for case in testcases:
+            actual = my_function(case.input)
+            self.assertEqual(
+                case.expected,
+                actual,
+                "failed test '{}': expected {}, got {}".format(case.name, case.expected, actual),
+            )
 ```
 ## Config
 The modules use a `config.yaml` file to tie all file and other dependencies as well as parameters for different rules together.
-To make configuration easier, add an example to the config folder. See further [pipeline configuration](config.md).
+To make configuration easier, add an example to the config folder. See further [pipeline configuration](../make_pipeline/config.md).
 
-## `sample.tsv` and `units.tsv`
+## `samples.tsv` and `units.tsv`
 The files `samples.tsv` and `units.tsv` store all sample meta data needed to run pipelines that uses hydra-genetics.
-These can be automatically generated from the `.fastq`-files by the hydra-genetics help tool, see [create sample files](create_sample_files.md).
+These can be automatically generated from fastq files (Illumina) or unaligned BAM files (PacBio/ONT) with the `create-input-files` command, see [create sample files](../run_pipeline/create_sample_files.md).
 
 ## Schemas
 For `config.yaml`, `resources.yaml` and input tsv-files (`samples.tsv` and `units.tsv`), appropriate schemas should be included in workflow/schemas/.
@@ -168,7 +171,7 @@ properties:
         type: string
         description: parameters that should be forwarded
 ```
-An example schema for the `unit.tsv`:
+An example schema for the `units.tsv`:
 ```
 $schema: "http://json-schema.org/draft-04/schema#"
 description: row represents one dataset
@@ -180,9 +183,18 @@ properties:
     type: string
     description: type of sample data Tumor, Normal, RNA (N|T|R)
     pattern: "^(N|T|R)$"
+  platform:
+    type: string
+    description: sequencing platform
   flowcell:
     type: string
     description: flowcell id
+  lane:
+    type: string
+    description: lane id
+  barcode:
+    type: string
+    description: barcode sequence
   fastq1:
     type: string
     description: absolute path to R1 fastq file
@@ -192,13 +204,16 @@ properties:
 required:
   - sample
   - type
+  - platform
   - flowcell
+  - lane
+  - barcode
   - fastq1
   - fastq2
 ```
 
 ## Github
-The following branches are used: main, develop (default), feature, bugfix and release branches. Branches are merged into main and then into main follwoing a new release. Read more about gitflow: https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
+The following branches are used: main, develop (default), feature, bugfix and release branches. Branches are merged into develop and then into main following a new release. Read more about gitflow: https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
 https://lucamezzalira.com/2014/03/10/git-flow-vs-github-flow/  
 
 * Code contribution should be kept small, be done via pull-request.

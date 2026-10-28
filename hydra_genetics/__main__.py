@@ -195,7 +195,7 @@ def default_adapter(platform):
         "-o",
         "--outdir",
         type=str,
-        help="Output directory for where rule will be added (default: current dir)")
+        help="Output directory for the generated files (default: current dir)")
 @click.option(
         "-p",
         "--platform",
@@ -213,19 +213,19 @@ def default_adapter(platform):
         "-s",
         "--sample-regex",
         type=str,
-        help="Regex used find fastq files and to extract samplefrom filename, default '([A-Za-z0-9-]+)_.+.gz$'",
+        help="Regex used to find fastq files and to extract sample from filename, default '([A-Za-z0-9-]+)_.+\\.fastq.gz'",
         default=r"([A-Za-z0-9-]+)_.+\.fastq.gz")
 @click.option(
         "-n",
         "--read-number-regex",
         type=str,
-        help="Regex used to extract read number from filename (note only number value), default '_R([1-2]{1})_001'",
+        help="Regex used to extract read number from filename (note only number value), default '_R([12]{1})_'",
         default="_R([12]{1})_")
 @click.option(
         "-a",
         "--adapters",
         type=str,
-        help="adapter sequence, comma sepearated",
+        help="adapter sequence, comma separated",
         default=lambda: default_adapter(click.get_current_context().params.get("platform", 'Illumina')))
 @click.option(
         "--post-file-modifier",
@@ -261,7 +261,7 @@ def default_adapter(platform):
         default=None)
 @click.option(
         "--validate",
-        help="see if fastq contain multipl runs/lanes by comparing first and last "
+        help="see if fastq contain multiple runs/lanes by comparing first and last "
              "read. Note will take time since whole file need to be parsed.",
         is_flag=True)
 @click.option(
@@ -270,7 +270,7 @@ def default_adapter(platform):
         is_flag=True)
 @click.option(
         "--th",
-        help="if occurences of a concesuns base in barcode is below this value a warning will be printed",
+        help="if occurrences of a consensus base in barcode is below this value a warning will be printed",
         type=float,
         default=0.9)
 @click.option(

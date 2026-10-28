@@ -7,17 +7,17 @@ Basic setup for `config.yaml`:
 resources: "config/resources.yaml"                          # resources parameters
 samples: "samples.tsv"                                      # sample names
 units: "units.tsv"                                          # sample file and meta info
-output: "config/output_list.json"                           # rule all files (optional)
+output: "config/output_files.yaml"                          # rule all files
 default_container: "docker://hydragenetics/common:0.1.9"    # default container
 reference:                                                  # list of general references
-  fasta: “reference_genome.fasta”
+  fasta: "reference_genome.fasta"
 ```
 Basic setup for the `resources.yaml` for default resource usage:
 ```
 default_resources:
   mem_mb: 6144        # total max memory
   mem_per_cpu: 6144   # memory per thread
-  partition: "core"   # partition to us on the cluster (optional)
+  partition: "core"   # partition to use on the cluster (optional)
   threads: 1          # threads
   time: "4:00:00"     # wall time
 ```

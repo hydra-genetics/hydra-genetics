@@ -1,4 +1,4 @@
-In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline, which should be put in `workflow/rules/common.smk`. These functions include version checking of Hydra-Genetics, helper functions for module importation, and more.
+In addition to the command line tools used to create new pipelines and rules, there is also a collection of functions that can be used in a pipeline, which should be put in `workflow/rules/common.smk`. These functions include version checking of hydra-genetics, helper functions for module importation, and more.
 
 # Version handling
 ## Version checking
@@ -38,7 +38,7 @@ pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
 # {
 #     "Twist_Solid": {
 #         'version': 'v1.0.0',
-#         'commit': 'ac739ca938c'
+#         'commit_id': 'ac739ca938c'
 #     }
 # }
 
@@ -63,8 +63,8 @@ onstart:
 Example:
 
 ```bash
-versions/softwares__20210403/
-|--Twist_Solid_mqc_versions.yaml
+versions/software_20210403/
+|--Twist_Solid__v1.0.0_mqc_versions.yaml
 
 ```
 
@@ -74,7 +74,7 @@ To log the versions of the software used during the analysis of the samples, mul
 **Code**
 ```python
 from datetime import datetime
-from hydra_genetics.utils.software_versions import add_version_file_to_multiqc
+from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
 from hydra_genetics.utils.software_versions import add_software_version_to_config
 from hydra_genetics.utils.software_versions import export_software_version_as_file
 from hydra_genetics.utils.software_versions import use_container
@@ -91,7 +91,7 @@ if use_container(workflow):
 # Use onstart to make sure that containers have been downloaded
 # before extracting versions. This will also prevent the functions from
 # running twice.
-onstart:   
+onstart:
     # Make sure that the user have the requested containers to be used
     if use_container(workflow):
         # From the config retrieve all dockers used and parse labels for software versions. Add
@@ -101,7 +101,7 @@ onstart:
         # - directory, default value: versions/software
         # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_software_version_as_file(software_info, date_string=date_string)       
+        export_software_version_as_file(software_info, date_string=date_string)
 ```
 
 **Folder and file structure**
@@ -110,7 +110,7 @@ Example output
 
 ```bash
 # Softwares
-versions/software__20210403/
+versions/software_20210403/
 |--softwares_mqc_versions.yaml
 ```
 
@@ -120,21 +120,22 @@ dict has been made, i.e after resources have been added and after software versi
 
 **Code**
 ```python
+from datetime import datetime
 from hydra_genetics.utils.misc import export_config_as_file
-from hydra_genetics.utils.software_versions import add_version_files_to_multiqc
+from hydra_genetics.utils.software_versions import add_software_version_to_config
+from hydra_genetics.utils.software_versions import use_container
 
 date_string = datetime.now().strftime('%Y%m%d')
 
-if use_container(workflow):
-    version_files = touch_software_version_file(config, date_string=date_string, directory="results/versions/software_version")
-    add_version_files_to_multiqc(config, version_files)
-
-# print config dict as a file. Additional parameters that can be set
-# output_file, default config
-# output_directory, default = None, i.e no folder
-# date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-export_config_as_file(update_config, date_string=date_string)
-
+onstart:
+    update_config = config
+    if use_container(workflow):
+        update_config, software_info = add_software_version_to_config(config, workflow, False)
+    # print config dict as a file. Additional parameters that can be set
+    # output_file, default config
+    # directory, default versions. Set to an empty string for no folder
+    # date_string, a string that will be added to the file name to make it unique (preferably a timestamp)
+    export_config_as_file(update_config, date_string=date_string)
 ```
 
 **Folder and file structure**
@@ -143,11 +144,11 @@ Example output
 
 ```bash
 # Config file
-versions/config__20210403.yaml
+versions/config_20210403.yaml
 ```
 
 # Variable usage in config
-Modifying paths for all reference and design files in the configuration can be time-consuming and may result in long strings, making it challenging to read the configuration file. To simplify this process, one can use the `replace_dict_variable` function. This function allows the definition of variables in the YAML file, providing a more streamlined approach. 
+Modifying paths for all reference and design files in the configuration can be time-consuming and may result in long strings, making it challenging to read the configuration file. To simplify this process, one can use the `replace_dict_variables` function. This function allows the definition of variables in the YAML file, providing a more streamlined approach. 
 
 **Code**
 ```python
@@ -189,7 +190,7 @@ to
 ```
 
 # Load resources
-For Hydra-Genetics modules and pipelines, resource definitions are stored in a YAML file (`resource.yaml`). These settings need to be added to the config dictionary, and this can be achieved using the `load_resources` function.
+For hydra-genetics modules and pipelines, resource definitions are stored in a YAML file (`resources.yaml`). These settings need to be added to the config dictionary, and this can be achieved using the `load_resources` function.
 
 **Code**
 ```python

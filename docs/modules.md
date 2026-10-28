@@ -1,6 +1,6 @@
-## Hydra-genetics modules
-Listed are all modules currently available in the hydra-genetics framework. Links are provided to module specific documentation
-covering all included softwares as well as links to respective github repositories.  
+## hydra-genetics modules
+Listed are all modules currently available in the hydra-genetics framework. Links are provided to module-specific documentation
+covering all included software as well as links to the respective github repositories.
 
 | Documentation | github |
 | ----------------------------------- | ------ |
@@ -14,11 +14,11 @@ covering all included softwares as well as links to respective github repositori
 | [fusions](https://hydra-genetics-fusions.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/fusions](https://github.com/hydra-genetics/fusions) |
 | [misc](https://hydra-genetics-misc.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/misc](https://github.com/hydra-genetics/misc) |
 | [mitochondrial](https://hydra-genetics-mitochondrial.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/mitochondrial](https://github.com/hydra-genetics/mitochondrial) |
-| [snv_indels](https://hydra-genetics-snv-indels.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/snv_indels](https://github.com/hydra-genetics/snv_indels) |
 | [parabricks](https://hydra-genetics-parabricks.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/parabricks](https://github.com/hydra-genetics/parabricks) |
 | [prealignment](https://hydra-genetics-prealignment.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/prealignment](https://github.com/hydra-genetics/prealignment) |
 | [profiles](https://hydra-genetics-profiles.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/profiles](https://github.com/hydra-genetics/profiles) |
 | [qc](https://hydra-genetics-qc.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/qc](https://github.com/hydra-genetics/qc) |
+| [snv_indels](https://hydra-genetics-snv-indels.readthedocs.io/en/latest/) | [https://github.com/hydra-genetics/snv_indels](https://github.com/hydra-genetics/snv_indels) |
 
 ## Create new modules
-Modules are created the same way as new [pipelines](create.md).
+Modules are created the same way as new [pipelines](make_pipeline/create.md).

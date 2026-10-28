@@ -16,18 +16,14 @@ This tutorial will guide you through making a pipeline that trim and then align 
 
 Local installations:
 
-* Python => 3.8 (with pip and venv) but < 3.10 (otherwise there are compatibility issues with the *core* module of the `click` package)
+* Python >= 3.10 (with pip and venv)
 * Singularity >= 3.8.6 or Apptainer
 * graphviz
 
 <hr />
 
 ## Setup environment
-```bash
-python3.8 -m venv hackaton_venv
-source hackaton_venv/bin/activate
-pip install hydra-genetics==3.0.0
-```
+Install hydra-genetics as described in [Installation](../installation.md), using Python 3.10 or newer. This tutorial was written for hydra-genetics 4.2.1, which is installed with `pip install hydra-genetics==4.2.1`.
 
 <hr />
 
@@ -48,7 +44,7 @@ Look through the generated files.
 
 ### Optional: Add a remote repository
 
-Note the hidden *.git* subdirectory in the `simple-pipeline` directory: with the `hydra-genetics create-pipeline` command, the skeleton pipeline is created with Git version control that is set up, however the pipeline's repository does not have any remote repository defined.
+Note the hidden *.git* subdirectory in the `simple_pipeline` directory: with the `hydra-genetics create-pipeline` command, the skeleton pipeline is created with Git version control that is set up, however the pipeline's repository does not have any remote repository defined.
 The user may add a remote repository.
 
 <hr />
@@ -68,14 +64,16 @@ gdown https://drive.google.com/drive/folders/1X1tRvHp6bKGESBixD2hpbmIL0CWeaEe2?u
 ```
 
 ### Add hydra-genetics modules
-Add the [prealignment module](https://github.com/hydra-genetics/prealignment) to `workflow/Snakefile` (use tag=”v1.1.0”). See instructions in the module README.  
-Add the [alignment module](https://github.com/hydra-genetics/alignment) to `workflow/Snakefile` (use tag=”v0.4.0”). See instructions in the module README.  
+Add the [prealignment module](https://github.com/hydra-genetics/prealignment) to `workflow/Snakefile` (use tag="v1.1.0"). See instructions in the module README.  
+Add the [alignment module](https://github.com/hydra-genetics/alignment) to `workflow/Snakefile` (use tag="v0.4.0"). See instructions in the module README.  
 
 ### Create input files
-The below command will not find anything due to how the files are named. First, try the command and the try to modify it by adding --read-number-regex "modified_regex" to match the file names.  
+The below command will not find anything due to how the files are named. First, try the command and then try to modify it by adding --read-number-regex "modified_regex" to match the file names.  
 ```bash
 hydra-genetics create-input-files \
    -d path/to/fastq/ \
+   -p Illumina \
+   --tc 1.0 \
    --every 2 \
    --nreads 10
 ```
@@ -92,21 +90,21 @@ HD827sonic-testing2	1.0
 HD827sonic-testing3	1.0
 ```
 
-In the file `units.tsv`, all samples should be of type "T" and sequenced on  Illumina platform.
+In the file `units.tsv`, all samples should be of type "T" and sequenced on the Illumina platform.
 
 ### Config file for the simple pipeline
 Upon creation, the config file for the pipeline is minimalistic as it should suit any pipeline.
 
 The simple pipeline in this tutorial is supposed to trim the fastq files and then output merged and sorted BAM files.
-The modules *prealignment* and *alignment* will used for this purpose. The config requirements for these modules are also necessary in the newly created pipeline.
-Look at the schemas, example configs, and documentation for *prealignment* and *alignment* to find out what needs to be added in the config (`config/config.yaml`) of *simple-pipeline*. Recall that one should look at the versions of the repositories *prealignment* and *alignment* with the correct tag. 
+The modules *prealignment* and *alignment* will be used for this purpose. The config requirements for these modules are also necessary in the newly created pipeline.
+Look at the schemas, example configs, and documentation for *prealignment* and *alignment* to find out what needs to be added in the config (`config/config.yaml`) of *simple_pipeline*. Recall that one should look at the versions of the repositories *prealignment* and *alignment* with the correct tag. 
 
 * `prealignment/config/config.yaml`
 * `alignment/config/config.yaml`
-* `prealignment/workflow/schemas/config.schemas.yaml`
-* `alignment/workflow/schemas/config.schemas.yaml`
+* `prealignment/workflow/schemas/config.schema.yaml`
+* `alignment/workflow/schemas/config.schema.yaml`
 
-Any requirement in `simple-pipeline/workflow/schemas/config.schemas.yaml`  must be met in `simple-pipeline/config/config.yaml` by adding the relevant section.
+Any requirement in `simple_pipeline/workflow/schemas/config.schema.yaml` must be met in `simple_pipeline/config/config.yaml` by adding the relevant section.
 
 **Hint**: Furthermore, some configurations that are found in `alignment/config/config.yaml` and in `prealignment/config/config.yaml` are necessary in order to run the simple pipeline, even if those are not specified as "required" in any of the schemas of the 2 modules. These necessary configurations in `config/config.yaml` are specifications for:
 
@@ -116,10 +114,7 @@ Any requirement in `simple-pipeline/workflow/schemas/config.schemas.yaml`  must 
 - location of the Docker container with the tool Picard.
 
 ### Run pipeline
-Install required programs (snakemake, …):
-```bash
-pip install -r requirements.txt
-```
+Install the programs required by the pipeline (snakemake, …), which are listed in `requirements.txt`, see [Installation](../installation.md#module-and-pipeline-requirements).
 
 <br />
 
@@ -195,10 +190,7 @@ snakemake -s workflow/Snakefile --configfile config/config.yaml --until alignmen
 
 ## Code testing
 Before making a pull-request to a hydra-genetics module or pipeline it is recommended to run a number of tests locally.  
-Install test programs:
-```bash
-pip install -r requirements.test.txt
-```
+Install the test programs, which are listed in `requirements.test.txt`, see [Installation](../installation.md#module-and-pipeline-requirements).
 
 <br />
 
@@ -244,7 +236,7 @@ hydra-genetics create-rule \
 ```
 
 ### Modify rule
-Modify ´simple_pipeline/workflow/rules/picard.smk´ so that the rule does what you what it to do.
+Modify `simple_pipeline/workflow/rules/picard.smk` so that the rule does what you want it to do.
 
 ### Update pipeline
 Update the pipeline to use the new rule.  
@@ -260,7 +252,7 @@ Run the pipeline to generate the new output files.
 snakemake -s workflow/Snakefile \
       --use-singularity \
       -c1 \
-      --singularity-args "-B path/to/fastq_and_reference_files/"
+      --singularity-args "-B path/to/fastq_and_reference_files/" \
       --configfile config/config.yaml
 ```
 
@@ -286,6 +278,6 @@ mkdocs serve
 Update the descriptions in the schemas and the software documentation page will update with this new information. (Might need restart of server). Look at `docs/softwares.md` to see the code that generates the documentation.  
 Schemas:
 
-* `simple_pipeline/workflow/schemas/rule.schema.yaml` #Description of the rule input and output
+* `simple_pipeline/workflow/schemas/rules.schema.yaml` #Description of the rule input and output
 * `simple_pipeline/workflow/schemas/config.schema.yaml` #Description of the configurations (params, container, ...)
 * `simple_pipeline/workflow/schemas/resources.schema.yaml` #Description of the computer resources (modify if extra resources are needed)

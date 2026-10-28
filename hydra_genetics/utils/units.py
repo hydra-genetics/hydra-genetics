@@ -187,7 +187,11 @@ def get_platforms(units: pandas.DataFrame, wildcards: snakemake.io.Wildcards) ->
     Raises:
         raises an exception (KeyError) if no unit(s) can be extracted from the Dataframe
     """
-    return set([u.platform for u in units.loc[(wildcards.sample, wildcards.type)].itertuples()])
+    selected = units.loc[(wildcards.sample, wildcards.type)]
+    if isinstance(selected, pandas.Series):
+        # a unique (sample, type) selection is returned as a Series instead of a DataFrame
+        return {selected["platform"]}
+    return set([u.platform for u in selected.itertuples()])
 
 
 def get_unit_types(units: pandas.DataFrame, sample: str) -> set:

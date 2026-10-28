@@ -550,6 +550,14 @@ class TestUnitUtils(unittest.TestCase):
             {'novaseq'}
         )
 
+    def test_get_platforms_unique_sample_type(self):
+        from hydra_genetics.utils.units import get_platforms
+        units = pandas.DataFrame(
+            {"sample": ["a", "b"], "type": ["T", "T"], "platform": ["ONT", "PACBIO"]}
+        ).set_index(["sample", "type"], drop=False).sort_index()
+        self.assertEqual(get_platforms(units, Wildcards(fromdict={'sample': 'a', 'type': "T"})), {'ONT'})
+        self.assertEqual(get_platforms(units, Wildcards(fromdict={'sample': 'b', 'type': "T"})), {'PACBIO'})
+
     def test_get_unit_types(self):
         from hydra_genetics.utils.units import get_unit_types
         self.assertEqual(

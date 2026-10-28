@@ -8,7 +8,7 @@ Full documentation is available at [hydra-genetics.readthedocs.io](https://hydra
 
 [![build mkdocs](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml/badge.svg)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml)
 
-![python](https://img.shields.io/badge/python-%3E%3D3.8%2C%3C%3D3.11-blue)
+![python](https://img.shields.io/badge/python-%3E%3D3.8%2C%3C%3D3.12-blue)
 
 ## Installation
 

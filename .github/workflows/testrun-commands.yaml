@@ -28,7 +28,7 @@ jobs:
       - name: Add conda to system path
         run: |
           echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install hydra genetics
+      - name: Install hydra-genetics
         run: |
           pip install -e .
       - name: Create module

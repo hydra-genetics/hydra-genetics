@@ -2,7 +2,7 @@
 
 A short introduction to our awesome pipeline {{ short_name }}
 
-# Hydra-genetics
+# hydra-genetics
 
 We are an organization/community with the goal of making [snakemake](https://snakemake.readthedocs.io/en/stable/index.html) pipeline development easier, faster, a bit more structured and of higher quality.
 

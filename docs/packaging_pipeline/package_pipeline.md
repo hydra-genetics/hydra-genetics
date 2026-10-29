@@ -1,6 +1,6 @@
 # Pipeline packaging
 
-Some systems don't allow access to internet making it impossible to use a pipeline that is dependent on resources hosted on the web, like docker hub and github. This is solved by packing the pipeline and all its dependencies.
+Some systems don't allow access to internet making it impossible to use a pipeline that is dependent on resources hosted on the web, like docker hub and github. This is solved by packaging the pipeline and all its dependencies.
 
 ## Package pipeline
 

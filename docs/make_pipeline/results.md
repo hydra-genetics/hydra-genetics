@@ -1,83 +1,99 @@
 # How to specify results files
 
 ## Rule all
-The rule all specifies the result files from the pipeline and is defined last in the `Snakemake` file:
+The rule all specifies the result files from the pipeline. It is defined in the `Snakefile` before any modules are
+included, since the modules also contain an `all` rule:
 ```
 rule all:
     input:
-        unpack(compile_output_list),
+        compile_output_file_list,
 ```
 
-## compile_output_list function
-The rule calls upon the function *compile_output_list* defined in `common.smk` which uses a json-file to define the output files. An example of the function is shown below:
-```python
-def compile_output_list(wildcards):
-    output_files = []
-    types = set([unit.type for unit in units.itertuples()])
-    for output in output_json:                                                            
-        output_files += set(
-            [
-                output.format(sample=sample, type=unit_type, caller=caller)
-                for sample in get_samples(samples)
-                for unit_type in get_unit_types(units, sample)
-                if unit_type in set(output_json[output]["types"]).intersection(types)
-                for caller in config["bcbio_variation_recall_ensemble"]["callers"]
-            ]
-        )
-    return list(set(output_files))
+## Output files specified in a yaml file
+The result files are defined in a yaml file, `config/output_files.yaml` in a pipeline created with hydra-genetics. The
+file is pointed out by the `output` key in `config.yaml`:
+```yaml
+output: "config/output_files.yaml"
 ```
-
-## Output files specified in json format
-The output_json is specified in the `common.smk` which look up the actual file in `config.yaml`:
+The file is read and validated against `workflow/schemas/output_files.schema.yaml` in `common.smk`:
 ```python
 with open(config["output"]) as output:
-    output_json = json.load(output)
+    if config["output"].endswith("json"):
+        output_spec = json.load(output)
+    elif config["output"].endswith("yaml") or config["output"].endswith("yml"):
+        output_spec = yaml.safe_load(output.read())
+
+validate(output_spec, schema="../schemas/output_files.schema.yaml")
 ```
-In our example the output_json file looks like this:
+Note that a json file with the same structure is also accepted, but yaml is the format used by the pipeline template.
+
+An example of the file:
+```yaml
+directory: "results"
+files:
+  - name: "bam"
+    input: "alignment/samtools_merge_bam/{sample}_{type}.bam"
+    output: "dna/bam/{sample}_{type}.bam"
+  - name: "bai"
+    input: "alignment/samtools_merge_bam/{sample}_{type}.bam.bai"
+    output: "dna/bam/{sample}_{type}.bam.bai"
+  - name: "multiqc html"
+    input: null
+    output: "qc/multiqc.html"
 ```
-{
-  "bam_dna/{sample}_{type}.bam": {"name": "_result_bam", "file": "alignment/samtools_merge_bam/{sample}_{type}.bam", "types": ["T", "N"]},
-  "bam_dna/{sample}_{type}.bam.bai": {"name": "_result_bai", "file": null, "types": ["T", "N"]},
-  "results/dna/vcf/{sample}_{type}.annotated.vcf.gz": {"name": "_result_annotated_vcf", "file": "annotation/background_annotation/{sample}_{type}.background_annotation.vcf.gz", "types": ["T", "N"]},
-  "results/rna/qc/multiqc_RNA.html": {"name": "_result_multiqc_rna_html", "file": "qc/multiqc/multiqc_RNA.html", "types": ["R"]}
-}
+
+| Key | Explanation |
+|-----|-------------|
+| directory | Optional, the directory the result files are placed in (default: `./`). |
+| files | List of result files, required. |
+| name | Descriptive name of the result file, required. It is also used to name the copy rule for the file. |
+| input | Path to the file that should be copied to the output directory, required. The wildcards `{sample}` and `{type}` can be used. If the value is `null` no copy rule is created and Snakemake has to find another rule that generates the file at `output`. |
+| output | Path of the result file relative to `directory`, required. The wildcards `{sample}` and `{type}` can be used. |
+| types | Optional list of sample types (`N`, `T` or `R`) the file is meant for. The key is allowed by the schema, but it is not used by the function in the pipeline template, see below. |
+
+## compile_output_file_list function
+The rule all calls the function `compile_output_file_list`, defined in `common.smk`, which uses the specification
+above to create the list of all files that the pipeline should generate. The function in the pipeline template looks
+like this:
+```python
+def compile_output_file_list(wildcards):
+    outdir = pathlib.Path(output_spec.get("directory", "./"))
+    output_files = []
+
+    for f in output_spec["files"]:
+        # Please remember to add any additional values down below
+        # that the output strings should be formatted with.
+        outputpaths = set(
+            [
+                f["output"].format(sample=sample, type=unit_type)
+                for sample in get_samples(samples)
+                for unit_type in get_unit_types(units, sample)
+            ]
+        )
+
+        for op in outputpaths:
+            output_files.append(outdir / Path(op))
+
+    return output_files
 ```
+If a result file should only be created for some sample types, or if the paths contain other wildcards, for example
+a caller, the function has to be extended to filter on `f["types"]` and to format the strings with the extra values.
 
 ## Generate copy file rules
-It is recommended to use a copy rule for each output file. In this way, result files will be copied individually and not as a bulk which improves performance for reruns. These rules can be generated programmatically in `common.smk` for example by the following function:
-```python
-def generate_copy_code(workflow, output_json):
-    code = ""
-    for result, values in output_json.items():
-        if values["file"] is not None:
-            input_file = values["file"]
-            output_file = result
-            rule_name = values["name"]
-            mem_mb = config.get("_copy", {}).get("mem_mb", config["default_resources"]["mem_mb"])
-            mem_per_cpu = config.get("_copy", {}).get("mem_mb", config["default_resources"]["mem_mb"])
-            partition = config.get("_copy", {}).get("partition", config["default_resources"]["partition"])
-            threads = config.get("_copy", {}).get("threads", config["default_resources"]["threads"])
-            time = config.get("_copy", {}).get("time", config["default_resources"]["time"])
-            copy_container = config.get("_copy", {}).get("container", config["default_container"])
-            result_file = os.path.basename(output_file)
-            code += f'@workflow.rule(name="{rule_name}")\n'
-            code += f'@workflow.input("{input_file}")\n'
-            code += f'@workflow.output("{output_file}")\n'
-            code += f'@workflow.log("logs/{rule_name}_{result_file}.log")\n'
-            code += f'@workflow.container("{copy_container}")\n'
-            code += f'@workflow.conda("../env/copy_result.yaml")\n'
-            code += f'@workflow.resources(time = "{time}", threads = {threads}, mem_mb = {mem_mb}, mem_per_cpu = {mem_per_cpu}, partition = "{partition}")\n'
-            code += '@workflow.shellcmd("cp {input} {output}")\n\n'
-            code += "@workflow.run\n"
-            code += (
-                f"def __rule_{rule_name}(input, output, params, wildcards, threads, resources, log, version, rule, "
-                "conda_env, container_img, singularity_args, use_singularity, env_modules, bench_record, jobid, is_shell, "
-                "bench_iteration, cleanup_scripts, shadow_dir, edit_notebook, conda_base_path, basedir, runtime_sourcecache_path, "
-                "__is_snakemake_rule_func=True):\n"
-                '\tshell ( "(cp {input[0]} {output[0]}) &> {log}" , bench_record=bench_record, bench_iteration=bench_iteration)\n\n'
-            )
-    exec(compile(code, "result_to_copy", "exec"), workflow.globals)
+It is recommended to use a copy rule for each result file. In this way, result files will be copied individually and
+not as a bulk, which improves performance for reruns. The copy rules are generated programmatically in `common.smk`
+by the function `generate_copy_rules(output_spec)`, which is called once after it is defined.
 
+For each entry in `files` with an `input` that is not `null` the function creates a rule that copies `input` to
+`directory`/`output`. The rule is named `_copy_` followed by `name`, converted to lower case with every group of
+non-word characters replaced by an underscore, e.g. the name `"multiqc html"` results in the rule `_copy_multiqc_html`.
 
-generate_copy_code(workflow, output_json)
+The resources and the container of the copy rules can be configured in `config.yaml` and `resources.yaml` using the
+key `_copy`, with the values in `default_resources` and `default_container` as defaults:
+```yaml
+_copy:
+  container: "docker://hydragenetics/common:0.1.9"
+  mem_mb: 1024
+  threads: 1
 ```
+See the function in the generated `workflow/rules/common.smk` for the full code.

@@ -196,7 +196,7 @@ def default_adapter(platform):
         "-o",
         "--outdir",
         type=str,
-        help="Output directory for the generated samples.tsv and units.tsv (default: current dir)")
+        help="Output directory for the generated files (default: current dir)")
 @click.option(
         "-p",
         "--platform",

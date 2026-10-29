@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-    Main hydra_genetics module file.
+    Main hydra-genetics module file.
 
 """
 from packaging.version import Version
@@ -12,7 +12,7 @@ def min_version(version):
     if Version(__version__) < Version(version):
         from .exceptions import HydraGeneticsVersionError
         raise HydraGeneticsVersionError(
-            "Expecting Hydra-Genetics version {} or higher (you are currently using {}).".format(
+            "Expecting hydra-genetics version {} or higher (you are currently using {}).".format(
                 version, __version__
             )
         )
@@ -23,7 +23,7 @@ def max_version(version):
     if Version(__version__) > Version(version):
         from .exceptions import HydraGeneticsVersionError
         raise HydraGeneticsVersionError(
-            "Expecting Hydra-Genetics version {} or less (you are currently using {}).".format(
+            "Expecting hydra-genetics version {} or less (you are currently using {}).".format(
                 version, __version__
             )
         )

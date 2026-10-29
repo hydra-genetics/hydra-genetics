@@ -2,16 +2,12 @@
 Using the **hydra-genetics tool** it is very easy to create a new pipeline skeleton following the hydra-genetics standard.
 Note, hydra-genetics modules are created in the exact same way.
 ## Installation
-Activate a python virtual environment. Then install the hydra-genetics tools using pip
-```
-source venv/bin/activate
-pip install hydra_genetics
-```
+Install hydra-genetics as described in [Installation](../installation.md).
 ## Make a pipeline skeleton
 The hydra-genetics tools will set up a folder structure following the hydra-genetics standard
-as well as ready made code testing for github.
+as well as ready-made code testing for GitHub.
 ```
-hydra-genetics create-module -n new_pipeline_name -d "solid cancer" -a "Your Name" -e name@email.com -g git_username [OPTIONS]
+hydra-genetics create-pipeline -n new_pipeline_name -d "solid cancer" -a "Your Name" -e name@email.com -g git_username [OPTIONS]
 ```
 | Option | Explanation |
 |--------|-------------|
@@ -27,7 +23,7 @@ hydra-genetics create-module -n new_pipeline_name -d "solid cancer" -a "Your Nam
 | -o, --outdir TEXT | Output directory for new pipeline (default: pipeline name) |
 | --help | Show help text |
 
-After creation, add the push the new pipeline skeleton to git:
+After creation, push the new pipeline skeleton to git:
 
 ```bash
 cd new_pipeline_name
@@ -36,10 +32,10 @@ git push --all origin
 ```
 ## Folder structure
 The folder structure is listed below.
-Code testing using github actions is set up in `.github`.
+Code testing using GitHub Actions is set up in `.github`.
 In `.tests` small datasets are run through the pipeline.
 The `config` folder holds all configuration files.
-In the `workflow` folder contains the actual pipeline with all the rules, scripts, schemas and so on.
+The `workflow` folder contains the actual pipeline with all the rules, scripts, schemas and so on.
 ```
 ├── .git
 ├── .github
@@ -47,53 +43,65 @@ In the `workflow` folder contains the actual pipeline with all the rules, script
 │   ├── ISSUE_TEMPLATE
 │   │   ├── bug_report.md
 │   │   └── feature_request.md
+│   ├── PULL_REQUEST_TEMPLATE.md
 │   ├── linters
+│   │   ├── .snakefmt.toml
 │   │   └── report
 │   └── workflows
+│       ├── conventional-prs.yml
 │       ├── integration.yaml
 │       ├── lint.yaml
 │       ├── pycodestyle.yaml
 │       ├── pytest.yaml
+│       ├── release-please.yaml
 │       ├── snakefmt.yaml
-│       └── snakemake-dry-run.yaml
+│       ├── snakemake-dry-run.yaml
+│       └── test-build-mkdocs
 ├── .gitignore
-├── README.md
-├── LICENSE.md
-├── requirements.test.txt
-├── requirements.txt
+├── .readthedocs.yaml
 ├── .tests
 │   └── integration
-│       ├── config.yaml
-│       ├── resources.tsv
+│       ├── config
+│       │   ├── config.yaml
+│       │   └── resources.yaml
 │       ├── samples.tsv
 │       └── units.tsv
+├── LICENSE.md
+├── README.md
 ├── config
 │   ├── config.yaml
-│   ├── resources.tsv
+│   ├── output_files.yaml
+│   ├── resources.yaml
 │   ├── samples.tsv
 │   └── units.tsv
+├── docs
+│   ├── extra.css
+│   ├── includes
+│   │   └── abbreviations.md
+│   ├── index.md
+│   ├── intro.md
+│   ├── requirements.txt
+│   └── softwares.md
 ├── images
-│   └── rulegraph.svg
+│   └── hydragenetics.png
+├── mkdocs.yaml
+├── requirements.test.txt
+├── requirements.txt
 └── workflow
-    ├── envs
-    │   ├── tool1.yaml
-    │   └── tool2.yaml
+    ├── Snakefile
     ├── notebooks
-    │   ├── notebook1.py.ipynb
-    │   └── notebook2.r.ipynb
+    │   └── describe_jupyter_notebook.txt
     ├── rules
-    │   ├── common.smk
-    │   ├── tool1.smk
-    │   └── tool2.smk
+    │   └── common.smk
     ├── schemas
     │   ├── config.schema.yaml
+    │   ├── output_files.schema.yaml
     │   ├── resources.schema.yaml
+    │   ├── rules.schema.yaml
     │   ├── samples.schema.yaml
     │   └── units.schema.yaml
-    ├── scripts
-    │   ├── script1.py
-    │   ├── script1_test.py
-    │   ├── script2.R
-    │   └── script2_test.R
-    └── Snakefile
+    └── scripts
+        ├── dummy.py
+        └── test_dummy.py
 ```
+Rule files (`workflow/rules/<tool>.smk`) and environment files (`workflow/envs/`) are added with the `create-rule` command.

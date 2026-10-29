@@ -395,6 +395,8 @@ class CreateInputFiles(object):
         elif self.data_json or self.data_columns:
             log.error("Both --data-json and --data-columns need to be specified at the same time, not only one of them.")
         for d in self.directory:
+            # units.tsv is written to --outdir, so input paths must not depend on the current directory
+            d = os.path.abspath(d)
             dir_files_found = 0
             log.info(f"Dir: %s" % d)
             for f in glob.glob('%s/**/*.fastq.gz' % d, recursive=True):
@@ -434,6 +436,8 @@ class CreateInputFiles(object):
             for files in file_dict[sample]:
                 if len(file_dict[sample][files]) % 2 != 0:
                     raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
+
+        os.makedirs(self.outdir, exist_ok=True)
 
         excluded_samples = []
         if self.min_file_size is not None:
@@ -738,6 +742,8 @@ class CreateLongReadInputFiles(object):
 
         file_list = []
         for d in self.directory:
+            # units.tsv is written to --outdir, so input paths must not depend on the current directory
+            d = os.path.abspath(d)
             dir_files_found = 0
             log.info(f"Dir: {d}")
             for f in glob.glob(f"{d}/**/*.bam", recursive=True):
@@ -802,6 +808,8 @@ class CreateLongReadInputFiles(object):
                 units_dict["run_id"].append(rg_dict["run_id"])
 
         units_df = pd.DataFrame(units_dict)
+
+        os.makedirs(self.outdir, exist_ok=True)
 
         excluded_samples = []
         if self.min_file_size is not None:

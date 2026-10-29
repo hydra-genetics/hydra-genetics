@@ -116,6 +116,30 @@ class TestCreateInputFiles(unittest.TestCase):
         finally:
             shutil.rmtree(cwd_dir)
 
+    def test_init_creates_missing_outdir(self):
+        new_outdir = os.path.join(self.out_dir, "does", "not", "exist")
+        creator = CreateInputFiles(
+            directory=[self.fastq_dir], outdir=new_outdir, read_number_regex=r"_R([12]{1})[_.]",
+            min_file_size=10000)
+        creator.init()
+        for file_name in ["samples.tsv", "units.tsv", "excluded_samples_mqc.tsv"]:
+            self.assertTrue(os.path.exists(os.path.join(new_outdir, file_name)), file_name)
+
+    def test_init_relative_directory_gives_absolute_paths_in_units(self):
+        original_cwd = os.getcwd()
+        os.chdir(self.test_dir)
+        try:
+            creator = CreateInputFiles(
+                directory=["fastq"], outdir=self.out_dir, read_number_regex=r"_R([12]{1})[_.]")
+            creator.init()
+        finally:
+            os.chdir(original_cwd)
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t")
+        for column in ["fastq1", "fastq2"]:
+            for path in units_df[column]:
+                self.assertTrue(os.path.isabs(path), path)
+                self.assertTrue(os.path.isfile(path), path)
+
     def test_init_min_file_size_excludes_all_hard_fails_and_writes_mqc(self):
         original_cwd = os.getcwd()
         os.chdir(self.out_dir)

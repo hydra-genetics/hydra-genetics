@@ -207,6 +207,15 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
         self.assertEqual(rg_dict["pu"], "pu1")
         self.assertEqual(rg_dict["sample"], "sample1")
 
+    def test_extract_bam_information_bam_without_reads(self):
+        path = os.path.join(self.test_dir, "empty.bam")
+        header = {"HD": {"VN": "1.6"}, "RG": [{"ID": "x", "PL": "PACBIO", "PU": "pu1", "SM": "sample1"}]}
+        pysam.AlignmentFile(path, "wb", header=header).close()
+        with self.assertLogs("hydra_genetics.commands.create", level="WARNING") as logs:
+            rg_dict = extract_bam_information(path, platform="PACBIO")
+        self.assertEqual(rg_dict["methylation"], "No")
+        self.assertIn(path, logs.output[0])
+
 
 if __name__ == "__main__":
     unittest.main()

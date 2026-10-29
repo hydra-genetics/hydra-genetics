@@ -1021,12 +1021,13 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
             sample_id = _require_read_group_tag(read_group_dict, "LB", file_path, "library, used as sample id since SM is missing")
 
     # check first read for methylation tags
-    first_read = bam.head(1)
+    methylation_tags = 'No'
+    first_read = list(bam.head(1))
+    if not first_read:
+        log.warning(f"No reads found in {file_path}, methylation is set to 'No'")
     for read in first_read:
         if read.has_tag('MM') and read.has_tag('ML'):
             methylation_tags = 'Yes'
-        else:
-            methylation_tags = 'No'
 
     rg_dict = {"sample": sample_id, "machine": machine_id,
                "pu": pu, "barcode": barcode,

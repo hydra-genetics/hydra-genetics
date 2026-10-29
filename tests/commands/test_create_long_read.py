@@ -3,7 +3,8 @@ import os
 import shutil
 import tempfile
 import pandas as pd
-from hydra_genetics.commands.create import CreateLongReadInputFiles
+import pysam
+from hydra_genetics.commands.create import CreateLongReadInputFiles, extract_bam_information
 
 
 class TestCreateLongReadInputFiles(unittest.TestCase):
@@ -165,6 +166,46 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
 
         finally:
             os.chdir(original_cwd)
+
+    def _write_bam(self, read_group, name="test.bam"):
+        """Write a one-read unmapped BAM whose header has the given read group (None for no RG line)."""
+        path = os.path.join(self.test_dir, name)
+        header = {"HD": {"VN": "1.6"}}
+        if read_group is not None:
+            header["RG"] = [read_group]
+        with pysam.AlignmentFile(path, "wb", header=header) as bam:
+            read = pysam.AlignedSegment()
+            read.query_name = "read1"
+            read.query_sequence = "ACGT"
+            read.flag = 4
+            bam.write(read)
+        return path
+
+    def test_extract_bam_information_missing_tags_give_clear_error(self):
+        ont_ds = "runid=abc basecall_model=model1"
+        cases = [
+            ("no RG line", "ONT", None, "read group"),
+            ("no PL", "ONT", {"ID": "x", "PU": "pu", "DS": ont_ds, "SM": "s"}, "PL"),
+            ("no PU", "ONT", {"ID": "x", "PL": "ONT", "DS": ont_ds, "SM": "s"}, "PU"),
+            ("ONT without DS", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "SM": "s"}, "DS"),
+            ("ONT DS without runid", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model=m", "SM": "s"}, "runid"),
+            ("ONT without al, SM and LB", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": ont_ds}, "LB"),
+            ("PACBIO without SM and LB", "PACBIO", {"ID": "x", "PL": "PACBIO", "PU": "pu"}, "LB"),
+        ]
+        for label, platform, read_group, expected in cases:
+            with self.subTest(label):
+                path = self._write_bam(read_group)
+                with self.assertLogs("hydra_genetics.commands.create", level="ERROR") as logs:
+                    with self.assertRaises(SystemExit):
+                        extract_bam_information(path, platform=platform)
+                self.assertIn(expected, logs.output[0])
+                self.assertIn(path, logs.output[0])
+
+    def test_extract_bam_information_pacbio_does_not_need_ds(self):
+        path = self._write_bam({"ID": "x", "PL": "PACBIO", "PU": "pu1", "SM": "sample1"})
+        rg_dict = extract_bam_information(path, platform="PACBIO")
+        self.assertEqual(rg_dict["pu"], "pu1")
+        self.assertEqual(rg_dict["sample"], "sample1")
 
 
 if __name__ == "__main__":

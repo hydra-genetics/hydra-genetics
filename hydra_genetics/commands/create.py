@@ -922,6 +922,19 @@ def extract_value(field, default, data):
         return data[head]
 
 
+def _require_read_group_tag(read_group_dict, tag, file_path, description):
+    """
+    Return read_group_dict[tag], or log which read group tag is missing from which BAM file and exit,
+    instead of letting a bare KeyError reach the user.
+    """
+    try:
+        return read_group_dict[tag]
+    except KeyError:
+        log.error(f"The {tag} tag ({description}) is missing from the read group in the BAM header of {file_path}. "
+                  f"Tags found: {', '.join(sorted(read_group_dict)) or 'none'}")
+        exit(1)
+
+
 def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
 
     """
@@ -946,6 +959,9 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
 
     bam = pysam.AlignmentFile(file_path, "rb", check_sq=False)
     header_dict = bam.header.to_dict()
+    if "RG" not in header_dict:
+        log.error(f"No read group (RG) found in the BAM header of {file_path}")
+        exit(1)
     read_group = header_dict["RG"]
     read_group_num = len(read_group)  # check for for more than one read group in the bam header
     if read_group_num > 1:
@@ -954,24 +970,28 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
 
     read_group_dict = read_group[0]
 
-    bam_platform = read_group_dict["PL"]
+    bam_platform = _require_read_group_tag(read_group_dict, "PL", file_path, "sequencing platform")
     if bam_platform != platform:
         log.error(f"The platform specified in the BAM file is not {platform}!")
         exit(1)
 
-    pu = read_group_dict["PU"]
+    pu = _require_read_group_tag(read_group_dict, "PU", file_path, "platform unit")
 
     try:  # PM tag not in some older pacbio BAM files
         machine_id = read_group_dict["PM"]
     except KeyError:
         machine_id = "NA"
 
-    read_group_description = {}
-    for desc in read_group_dict['DS'].split(' '):
-        desc_fields = desc.split("=")
-        read_group_description[desc_fields[0]] = desc_fields[1]
-
     if platform == "ONT":
+        # DS holds space separated key=value pairs, only ONT needs basecall_model and runid from it
+        read_group_description = {}
+        for desc in _require_read_group_tag(read_group_dict, "DS", file_path, "description").split(' '):
+            key, _, value = desc.partition("=")
+            read_group_description[key] = value
+        for key in ["basecall_model", "runid"]:
+            if key not in read_group_description:
+                log.error(f"'{key}' is missing from the DS tag of the read group in the BAM header of {file_path}")
+                exit(1)
         basecall_model = read_group_description["basecall_model"]
         run_id = read_group_description["runid"]
 
@@ -992,12 +1012,13 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
             try:
                 sample_id = read_group_dict["SM"]
             except KeyError:
-                sample_id = read_group_dict["LB"]
+                sample_id = _require_read_group_tag(read_group_dict, "LB", file_path,
+                                                    "library, used as sample id since al and SM are missing")
     else:
         try:
             sample_id = read_group_dict["SM"]
         except KeyError:
-            sample_id = read_group_dict["LB"]
+            sample_id = _require_read_group_tag(read_group_dict, "LB", file_path, "library, used as sample id since SM is missing")
 
     # check first read for methylation tags
     first_read = bam.head(1)

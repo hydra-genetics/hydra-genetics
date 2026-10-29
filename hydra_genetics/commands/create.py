@@ -986,11 +986,13 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
         # DS holds space separated key=value pairs, only ONT needs basecall_model and runid from it
         read_group_description = {}
         for desc in _require_read_group_tag(read_group_dict, "DS", file_path, "description").split(' '):
-            key, _, value = desc.partition("=")
-            read_group_description[key] = value
+            key, separator, value = desc.partition("=")
+            if separator:
+                read_group_description[key] = value
         for key in ["basecall_model", "runid"]:
-            if key not in read_group_description:
-                log.error(f"'{key}' is missing from the DS tag of the read group in the BAM header of {file_path}")
+            if not read_group_description.get(key):
+                log.error(f"'{key}' is missing, has no '=' or has an empty value in the DS tag of the read group "
+                          f"in the BAM header of {file_path}")
                 exit(1)
         basecall_model = read_group_description["basecall_model"]
         run_id = read_group_description["runid"]

@@ -189,6 +189,12 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
             ("no PU", "ONT", {"ID": "x", "PL": "ONT", "DS": ont_ds, "SM": "s"}, "PU"),
             ("ONT without DS", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "SM": "s"}, "DS"),
             ("ONT DS without runid", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model=m", "SM": "s"}, "runid"),
+            ("ONT DS runid without =", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model=m runid", "SM": "s"}, "runid"),
+            ("ONT DS runid empty", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model=m runid=", "SM": "s"}, "runid"),
+            ("ONT DS basecall_model without =", "ONT",
+             {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model runid=abc", "SM": "s"}, "basecall_model"),
+            ("ONT DS basecall_model empty", "ONT",
+             {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model= runid=abc", "SM": "s"}, "basecall_model"),
             ("ONT without al, SM and LB", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": ont_ds}, "LB"),
             ("PACBIO without SM and LB", "PACBIO", {"ID": "x", "PL": "PACBIO", "PU": "pu"}, "LB"),
         ]

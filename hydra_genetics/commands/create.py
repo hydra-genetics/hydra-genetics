@@ -452,8 +452,8 @@ class CreateInputFiles(object):
             # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
             # so a pre-existing-file conflict here fails fast without having already modified other outputs,
             # and so the file always exists afterwards -- including when every sample gets excluded below.
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force,
-                                       self.outdir)
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.outdir, self.post_file_modifier,
+                                       self.force)
             if len(file_dict) == 0:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -516,10 +516,7 @@ class CreateInputFiles(object):
                                                                               'machine': machine_id,
                                                                               'barcode': barcode}}}}
 
-        samples_file_name = "samples.tsv"
-        if self.post_file_modifier is not None:
-            samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
-        samples_file_name = os.path.join(self.outdir, samples_file_name)
+        samples_file_name = _output_path(self.outdir, "samples", self.post_file_modifier)
         if os.path.isfile(samples_file_name):
             if not self.force:
                 log.warn("File exists {} and force wasn't used".format(samples_file_name))
@@ -541,10 +538,7 @@ class CreateInputFiles(object):
                 elif self.tc is not None:
                     row_data.append(self.tc)
                 output.write("\n{}".format("\t".join(map(lambda x: str(x), row_data))))
-        units_file_name = "units.tsv"
-        if self.post_file_modifier is not None:
-            units_file_name = "units_{}.tsv".format(self.post_file_modifier)
-        units_file_name = os.path.join(self.outdir, units_file_name)
+        units_file_name = _output_path(self.outdir, "units", self.post_file_modifier)
         if os.path.isfile(units_file_name):
             if not self.force:
                 log.warn("File exists {} and force wasn't used".format(units_file_name))
@@ -609,7 +603,16 @@ class CreateInputFiles(object):
                                                          s_adapters] + extra_data))
 
 
-def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifier=None, force=False, outdir=None):
+def _output_path(outdir, prefix, post_file_modifier=None, suffix=".tsv"):
+    """
+    Path of an output file inside outdir: <prefix>[_<post_file_modifier>]<suffix>,
+    e.g. samples.tsv, units_run1.tsv or excluded_samples_run1_mqc.tsv.
+    """
+    name = prefix if post_file_modifier is None else "{}_{}".format(prefix, post_file_modifier)
+    return os.path.join(outdir, name + suffix)
+
+
+def write_excluded_samples_mqc(excluded_samples, min_file_size, outdir, post_file_modifier=None, force=False):
     """
     Writes a MultiQC custom-content file listing samples excluded by --min-file-size, shared by
     CreateInputFiles (fastq, size summed per sample) and CreateLongReadInputFiles (BAM, same idea).
@@ -618,15 +621,11 @@ def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifi
 
     :param excluded_samples: list of (sample, total_size_bytes) tuples
     :param min_file_size: the --min-file-size threshold that was in effect
+    :param outdir: existing directory where the file is written
     :param post_file_modifier: optional string appended to the output filename, matches samples.tsv/units.tsv
     :param force: overwrite an existing file instead of refusing
-    :param outdir: optional directory where the file is written (default: current directory)
     """
-    excluded_samples_file_name = "excluded_samples_mqc.tsv"
-    if post_file_modifier is not None:
-        excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(post_file_modifier)
-    if outdir:
-        excluded_samples_file_name = os.path.join(outdir, excluded_samples_file_name)
+    excluded_samples_file_name = _output_path(outdir, "excluded_samples", post_file_modifier, "_mqc.tsv")
     if os.path.isfile(excluded_samples_file_name):
         if not force:
             log.warning("File exists {} and force wasn't used".format(excluded_samples_file_name))
@@ -818,8 +817,8 @@ class CreateLongReadInputFiles(object):
             # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
             # so a pre-existing-file conflict here fails fast without having already modified other outputs,
             # and so the file always exists afterwards -- including when every sample gets excluded below.
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force,
-                                       self.outdir)
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.outdir, self.post_file_modifier,
+                                       self.force)
             if units_df.empty:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -837,11 +836,7 @@ class CreateLongReadInputFiles(object):
             log.warning("The RG information is the same in multiple BAM files."
                         "Consider merging bam files with the same read groups")
 
-        samples_file_name = "samples.tsv"
-        if self.post_file_modifier is not None:
-            samples_file_name = "samples_{}.tsv".format(
-                self.post_file_modifier)
-        samples_file_name = os.path.join(self.outdir, samples_file_name)
+        samples_file_name = _output_path(self.outdir, "samples", self.post_file_modifier)
         if os.path.isfile(samples_file_name):
             if not self.force:
                 log.warning("File exists {} and force wasn't used".format(
@@ -876,10 +871,7 @@ class CreateLongReadInputFiles(object):
         samples_df.sort_values(by="sample", inplace=True)
         samples_df.to_csv(samples_file_name, index=False, sep='\t')
 
-        units_file_name = "units.tsv"
-        if self.post_file_modifier is not None:
-            units_file_name = "units_{}.tsv".format(self.post_file_modifier)
-        units_file_name = os.path.join(self.outdir, units_file_name)
+        units_file_name = _output_path(self.outdir, "units", self.post_file_modifier)
         if os.path.isfile(units_file_name):
             if not self.force:
                 log.warning("File exists {} and force wasn't used".format(units_file_name))

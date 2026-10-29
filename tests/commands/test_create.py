@@ -125,6 +125,22 @@ class TestCreateInputFiles(unittest.TestCase):
         for file_name in ["samples.tsv", "units.tsv", "excluded_samples_mqc.tsv"]:
             self.assertTrue(os.path.exists(os.path.join(new_outdir, file_name)), file_name)
 
+    def test_init_existing_file_in_outdir_requires_force(self):
+        kwargs = dict(directory=[self.fastq_dir], outdir=self.out_dir, read_number_regex=r"_R([12]{1})[_.]")
+        CreateInputFiles(**kwargs).init()
+        units_path = os.path.join(self.out_dir, "units.tsv")
+        with open(units_path, "w") as fh:
+            fh.write("sentinel")
+
+        with self.assertRaises(SystemExit):
+            CreateInputFiles(**kwargs).init()
+        with open(units_path) as fh:
+            self.assertEqual(fh.read(), "sentinel")
+
+        CreateInputFiles(force=True, **kwargs).init()
+        with open(units_path) as fh:
+            self.assertNotEqual(fh.read(), "sentinel")
+
     def test_init_relative_directory_gives_absolute_paths_in_units(self):
         original_cwd = os.getcwd()
         os.chdir(self.test_dir)

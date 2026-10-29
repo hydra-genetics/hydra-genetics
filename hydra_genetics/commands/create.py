@@ -1038,7 +1038,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
     :type default_barcode: string
     :param number_of_reads: number of reads that will be used to create consensus barcode
     :type number_of_reads: integer
-    :param: warning_threshold: raise a warning for char with lower occurences this value
+    :param: warning_threshold: raise a warning for char with lower occurrence than this value
     :type warning_threshold: float
     :param compare_first_and_last_read: compare first read with last read to detect merged lanes or flowcells
 
@@ -1060,7 +1060,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
 
     def count_bases(data, barcode, length):
         """
-        iterate over barcode and increate data counter
+        iterate over barcode and increase data counter
 
         :param data: data structure representing each position in the barcode,
                      ex [[{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} ...]
@@ -1100,7 +1100,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
 
     def create_barcode(data, length, number_of_reads, warning_threshold=0.9):
         """
-        from data a barcode will be generate. Warnings will be raised for consensus chars that have a lower occurences then
+        from data a barcode will be generated. Warnings will be raised for consensus chars that have a lower occurrence than
         the provided threshold.
 
         :param data: data structure representing each position in the barcode,
@@ -1110,7 +1110,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         :type length: integer
         :param number_of_reads: number of reads that have been use to create data
         :type number_of_reads: integer
-        :param: warning_threshold: raise a warning for char with lower occurences this value
+        :param: warning_threshold: raise a warning for char with lower occurrence than this value
         :type warning_threshold: float
 
         :return: consensus barcode
@@ -1120,10 +1120,10 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         for i in range(length):
             max_base = max(data[i], key=data[i].get)
             if list(data[i].values()).count(data[i][max_base]) > 1:
-                raise Exception("Multiple base with same occurences: {}. UNABLE to handle exiting!".format(data[i]))
+                raise Exception("Multiple bases with same occurrence: {}. UNABLE to handle, exiting!".format(data[i]))
             max_base_n = data[i][max_base]
             if max_base_n / number_of_reads < warning_threshold:
-                logging.warning('Consensus base {} occurences {:.1%} at position {} in barcode, file {}'.
+                logging.warning('Consensus base {} occurrence {:.1%} at position {} in barcode, file {}'.
                                 format(max_base, max_base_n / number_of_reads, i, file_path))
             barcode += max_base
         return barcode
@@ -1141,7 +1141,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         if len(user_input) == 0:
             raise Exception("No input entered!!!")
         if '_' in user_input:
-            logging.warning("Replacing all occurences of '_' with '-' in {}".format(user_input))
+            logging.warning("Replacing all occurrences of '_' with '-' in {}".format(user_input))
             user_input = user_input.replace("_", "-")
         return user_input
 

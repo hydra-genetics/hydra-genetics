@@ -112,6 +112,66 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
         finally:
             os.chdir(original_cwd)
 
+    def test_init_writes_files_to_outdir_not_cwd(self):
+        multi_sample_dir = os.path.join(self.test_dir, "pacbio_multi_outdir")
+        os.makedirs(multi_sample_dir)
+        for file_name in ["m84010_220919_232145_s1.hifi_reads.bam",
+                          "m84011_220902_175841_s1.hifi_reads.bam"]:
+            shutil.copy(os.path.join(self.src_pacbio_bam_dir, file_name), multi_sample_dir)
+
+        original_cwd = os.getcwd()
+        cwd_dir = tempfile.mkdtemp()
+        os.chdir(cwd_dir)
+        try:
+            creator = CreateLongReadInputFiles(
+                directory=[multi_sample_dir], outdir=self.out_dir, platform="PACBIO", min_file_size=140000)
+            creator.init()
+        finally:
+            os.chdir(original_cwd)
+        try:
+            for file_name in ["samples.tsv", "units.tsv", "excluded_samples_mqc.tsv"]:
+                self.assertTrue(os.path.exists(os.path.join(self.out_dir, file_name)), file_name)
+            self.assertEqual(os.listdir(cwd_dir), [])
+        finally:
+            shutil.rmtree(cwd_dir)
+
+    def test_init_creates_missing_outdir(self):
+        new_outdir = os.path.join(self.out_dir, "does", "not", "exist")
+        creator = CreateLongReadInputFiles(
+            directory=[self.pacbio_test_dir], outdir=new_outdir, platform="PACBIO", min_file_size=1)
+        creator.init()
+        for file_name in ["samples.tsv", "units.tsv", "excluded_samples_mqc.tsv"]:
+            self.assertTrue(os.path.exists(os.path.join(new_outdir, file_name)), file_name)
+
+    def test_init_existing_file_in_outdir_requires_force(self):
+        kwargs = dict(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO")
+        CreateLongReadInputFiles(**kwargs).init()
+        units_path = os.path.join(self.out_dir, "units.tsv")
+        with open(units_path, "w") as fh:
+            fh.write("sentinel")
+
+        with self.assertRaises(SystemExit):
+            CreateLongReadInputFiles(**kwargs).init()
+        with open(units_path) as fh:
+            self.assertEqual(fh.read(), "sentinel")
+
+        CreateLongReadInputFiles(force=True, **kwargs).init()
+        with open(units_path) as fh:
+            self.assertNotEqual(fh.read(), "sentinel")
+
+    def test_init_relative_directory_gives_absolute_paths_in_units(self):
+        original_cwd = os.getcwd()
+        os.chdir(self.test_dir)
+        try:
+            creator = CreateLongReadInputFiles(directory=["pacbio"], outdir=self.out_dir, platform="PACBIO")
+            creator.init()
+        finally:
+            os.chdir(original_cwd)
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t")
+        for path in units_df["bam"]:
+            self.assertTrue(os.path.isabs(path), path)
+            self.assertTrue(os.path.isfile(path), path)
+
     def test_init_pacbio_bams_min_file_size_excludes_all(self):
         multi_sample_dir = os.path.join(self.test_dir, "pacbio_all_excluded")
         os.makedirs(multi_sample_dir)

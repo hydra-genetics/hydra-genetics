@@ -14,12 +14,12 @@ from hydra_genetics.utils.misc import merge
 from hydra_genetics.utils.io.reference import fetch_reference_data, validate_reference_data
 
 
-@click.group("references", short_help="setup/validate reference files")
+@click.group("references", short_help="set up/validate reference files")
 def references():
     pass
 
 
-@references.command(short_help="make sure that all reference file exist and are valid")
+@references.command(short_help="make sure that all reference files exist and are valid")
 @click.option(
     "-c",
     "--config-file",

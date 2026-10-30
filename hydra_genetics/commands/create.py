@@ -395,6 +395,8 @@ class CreateInputFiles(object):
         elif self.data_json or self.data_columns:
             log.error("Both --data-json and --data-columns need to be specified at the same time, not only one of them.")
         for d in self.directory:
+            # units.tsv is written to --outdir, so input paths must not depend on the current directory
+            d = os.path.abspath(d)
             dir_files_found = 0
             log.info(f"Dir: %s" % d)
             for f in glob.glob('%s/**/*.fastq.gz' % d, recursive=True):
@@ -435,6 +437,8 @@ class CreateInputFiles(object):
                 if len(file_dict[sample][files]) % 2 != 0:
                     raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
 
+        os.makedirs(self.outdir, exist_ok=True)
+
         excluded_samples = []
         if self.min_file_size is not None:
             for sample in list(file_dict):
@@ -452,7 +456,8 @@ class CreateInputFiles(object):
             # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
             # so a pre-existing-file conflict here fails fast without having already modified other outputs,
             # and so the file always exists afterwards -- including when every sample gets excluded below.
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.outdir, self.post_file_modifier,
+                                       self.force)
             if len(file_dict) == 0:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -515,9 +520,7 @@ class CreateInputFiles(object):
                                                                               'machine': machine_id,
                                                                               'barcode': barcode}}}}
 
-        samples_file_name = "samples.tsv"
-        if self.post_file_modifier is not None:
-            samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
+        samples_file_name = _output_path(self.outdir, "samples", self.post_file_modifier)
         if os.path.isfile(samples_file_name):
             if not self.force:
                 log.warn("File exists {} and force wasn't used".format(samples_file_name))
@@ -539,9 +542,7 @@ class CreateInputFiles(object):
                 elif self.tc is not None:
                     row_data.append(self.tc)
                 output.write("\n{}".format("\t".join(map(lambda x: str(x), row_data))))
-        units_file_name = "units.tsv"
-        if self.post_file_modifier is not None:
-            units_file_name = "units_{}.tsv".format(self.post_file_modifier)
+        units_file_name = _output_path(self.outdir, "units", self.post_file_modifier)
         if os.path.isfile(units_file_name):
             if not self.force:
                 log.warn("File exists {} and force wasn't used".format(units_file_name))
@@ -606,7 +607,16 @@ class CreateInputFiles(object):
                                                          s_adapters] + extra_data))
 
 
-def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifier=None, force=False):
+def _output_path(outdir, prefix, post_file_modifier=None, suffix=".tsv"):
+    """
+    Path of an output file inside outdir: <prefix>[_<post_file_modifier>]<suffix>,
+    e.g. samples.tsv, units_run1.tsv or excluded_samples_run1_mqc.tsv.
+    """
+    name = prefix if post_file_modifier is None else "{}_{}".format(prefix, post_file_modifier)
+    return os.path.join(outdir, name + suffix)
+
+
+def write_excluded_samples_mqc(excluded_samples, min_file_size, outdir, post_file_modifier=None, force=False):
     """
     Writes a MultiQC custom-content file listing samples excluded by --min-file-size, shared by
     CreateInputFiles (fastq, size summed per sample) and CreateLongReadInputFiles (BAM, same idea).
@@ -615,12 +625,11 @@ def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifi
 
     :param excluded_samples: list of (sample, total_size_bytes) tuples
     :param min_file_size: the --min-file-size threshold that was in effect
+    :param outdir: existing directory where the file is written
     :param post_file_modifier: optional string appended to the output filename, matches samples.tsv/units.tsv
     :param force: overwrite an existing file instead of refusing
     """
-    excluded_samples_file_name = "excluded_samples_mqc.tsv"
-    if post_file_modifier is not None:
-        excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(post_file_modifier)
+    excluded_samples_file_name = _output_path(outdir, "excluded_samples", post_file_modifier, "_mqc.tsv")
     if os.path.isfile(excluded_samples_file_name):
         if not force:
             log.warning("File exists {} and force wasn't used".format(excluded_samples_file_name))
@@ -733,6 +742,8 @@ class CreateLongReadInputFiles(object):
 
         file_list = []
         for d in self.directory:
+            # units.tsv is written to --outdir, so input paths must not depend on the current directory
+            d = os.path.abspath(d)
             dir_files_found = 0
             log.info(f"Dir: {d}")
             for f in glob.glob(f"{d}/**/*.bam", recursive=True):
@@ -798,6 +809,8 @@ class CreateLongReadInputFiles(object):
 
         units_df = pd.DataFrame(units_dict)
 
+        os.makedirs(self.outdir, exist_ok=True)
+
         excluded_samples = []
         if self.min_file_size is not None:
             total_size_by_sample = units_df["bam"].map(os.path.getsize).groupby(units_df["sample"]).sum()
@@ -812,7 +825,8 @@ class CreateLongReadInputFiles(object):
             # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
             # so a pre-existing-file conflict here fails fast without having already modified other outputs,
             # and so the file always exists afterwards -- including when every sample gets excluded below.
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.outdir, self.post_file_modifier,
+                                       self.force)
             if units_df.empty:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -830,10 +844,7 @@ class CreateLongReadInputFiles(object):
             log.warning("The RG information is the same in multiple BAM files."
                         "Consider merging bam files with the same read groups")
 
-        samples_file_name = "samples.tsv"
-        if self.post_file_modifier is not None:
-            samples_file_name = "samples_{}.tsv".format(
-                self.post_file_modifier)
+        samples_file_name = _output_path(self.outdir, "samples", self.post_file_modifier)
         if os.path.isfile(samples_file_name):
             if not self.force:
                 log.warning("File exists {} and force wasn't used".format(
@@ -868,9 +879,7 @@ class CreateLongReadInputFiles(object):
         samples_df.sort_values(by="sample", inplace=True)
         samples_df.to_csv(samples_file_name, index=False, sep='\t')
 
-        units_file_name = "units.tsv"
-        if self.post_file_modifier is not None:
-            units_file_name = "units_{}.tsv".format(self.post_file_modifier)
+        units_file_name = _output_path(self.outdir, "units", self.post_file_modifier)
         if os.path.isfile(units_file_name):
             if not self.force:
                 log.warning("File exists {} and force wasn't used".format(units_file_name))
@@ -1053,7 +1062,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
     :type default_barcode: string
     :param number_of_reads: number of reads that will be used to create consensus barcode
     :type number_of_reads: integer
-    :param: warning_threshold: raise a warning for char with lower occurences this value
+    :param: warning_threshold: raise a warning for char with lower occurrence than this value
     :type warning_threshold: float
     :param compare_first_and_last_read: compare first read with last read to detect merged lanes or flowcells
 
@@ -1075,7 +1084,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
 
     def count_bases(data, barcode, length):
         """
-        iterate over barcode and increate data counter
+        iterate over barcode and increase data counter
 
         :param data: data structure representing each position in the barcode,
                      ex [[{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} ...]
@@ -1115,7 +1124,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
 
     def create_barcode(data, length, number_of_reads, warning_threshold=0.9):
         """
-        from data a barcode will be generate. Warnings will be raised for consensus chars that have a lower occurences then
+        from data a barcode will be generated. Warnings will be raised for consensus chars that have a lower occurrence than
         the provided threshold.
 
         :param data: data structure representing each position in the barcode,
@@ -1125,7 +1134,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         :type length: integer
         :param number_of_reads: number of reads that have been use to create data
         :type number_of_reads: integer
-        :param: warning_threshold: raise a warning for char with lower occurences this value
+        :param: warning_threshold: raise a warning for char with lower occurrence than this value
         :type warning_threshold: float
 
         :return: consensus barcode
@@ -1135,10 +1144,10 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         for i in range(length):
             max_base = max(data[i], key=data[i].get)
             if list(data[i].values()).count(data[i][max_base]) > 1:
-                raise Exception("Multiple base with same occurences: {}. UNABLE to handle exiting!".format(data[i]))
+                raise Exception("Multiple bases with same occurrence: {}. UNABLE to handle, exiting!".format(data[i]))
             max_base_n = data[i][max_base]
             if max_base_n / number_of_reads < warning_threshold:
-                logging.warning('Consensus base {} occurences {:.1%} at position {} in barcode, file {}'.
+                logging.warning('Consensus base {} occurrence {:.1%} at position {} in barcode, file {}'.
                                 format(max_base, max_base_n / number_of_reads, i, file_path))
             barcode += max_base
         return barcode
@@ -1156,7 +1165,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         if len(user_input) == 0:
             raise Exception("No input entered!!!")
         if '_' in user_input:
-            logging.warning("Replacing all occurences of '_' with '-' in {}".format(user_input))
+            logging.warning("Replacing all occurrences of '_' with '-' in {}".format(user_input))
             user_input = user_input.replace("_", "-")
         return user_input
 

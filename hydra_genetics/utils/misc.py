@@ -63,9 +63,9 @@ def extract_chr(file, filter_out=["chrM"]):
 
 def replace_dict_variables(config):
     '''
-        Make it possible to defina a variable in a  vaue string using ´{{}}´,
+        Make it possible to define a variable in a value string using ´{{}}´,
         ex {{PROJECT_VARIABLE}}. PROJECT_VARIABLE must exist as a variable
-        in the yaml file and will be used to replace all occurences of
+        in the yaml file and will be used to replace all occurrences of
         {{PROJECT_VARAIBLE}} in the yaml file.
     '''
     def update_dict(temp_config):

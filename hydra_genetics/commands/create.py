@@ -731,14 +731,28 @@ class CreateLongReadInputFiles(object):
             log.error("Both --data-json and --data-columns need to be "
                       "specified at the same time, not only one of them.")
 
-        sample_type = self.sample_type
-        platform = self.platform
-        adapters = self.adapters
-        units_dict = {"sample": [], "type": [], "platform": [], "machine": [],
-                      "processing_unit": [], "barcode": [], "methylation": [],
-                      "bam": []}
-        if adapters is not None:
+        # --data-columns "units" entries are resolved per BAM file. "type", "platform" and "adapter"
+        # replace the command line values, every other entry becomes an extra column.
+        unit_columns = data_columns.get("units", {}) if data_json else {}
+        extra_unit_columns = [c for c in unit_columns if c not in ("type", "platform", "adapter")]
+
+        # Columns in output order
+        units_dict = {"sample": [], "type": [], "platform": [], "machine": [], "processing_unit": []}
+        if self.platform == "ONT":
+            units_dict["run_id"] = []
+        units_dict["barcode"] = []
+        units_dict["methylation"] = []
+        if self.platform == "ONT":
+            units_dict["basecalling_model"] = []
+        units_dict["bam"] = []
+        if self.adapters is not None or "adapter" in unit_columns:
             units_dict["adapter"] = []
+        clashing_columns = [c for c in extra_unit_columns if c in units_dict]
+        if clashing_columns:
+            log.error(f"--data-columns units {clashing_columns} clash with columns that are read from the BAM files")
+            exit(1)
+        for column in extra_unit_columns:
+            units_dict[column] = []
 
         file_list = []
         for d in self.directory:
@@ -761,51 +775,33 @@ class CreateLongReadInputFiles(object):
         log.info("Processing found BAM files, extracting run information:")
         for bam_file in file_list:
             log.info(f"\t - {bam_file} for run information")
-            rg_dict = extract_bam_information(bam_file, self.default_barcode,
-                                              platform)
+            rg_dict = extract_bam_information(bam_file, self.default_barcode, self.platform)
             sample = rg_dict["sample"]
-            units_dict["sample"].append(sample)
-            if data_json and 'units' in data_columns:
-                extra_columns = list(data_columns['units'].keys())
-                if "platform" in extra_columns:
-                    value = data_columns['units']['platform']
-                    platform = extract_value(value[1][2:], value[0],
-                                             data_json['samples'][sample])
-                    units_dict["platform"].append(platform)
-                else:
-                    units_dict["platform"].append(platform)
-                if "type" in extra_columns:
-                    value = data_columns['units']['type']
-                    units_dict["type"] = extract_value(
-                        value[1][2:], value[0], data_json['samples'][sample])
-                else:
-                    units_dict["type"].append(sample_type)
-                if "adapters" in extra_columns:
-                    value = data_columns['units']['adapter']
-                    units_dict["adapter"] = extract_value(
-                        value[1][2:], value[0], data_json['samples'][sample])
-                else:
-                    if adapters is not None:
-                        units_dict["adapter"].append(adapters)
-            else:
-                units_dict["type"].append(sample_type)
-                units_dict["platform"].append(platform)
-                if adapters is not None:
-                    units_dict["adapter"].append(adapters)
+            values = {column: extract_value(path[2:], default, data_json["samples"][sample])
+                      for column, (default, path) in unit_columns.items()}
 
+            # The platform must match the PL tag of the BAM file, which extract_bam_information has checked
+            platform = values.get("platform", self.platform)
+            if platform != self.platform:
+                log.error(f"--data-json sets platform '{platform}' for sample {sample}, "
+                          f"but {bam_file} has platform {self.platform}")
+                exit(1)
+
+            units_dict["sample"].append(sample)
+            units_dict["type"].append(values.get("type", self.sample_type))
+            units_dict["platform"].append(platform)
             units_dict["machine"].append(rg_dict["machine"])
             units_dict["processing_unit"].append(rg_dict["pu"])
             units_dict["barcode"].append(rg_dict["barcode"])
-            units_dict["bam"].append(bam_file)
             units_dict["methylation"].append(rg_dict["methylation"])
-
-            if platform == 'ONT':
-                if "basecalling_model" not in units_dict.keys():
-                    units_dict["basecalling_model"] = []
-                    units_dict["run_id"] = []
-
-                units_dict["basecalling_model"].append(rg_dict["basecalling_model"])
+            if self.platform == "ONT":
                 units_dict["run_id"].append(rg_dict["run_id"])
+                units_dict["basecalling_model"].append(rg_dict["basecalling_model"])
+            units_dict["bam"].append(bam_file)
+            if "adapter" in units_dict:
+                units_dict["adapter"].append(values.get("adapter", self.adapters))
+            for column in extra_unit_columns:
+                units_dict[column].append(values[column])
 
         units_df = pd.DataFrame(units_dict)
 
@@ -834,7 +830,7 @@ class CreateLongReadInputFiles(object):
 
         # Check for duplicated rows which indicate bam files with the same read group info
         # This triggers a warning that these bam files with the same could be merged
-        if platform == 'ONT':
+        if self.platform == 'ONT':
             cols_to_check = ["sample", "type", "run_id", "platform", "machine",
                              "processing_unit", "barcode"]
         else:
@@ -886,36 +882,6 @@ class CreateLongReadInputFiles(object):
                 exit(1)
             else:
                 log.warning("File exists {} overwriting!!!".format(units_file_name))
-
-        if platform == "ONT":
-            col_order = ["sample", "type", "platform", "machine", "processing_unit",
-                         "run_id", "barcode", "methylation",
-                         "basecalling_model", "bam"]
-            units_df = units_df[col_order]
-
-        extra_header_columns = []
-        if data_columns and 'units' in data_columns:
-            extra_header_columns = list(data_columns['units'].keys())
-            if 'type' in extra_header_columns:
-                extra_header_columns.remove("type")
-            if 'platform' in extra_header_columns:
-                extra_header_columns.remove("platform")
-            if 'adapter' in extra_header_columns:
-                extra_header_columns.remove("adapter")
-
-        if len(extra_header_columns) > 0:
-            extra_units_cols_header = ["sample"] + extra_header_columns
-            extra_cols = []
-            extra_columns = list(data_columns['units'].keys())
-            for sample in samples_series:
-                extra_data = []
-                for column in extra_columns:
-                    value = data_columns['units'][column]
-                    extra_data.append(extract_value(value[1][2:], value[0], data_json['samples'][sample]))
-                extra_cols.append(extra_data)
-
-            extra_unit_cols_df = pd.DataFrame(extra_cols, columns=extra_units_cols_header)
-            units_df = pd.merge(units_df, extra_unit_cols_df, on="sample", validate="one_to_one")
 
         units_df.sort_values(by="sample", inplace=True)
         units_df.to_csv(units_file_name, index=False, sep='\t', na_rep='NA')

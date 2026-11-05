@@ -327,18 +327,24 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
             creator.init()
         self.assertFalse(os.path.exists(os.path.join(self.out_dir, "units.tsv")))
 
+    def test_init_data_json_platform_matching_bam(self):
+        CreateLongReadInputFiles(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO",
+                                 **self._data_json_args({"HG004": {"platform": "PACBIO"}}, ["platform:PACBIO"])).init()
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t")
+        self.assertEqual(units_df["platform"].tolist(), ["PACBIO"])
+
     def test_init_ont_data_json_extra_units_column(self):
-        samples = {"sample1": {"type": "T", "kit": "LSK114"}, "barcode01": {}}
+        samples = {"sample1": {"type": "T", "kit": "LSK114", "adapter": "CCCC"}, "barcode01": {}}
 
         CreateLongReadInputFiles(directory=[self.ont_test_dir], outdir=self.out_dir, platform="ONT",
-                                 **self._data_json_args(samples, ["type:N", "kit:NA"])).init()
+                                 **self._data_json_args(samples, ["type:N", "kit:NA", "adapter:AAAA"])).init()
 
         units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t", keep_default_na=False)
         self.assertEqual(list(units_df.columns), ["sample", "type", "platform", "machine", "processing_unit", "run_id",
-                                                  "barcode", "methylation", "basecalling_model", "bam", "kit"])
+                                                  "barcode", "methylation", "basecalling_model", "bam", "adapter", "kit"])
         units_df = units_df.set_index("sample")
-        self.assertEqual(units_df.loc["sample1", ["type", "kit"]].tolist(), ["T", "LSK114"])
-        self.assertEqual(units_df.loc["barcode01", ["type", "kit"]].tolist(), ["N", "NA"])
+        self.assertEqual(units_df.loc["sample1", ["type", "kit", "adapter"]].tolist(), ["T", "LSK114", "CCCC"])
+        self.assertEqual(units_df.loc["barcode01", ["type", "kit", "adapter"]].tolist(), ["N", "NA", "AAAA"])
 
     def test_init_data_json_units_column_clashing_with_bam_column(self):
         creator = CreateLongReadInputFiles(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO",

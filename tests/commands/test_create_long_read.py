@@ -1,3 +1,4 @@
+import json
 import unittest
 import os
 import shutil
@@ -281,6 +282,69 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
             rg_dict = extract_bam_information(path, platform="PACBIO")
         self.assertEqual(rg_dict["methylation"], "No")
         self.assertIn(path, logs.output[0])
+
+    def _data_json_args(self, samples, unit_columns):
+        """Write --data-json/--data-columns files, return them as CreateLongReadInputFiles kwargs."""
+        data_json = os.path.join(self.test_dir, "data.json")
+        data_columns = os.path.join(self.test_dir, "columns.json")
+        with open(data_json, "w") as fh:
+            json.dump({"samples": {sample: {"settings": settings} for sample, settings in samples.items()}}, fh)
+        with open(data_columns, "w") as fh:
+            json.dump({"units": ["samples.{SAMPLE}.settings." + column for column in unit_columns]}, fh)
+        return {"data_json": data_json, "data_columns": data_columns}
+
+    def test_init_pacbio_data_json_units_columns(self):
+        bam_dir = os.path.join(self.test_dir, "pacbio_data_json")
+        os.makedirs(bam_dir)
+        for file_name in ["m84010_220919_232145_s1.hifi_reads.bam",   # HG004
+                          "m84010_220919_235306_s2.hifi_reads.bam",   # HG003
+                          "m84011_220902_175841_s1.hifi_reads.bam"]:  # HG002
+            shutil.copy(os.path.join(self.src_pacbio_bam_dir, file_name), bam_dir)
+        # A second SMRT cell for HG002
+        self._write_bam({"ID": "x", "PL": "PACBIO", "PU": "second_cell", "SM": "HG002"},
+                        name=os.path.join("pacbio_data_json", "second_cell.bam"))
+        samples = {"HG002": {"type": "T", "kit": "SPRQ", "adapter": "CCCC"},
+                   "HG003": {"type": "N", "kit": "SPRQ"},
+                   "HG004": {"type": "R"}}
+
+        CreateLongReadInputFiles(directory=[bam_dir], outdir=self.out_dir, platform="PACBIO",
+                                 **self._data_json_args(samples, ["type:N", "kit:NA", "adapter:AAAA"])).init()
+
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t", keep_default_na=False)
+        self.assertEqual(sorted(units_df["sample"]), ["HG002", "HG002", "HG003", "HG004"])
+        self.assertEqual(list(units_df.columns)[-3:], ["bam", "adapter", "kit"])
+        for _, row in units_df.iterrows():
+            expected = samples[row["sample"]]
+            self.assertEqual(row["type"], expected["type"])
+            self.assertEqual(row["platform"], "PACBIO")
+            self.assertEqual(row["kit"], expected.get("kit", "NA"))
+            self.assertEqual(row["adapter"], expected.get("adapter", "AAAA"))
+
+    def test_init_data_json_platform_must_match_bam(self):
+        creator = CreateLongReadInputFiles(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO",
+                                           **self._data_json_args({"HG004": {"platform": "ONT"}}, ["platform:PACBIO"]))
+        with self.assertRaises(SystemExit):
+            creator.init()
+        self.assertFalse(os.path.exists(os.path.join(self.out_dir, "units.tsv")))
+
+    def test_init_ont_data_json_extra_units_column(self):
+        samples = {"sample1": {"type": "T", "kit": "LSK114"}, "barcode01": {}}
+
+        CreateLongReadInputFiles(directory=[self.ont_test_dir], outdir=self.out_dir, platform="ONT",
+                                 **self._data_json_args(samples, ["type:N", "kit:NA"])).init()
+
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t", keep_default_na=False)
+        self.assertEqual(list(units_df.columns), ["sample", "type", "platform", "machine", "processing_unit", "run_id",
+                                                  "barcode", "methylation", "basecalling_model", "bam", "kit"])
+        units_df = units_df.set_index("sample")
+        self.assertEqual(units_df.loc["sample1", ["type", "kit"]].tolist(), ["T", "LSK114"])
+        self.assertEqual(units_df.loc["barcode01", ["type", "kit"]].tolist(), ["N", "NA"])
+
+    def test_init_data_json_units_column_clashing_with_bam_column(self):
+        creator = CreateLongReadInputFiles(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO",
+                                           **self._data_json_args({"HG004": {}}, ["barcode:NNNN"]))
+        with self.assertRaises(SystemExit):
+            creator.init()
 
 
 if __name__ == "__main__":

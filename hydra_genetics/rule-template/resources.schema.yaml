@@ -33,7 +33,7 @@ properties:
 
 {% endif -%}
 
-# Entry added using Hydra-Genetics CLI - please move it into alphabetically sorted order
+# Entry added using hydra-genetics CLI - please move it into alphabetically sorted order
   {{ name }}:
     type: object
     description: resource definitions for {{ name }}

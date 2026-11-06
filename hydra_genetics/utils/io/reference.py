@@ -307,7 +307,7 @@ def update_needed_for_entry(item, parent_dir="./"):
     """
         Checks if entry needs to be update, i.e checksum has change or the file/folder doesn't exist
 
-        Patameters:
+        Parameters:
             item (dict): see top part of this page
             parent_dir (string): path to where content will be saved
 
@@ -414,7 +414,7 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
             compress_folder (string): name of folder that should be moved.
 
         Returns:
-            bool: if extraction was succefull
+            bool: if extraction was successful
     """
     extracted_content_path = f"{temp_content_holder}_extracted"
     if "file" in content_type:

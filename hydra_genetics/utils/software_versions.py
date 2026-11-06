@@ -171,7 +171,7 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
     """
     Function that will look through the config dict to locate
     container definitions. When container information is found the
-    softwares version will be extracted and added to the config.
+    software version will be extracted and added to the config.
 
     Parameters:
     config: dict
@@ -264,7 +264,7 @@ def touch_software_version_file(config, directory="versions/software", file_name
     """
     To be able to pass a proper file list to multiqc the version files need to exist before the dag graph
     is built. And before the dag graph is built we can not guarantee that all images exist on the file system,
-    and therefor we can not use export_software_version_as_file to directly create the actual version files.
+    and therefore we cannot use export_software_version_as_file to directly create the actual version files.
     This function will create all files (empty) that export_software_version_as_file will create.
     NOTE: you need to have the same parameter as with export_software_version_as_file
 

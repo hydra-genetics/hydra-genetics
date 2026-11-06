@@ -74,22 +74,22 @@ fusioncatcher:
 
 ### Resource
 
-Make a copy of the resources file and make adapt the new resource file to match the new clusters system setup, ex:
+Make a copy of the resources file and adapt the new resources file to match the new clusters system setup, ex:
  - partition(s)
  - number of cores
  - memory
 
 ```bash
-cp config/resource.yaml config/resource.miarka.yaml
+cp config/resources.yaml config/resources.miarka.yaml
 ```
 
 Miarka has 6144 Mb per core on the CPU nodes so update all memory requirements to match this. 
 
-If GPU is used change partition to **gpu** and memory_per_cpu to 5000 Mb and the gres command to either:
+If GPU is used change partition to **gpu** and mem_per_cpu to 5000 Mb and the gres command to either:
 
-    * --gres=gres:gpu:2       # 2 GPUs on either GPU node
-    * --gres=gres:gpu:l40s:2  # 2 GPUs on the node with l40 cards
-    * --gres=gres:gpu:a100:2  # 2 GPUs on the node with a100 cards
+* --gres=gpu:2            # 2 GPUs on either GPU node
+* --gres=gpu:l40s:2       # 2 GPUs on the node with l40 cards
+* --gres=gpu:a100:2       # 2 GPUs on the node with a100 cards
 
 ```yaml
 default_resources:
@@ -105,7 +105,7 @@ bwa_mem:
   threads: 8
 
 pbrun_fq2bam:
-  gres: "--gres=gres:gpu:l40s:2"
+  gres: "--gres=gpu:l40s:2"
   mem_mb: 240000
   mem_per_cpu: 5000
   partition: "gpu"
@@ -114,10 +114,13 @@ pbrun_fq2bam:
 
 ### Config files
 
-Make a new config files where all file paths point to the reference directory. Example of new config `config/config.data.hg19.miarka.yaml`.
+Make a new config file where all file paths point to the reference directory. Example of new config `config/config.data.hg19.miarka.yaml`.
 ```yaml
 # Add the following line at the top with the actual absolute path (example /proj/ngi2024001/nobackup/bin/wp1_gms560/design_and_ref_files)
-REFERENCE_DATA: "<EXTRACT_PATH>/>PIPELINE_SHORT_NAME>/design_and_ref_files"
+REFERENCE_DATA: "<EXTRACT_PATH>/<PIPELINE_SHORT_NAME>/design_and_ref_files"
+
+# Use the cluster specific resources file created above, it is loaded by common.smk
+resources: "config/resources.miarka.yaml"
 
 # Adjust config so that all reference files have the {{REFERENCE_DATA}} variable
 # Add potential subfolder so that they match the paths found in the reference yaml files
@@ -129,17 +132,18 @@ reference:
 Adjust the main config file to point at the hydra-genetics modules
 ```yaml
 # Add the following line
-hydra_local_path: "{EXTRACT_PATH}/{PIPELINE_SHORT_NAME}/{TAG_OR_BRANCH}/hydra-genetics"
+hydra_local_path: "<EXTRACT_PATH>/<PIPELINE_SHORT_NAME>/<TAG_OR_BRANCH>/hydra-genetics"
 ```
 
-Add path to local singularities in the main config.yaml file 
+Add path to local singularity images in the main config.yaml file 
 ```bash
 # config/config.yaml
-# Build new python environment if needed and install requirements
+# Build new python environment if needed
 python3.11 -m venv python_venv/
-pip install -r requirements.txt
 # Activate python environment if not already active
 source python_venv/bin/activate
+# Install requirements
+pip install -r requirements.txt
 cp config/config.yaml config/config.yaml.copy
 hydra-genetics prepare-environment container-path-update -c config/config.yaml.copy -n config/config.yaml -p ${PATH_TO_apptainer_cache}
 ```
@@ -160,7 +164,7 @@ default_container: '{{APPTAINER_CACHE}}/hydragenetics__common_1.11.1.sif'
 
 Make a new profile and adjust it to the computer cluster 
 ```bash
-cp profile/marvin/config.yaml profile/miarka/config.yaml
+cp profiles/marvin/config.yaml profiles/miarka/config.yaml
 ```
 
 ```yaml
@@ -202,11 +206,11 @@ Add these line in `rules/common.smk`:
 
 ```py
 from hydra_genetics.utils.misc import get_module_snakefile # Needed for local git
-from hydra_genetics.utils.misc import replace_dict_variables # Used by hydra genetics to obtain the file paths to the files in the config
+from hydra_genetics.utils.misc import replace_dict_variables # Used by hydra-genetics to obtain the file paths to the files in the config
 
 config = replace_dict_variables(config) # Add this after the imports
 ```
 
 ## Add build script to pipeline
 
-Add the build script `build/build_conda.sh` found in `https://github.com/hydra-genetics/hydra-genetics` to the pipeline. This can be placed in a subdirectory of your pipeline call build
+Add the build script `build/build_conda.sh` found in `https://github.com/hydra-genetics/hydra-genetics` to the pipeline. This can be placed in a subdirectory of your pipeline called build

@@ -1,6 +1,6 @@
 # Input functions
 
-Hydra Genetics contains helper functions to compile paths to BAM files depending on your pipeline configuration. These paths are used  by rules in other Hydra Genetics modules that require an aligned BAM file as input.
+hydra-genetics contains helper functions to compile paths to BAM files depending on your pipeline configuration. These paths are used by rules in other hydra-genetics modules that require an aligned BAM file as input.
 
 The functions are located in `hydra_genetics/utils/misc.py`.
 
@@ -181,7 +181,7 @@ A tuple containing:
 
 ### Examples
 
-1. With phaser, no suffix
+1. With phaser
 ```python
 wildcards = types.SimpleNamespace(sample="sample1", type="T")
 config = {"phaser": "whatshap"}
@@ -190,8 +190,8 @@ bam_path, bai_path = get_input_haplotagged_bam(wildcards, config)
 
 # Returns
 (
-    "snv_indels/whatshap_haplotag/sample1_T.bam",
-    "snv_indels/whatshap_haplotag/sample1_T.bam.bai"
+    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam",
+    "snv_indels/whatshap_haplotag/sample1_T.haplotagged.bam.bai"
 )
 ```
 

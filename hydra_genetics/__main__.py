@@ -8,7 +8,14 @@ import sys
 import hydra_genetics.utils
 from hydra_genetics.commands.prep_pipeline_env import environment
 from hydra_genetics.commands.references import references
-from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles, CreateLongReadInputFiles
+from hydra_genetics.commands.create import (
+    DEFAULT_MIN_SNAKEMAKE_VERSION,
+    PipelineCreate,
+    RuleCreate,
+    CreateInputFiles,
+    CreateLongReadInputFiles,
+    next_major_version,
+)
 import rich.console
 import rich.logging
 import rich.traceback
@@ -88,16 +95,25 @@ def validate_wf_name_prompt(ctx, opts, value):
     return value
 
 
+def validate_min_snakemake_version(ctx, opts, value):
+    """Reject a min snakemake version that can not be written to the pipeline requirements"""
+    try:
+        next_major_version(value)
+    except ValueError as e:
+        raise click.BadParameter(str(e))
+    return value
+
+
 def validate_rule_name_prompt(ctx, opts, value):
     """Force the rule name to meet the hydra-core requirements"""
     if value is not None and not re.match(r"^[a-z0-9_]+$", value):
-        click.echo("Invalid command/tool formatting: only lowercase and '_' is allowed.")
+        click.echo("Invalid command/tool formatting: only lowercase letters, digits and '_' are allowed.")
         value = click.prompt(opts.prompt)
         return validate_rule_name_prompt(ctx, opts, value)
     return value
 
 
-@cli.command(short_help="create bare bone project, pipeline or module", context_settings={'show_default': True})
+@cli.command(short_help="create bare-bones project, pipeline or module", context_settings={'show_default': True})
 @click.option(
     "-n",
     "--name",
@@ -111,7 +127,13 @@ def validate_rule_name_prompt(ctx, opts, value):
 @click.option("-a", "--author", prompt=True, required=True, type=str, help="Name of the main author(s)")
 @click.option("-e", "--email", prompt=True, required=True, type=str, help="E-mail(s) of the main author(s)")
 @click.option("--version", type=str, default="0.0.1", help="The initial version number to use")
-@click.option("--min-snakemake-version", type=str, default="6.8.0", help="Min snakemake version")
+@click.option(
+    "--min-snakemake-version",
+    type=str,
+    default=DEFAULT_MIN_SNAKEMAKE_VERSION,
+    callback=validate_min_snakemake_version,
+    help="Min snakemake version, the pipeline will require snakemake >= this version and < the next major version",
+)
 @click.option("-g", "--git-user", prompt=True, required=True, help="User name of main git user(s)")
 @click.option("--no-git", is_flag=True, default=False, help="Do not create git repo")
 @click.option("-f", "--force", is_flag=True, default=False, help="Overwrite output directory if it already exists")
@@ -139,7 +161,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     type=str,
     default=None,
     help="tool that will be used to run the command, if provided it will be used during the naming of the "
-         "rule, ex samtools, optional",
+         "rule, e.g., samtools, optional",
 )
 @click.option(
     "-m",
@@ -148,8 +170,9 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     required=True,
     callback=validate_wf_name_prompt,
     type=str,
-    help="name module/pipeline where rule will be added. Expected folder structure is module_name_or_pipeline/workflow/, "
-         " the rule will be added to a subfolder named rules, env.yaml to a subfolder named envs.")
+    help="name of the module/pipeline where the rule will be added. Expected folder structure is "
+         "module_name_or_pipeline/workflow/, the rule will be added to a subfolder named rules, "
+         "env.yaml to a subfolder named envs.")
 @click.option(
         "-a",
         "--author",
@@ -168,7 +191,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
         "-o",
         "--outdir",
         type=str,
-        help="Output directory for where module is located (default: current dir)")
+        help="Output directory where the module is located (default: current dir)")
 def create_rule(command, tool, module, author, email, outdir):
     rule = RuleCreate(command, module, author, email, tool, outdir)
     rule.init_rule()
@@ -189,13 +212,13 @@ def default_adapter(platform):
     prompt="directory/directories",
     required=True,
     type=str,
-    help="path to dir where fastq-files should be looked for when platform is Illumina."
+    help="path to dir where fastq-files should be looked for when platform is Illumina. "
     "Path to unmapped BAM files when platform is ONT or PACBIO")
 @click.option(
         "-o",
         "--outdir",
         type=str,
-        help="Output directory for where rule will be added (default: current dir)")
+        help="Output directory for the generated files (default: current dir)")
 @click.option(
         "-p",
         "--platform",
@@ -213,19 +236,19 @@ def default_adapter(platform):
         "-s",
         "--sample-regex",
         type=str,
-        help="Regex used find fastq files and to extract samplefrom filename, default '([A-Za-z0-9-]+)_.+.gz$'",
+        help="Regex used to find fastq files and to extract sample from filename, default '([A-Za-z0-9-]+)_.+\\.fastq.gz'",
         default=r"([A-Za-z0-9-]+)_.+\.fastq.gz")
 @click.option(
         "-n",
         "--read-number-regex",
         type=str,
-        help="Regex used to extract read number from filename (note only number value), default '_R([1-2]{1})_001'",
+        help="Regex used to extract read number from filename (note only number value), default '_R([12]{1})_'",
         default="_R([12]{1})_")
 @click.option(
         "-a",
         "--adapters",
         type=str,
-        help="adapter sequence, comma sepearated",
+        help="adapter sequence, comma separated, default: the Illumina TruSeq adapters for Illumina, none for PACBIO/ONT",
         default=lambda: default_adapter(click.get_current_context().params.get("platform", 'Illumina')))
 @click.option(
         "--post-file-modifier",
@@ -261,16 +284,16 @@ def default_adapter(platform):
         default=None)
 @click.option(
         "--validate",
-        help="see if fastq contain multipl runs/lanes by comparing first and last "
-             "read. Note will take time since whole file need to be parsed.",
+        help="see if fastq contain multiple runs/lanes by comparing first and last "
+             "read. Note: this will take time since the whole file needs to be parsed.",
         is_flag=True)
 @click.option(
         "--ask",
-        help="ask user input when inconsistent machine id or flow cell id are found, only asked when --validate is set.",
+        help="ask for user input when inconsistent machine id or flow cell id are found, only asked when --validate is set.",
         is_flag=True)
 @click.option(
         "--th",
-        help="if occurences of a concesuns base in barcode is below this value a warning will be printed",
+        help="if the occurrence of a consensus base in the barcode is below this value a warning will be printed",
         type=float,
         default=0.9)
 @click.option(

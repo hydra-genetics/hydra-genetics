@@ -5,7 +5,7 @@
 # Prepare variables in terminal
 TAG_OR_BRANCH="vX.Y.Z" # eg TAG_OR_BRANCH="v0.18.3"
 PIPELINE_NAME="Your_pipeline_name" # eg PIPELINE_NAME="Twist_Solid"
-PIPELINE_SHORT_NAME="wpX_name" # wg PIPELINE_SHORT_NAME="wp1_gms560"
+PIPELINE_SHORT_NAME="wpX_name" # eg PIPELINE_SHORT_NAME="wp1_gms560"
 USER="username_on_remote_cluster"
 ```
 

@@ -11,3 +11,5 @@ units.tsv
 .idea/
 .vscode/
 hydra_genetics/_version.py
+.DS_Store
+CLAUDE.md

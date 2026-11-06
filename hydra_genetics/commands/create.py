@@ -21,6 +21,25 @@ import hydra_genetics
 
 log = logging.getLogger(__name__)
 
+DEFAULT_MIN_SNAKEMAKE_VERSION = "7.8.0"
+
+
+def next_major_version(version):
+    """
+    Return the next major version of a version string, ex 7.8.0 -> 8
+
+    :param version: version string made of one to three dot separated numbers, ex 7, 7.8 or 7.8.0
+    :type version: string
+
+    :raises ValueError: if version is not one to three dot separated numbers, ex 7.invalid
+
+    :return: next major version
+    :rtype: string
+    """
+    if not re.fullmatch(r"\d+(\.\d+){0,2}", version):
+        raise ValueError(f"Invalid version '{version}', expected MAJOR[.MINOR[.PATCH]], ex 7.8.0")
+    return str(int(version.split(".")[0]) + 1)
+
 
 class PipelineCreate(object):
     """Creates a hydra-genetics pipeline.
@@ -30,14 +49,15 @@ class PipelineCreate(object):
         author (str): Authors name
         email (str): Authors email
         version (str): Version flag. Semantic versioning only. Defaults to `1.0dev`.
-        snakemake_version (str): min snakemake version
+        min_snakemake_version (str): min snakemake version, the generated pipeline requires
+            snakemake >= min_snakemake_version and < the next major version
         git_user: (str) username on github
         no_git (bool): Prevents the creation of a local Git repository for the pipeline. Defaults to False.
         force (bool): Overwrites a given workflow directory with the same name. Defaults to False.
             May the force be with you.
         outdir (str): Path to the local output directory.
     """
-    def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version="6.10.0",
+    def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version=DEFAULT_MIN_SNAKEMAKE_VERSION,
                  git_user=None, no_git=False, force=False, outdir=None):
         self.short_name = name.lower().replace(r"/\s+/", "-").replace("hydra-genetics/", "").replace("/", "-")
         self.name = f"{self.short_name}"
@@ -46,6 +66,7 @@ class PipelineCreate(object):
         self.email = email
         self.version = version
         self.min_snakemake_version = min_snakemake_version
+        self.max_snakemake_version = next_major_version(min_snakemake_version)
         self.git_user = git_user
         self.no_git = no_git
         self.force = force
@@ -395,6 +416,8 @@ class CreateInputFiles(object):
         elif self.data_json or self.data_columns:
             log.error("Both --data-json and --data-columns need to be specified at the same time, not only one of them.")
         for d in self.directory:
+            # units.tsv is written to --outdir, so input paths must not depend on the current directory
+            d = os.path.abspath(d)
             dir_files_found = 0
             log.info(f"Dir: %s" % d)
             for f in glob.glob('%s/**/*.fastq.gz' % d, recursive=True):
@@ -435,6 +458,8 @@ class CreateInputFiles(object):
                 if len(file_dict[sample][files]) % 2 != 0:
                     raise ValueError("Uneven number of files found:\n{}".format(str(file_dict[sample][files])))
 
+        os.makedirs(self.outdir, exist_ok=True)
+
         excluded_samples = []
         if self.min_file_size is not None:
             for sample in list(file_dict):
@@ -452,7 +477,8 @@ class CreateInputFiles(object):
             # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
             # so a pre-existing-file conflict here fails fast without having already modified other outputs,
             # and so the file always exists afterwards -- including when every sample gets excluded below.
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.outdir, self.post_file_modifier,
+                                       self.force)
             if len(file_dict) == 0:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -515,9 +541,7 @@ class CreateInputFiles(object):
                                                                               'machine': machine_id,
                                                                               'barcode': barcode}}}}
 
-        samples_file_name = "samples.tsv"
-        if self.post_file_modifier is not None:
-            samples_file_name = "samples_{}.tsv".format(self.post_file_modifier)
+        samples_file_name = _output_path(self.outdir, "samples", self.post_file_modifier)
         if os.path.isfile(samples_file_name):
             if not self.force:
                 log.warn("File exists {} and force wasn't used".format(samples_file_name))
@@ -539,9 +563,7 @@ class CreateInputFiles(object):
                 elif self.tc is not None:
                     row_data.append(self.tc)
                 output.write("\n{}".format("\t".join(map(lambda x: str(x), row_data))))
-        units_file_name = "units.tsv"
-        if self.post_file_modifier is not None:
-            units_file_name = "units_{}.tsv".format(self.post_file_modifier)
+        units_file_name = _output_path(self.outdir, "units", self.post_file_modifier)
         if os.path.isfile(units_file_name):
             if not self.force:
                 log.warn("File exists {} and force wasn't used".format(units_file_name))
@@ -606,7 +628,16 @@ class CreateInputFiles(object):
                                                          s_adapters] + extra_data))
 
 
-def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifier=None, force=False):
+def _output_path(outdir, prefix, post_file_modifier=None, suffix=".tsv"):
+    """
+    Path of an output file inside outdir: <prefix>[_<post_file_modifier>]<suffix>,
+    e.g. samples.tsv, units_run1.tsv or excluded_samples_run1_mqc.tsv.
+    """
+    name = prefix if post_file_modifier is None else "{}_{}".format(prefix, post_file_modifier)
+    return os.path.join(outdir, name + suffix)
+
+
+def write_excluded_samples_mqc(excluded_samples, min_file_size, outdir, post_file_modifier=None, force=False):
     """
     Writes a MultiQC custom-content file listing samples excluded by --min-file-size, shared by
     CreateInputFiles (fastq, size summed per sample) and CreateLongReadInputFiles (BAM, same idea).
@@ -615,12 +646,11 @@ def write_excluded_samples_mqc(excluded_samples, min_file_size, post_file_modifi
 
     :param excluded_samples: list of (sample, total_size_bytes) tuples
     :param min_file_size: the --min-file-size threshold that was in effect
+    :param outdir: existing directory where the file is written
     :param post_file_modifier: optional string appended to the output filename, matches samples.tsv/units.tsv
     :param force: overwrite an existing file instead of refusing
     """
-    excluded_samples_file_name = "excluded_samples_mqc.tsv"
-    if post_file_modifier is not None:
-        excluded_samples_file_name = "excluded_samples_{}_mqc.tsv".format(post_file_modifier)
+    excluded_samples_file_name = _output_path(outdir, "excluded_samples", post_file_modifier, "_mqc.tsv")
     if os.path.isfile(excluded_samples_file_name):
         if not force:
             log.warning("File exists {} and force wasn't used".format(excluded_samples_file_name))
@@ -722,17 +752,33 @@ class CreateLongReadInputFiles(object):
             log.error("Both --data-json and --data-columns need to be "
                       "specified at the same time, not only one of them.")
 
-        sample_type = self.sample_type
-        platform = self.platform
-        adapters = self.adapters
-        units_dict = {"sample": [], "type": [], "platform": [], "machine": [],
-                      "processing_unit": [], "barcode": [], "methylation": [],
-                      "bam": []}
-        if adapters is not None:
+        # --data-columns "units" entries are resolved per BAM file. "type", "platform" and "adapter"
+        # replace the command line values, every other entry becomes an extra column.
+        unit_columns = data_columns.get("units", {}) if data_json else {}
+        extra_unit_columns = [c for c in unit_columns if c not in ("type", "platform", "adapter")]
+
+        # Columns in output order
+        units_dict = {"sample": [], "type": [], "platform": [], "machine": [], "processing_unit": []}
+        if self.platform == "ONT":
+            units_dict["run_id"] = []
+        units_dict["barcode"] = []
+        units_dict["methylation"] = []
+        if self.platform == "ONT":
+            units_dict["basecalling_model"] = []
+        units_dict["bam"] = []
+        if self.adapters is not None or "adapter" in unit_columns:
             units_dict["adapter"] = []
+        clashing_columns = [c for c in extra_unit_columns if c in units_dict]
+        if clashing_columns:
+            log.error(f"--data-columns units {clashing_columns} clash with columns that are read from the BAM files")
+            exit(1)
+        for column in extra_unit_columns:
+            units_dict[column] = []
 
         file_list = []
         for d in self.directory:
+            # units.tsv is written to --outdir, so input paths must not depend on the current directory
+            d = os.path.abspath(d)
             dir_files_found = 0
             log.info(f"Dir: {d}")
             for f in glob.glob(f"{d}/**/*.bam", recursive=True):
@@ -750,53 +796,37 @@ class CreateLongReadInputFiles(object):
         log.info("Processing found BAM files, extracting run information:")
         for bam_file in file_list:
             log.info(f"\t - {bam_file} for run information")
-            rg_dict = extract_bam_information(bam_file, self.default_barcode,
-                                              platform)
+            rg_dict = extract_bam_information(bam_file, self.default_barcode, self.platform)
             sample = rg_dict["sample"]
-            units_dict["sample"].append(sample)
-            if data_json and 'units' in data_columns:
-                extra_columns = list(data_columns['units'].keys())
-                if "platform" in extra_columns:
-                    value = data_columns['units']['platform']
-                    platform = extract_value(value[1][2:], value[0],
-                                             data_json['samples'][sample])
-                    units_dict["platform"].append(platform)
-                else:
-                    units_dict["platform"].append(platform)
-                if "type" in extra_columns:
-                    value = data_columns['units']['type']
-                    units_dict["type"] = extract_value(
-                        value[1][2:], value[0], data_json['samples'][sample])
-                else:
-                    units_dict["type"].append(sample_type)
-                if "adapters" in extra_columns:
-                    value = data_columns['units']['adapter']
-                    units_dict["adapter"] = extract_value(
-                        value[1][2:], value[0], data_json['samples'][sample])
-                else:
-                    if adapters is not None:
-                        units_dict["adapter"].append(adapters)
-            else:
-                units_dict["type"].append(sample_type)
-                units_dict["platform"].append(platform)
-                if adapters is not None:
-                    units_dict["adapter"].append(adapters)
+            values = {column: extract_value(path[2:], default, data_json["samples"][sample])
+                      for column, (default, path) in unit_columns.items()}
 
+            # The platform must match the PL tag of the BAM file, which extract_bam_information has checked
+            platform = values.get("platform", self.platform)
+            if platform != self.platform:
+                log.error(f"--data-json sets platform '{platform}' for sample {sample}, "
+                          f"but {bam_file} has platform {self.platform}")
+                exit(1)
+
+            units_dict["sample"].append(sample)
+            units_dict["type"].append(values.get("type", self.sample_type))
+            units_dict["platform"].append(platform)
             units_dict["machine"].append(rg_dict["machine"])
             units_dict["processing_unit"].append(rg_dict["pu"])
             units_dict["barcode"].append(rg_dict["barcode"])
-            units_dict["bam"].append(bam_file)
             units_dict["methylation"].append(rg_dict["methylation"])
-
-            if platform == 'ONT':
-                if "basecalling_model" not in units_dict.keys():
-                    units_dict["basecalling_model"] = []
-                    units_dict["run_id"] = []
-
-                units_dict["basecalling_model"].append(rg_dict["basecalling_model"])
+            if self.platform == "ONT":
                 units_dict["run_id"].append(rg_dict["run_id"])
+                units_dict["basecalling_model"].append(rg_dict["basecalling_model"])
+            units_dict["bam"].append(bam_file)
+            if "adapter" in units_dict:
+                units_dict["adapter"].append(values.get("adapter", self.adapters))
+            for column in extra_unit_columns:
+                units_dict[column].append(values[column])
 
         units_df = pd.DataFrame(units_dict)
+
+        os.makedirs(self.outdir, exist_ok=True)
 
         excluded_samples = []
         if self.min_file_size is not None:
@@ -812,7 +842,8 @@ class CreateLongReadInputFiles(object):
             # Write (or refuse to overwrite) excluded_samples_mqc.tsv before touching samples.tsv/units.tsv,
             # so a pre-existing-file conflict here fails fast without having already modified other outputs,
             # and so the file always exists afterwards -- including when every sample gets excluded below.
-            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.post_file_modifier, self.force)
+            write_excluded_samples_mqc(excluded_samples, self.min_file_size, self.outdir, self.post_file_modifier,
+                                       self.force)
             if units_df.empty:
                 log.error("All samples were excluded by --min-file-size {}; nothing left to process.".
                           format(self.min_file_size))
@@ -820,7 +851,7 @@ class CreateLongReadInputFiles(object):
 
         # Check for duplicated rows which indicate bam files with the same read group info
         # This triggers a warning that these bam files with the same could be merged
-        if platform == 'ONT':
+        if self.platform == 'ONT':
             cols_to_check = ["sample", "type", "run_id", "platform", "machine",
                              "processing_unit", "barcode"]
         else:
@@ -830,10 +861,7 @@ class CreateLongReadInputFiles(object):
             log.warning("The RG information is the same in multiple BAM files."
                         "Consider merging bam files with the same read groups")
 
-        samples_file_name = "samples.tsv"
-        if self.post_file_modifier is not None:
-            samples_file_name = "samples_{}.tsv".format(
-                self.post_file_modifier)
+        samples_file_name = _output_path(self.outdir, "samples", self.post_file_modifier)
         if os.path.isfile(samples_file_name):
             if not self.force:
                 log.warning("File exists {} and force wasn't used".format(
@@ -868,45 +896,13 @@ class CreateLongReadInputFiles(object):
         samples_df.sort_values(by="sample", inplace=True)
         samples_df.to_csv(samples_file_name, index=False, sep='\t')
 
-        units_file_name = "units.tsv"
-        if self.post_file_modifier is not None:
-            units_file_name = "units_{}.tsv".format(self.post_file_modifier)
+        units_file_name = _output_path(self.outdir, "units", self.post_file_modifier)
         if os.path.isfile(units_file_name):
             if not self.force:
                 log.warning("File exists {} and force wasn't used".format(units_file_name))
                 exit(1)
             else:
                 log.warning("File exists {} overwriting!!!".format(units_file_name))
-
-        if platform == "ONT":
-            col_order = ["sample", "type", "platform", "machine", "processing_unit",
-                         "run_id", "barcode", "methylation",
-                         "basecalling_model", "bam"]
-            units_df = units_df[col_order]
-
-        extra_header_columns = []
-        if data_columns and 'units' in data_columns:
-            extra_header_columns = list(data_columns['units'].keys())
-            if 'type' in extra_header_columns:
-                extra_header_columns.remove("type")
-            if 'platform' in extra_header_columns:
-                extra_header_columns.remove("platform")
-            if 'adapter' in extra_header_columns:
-                extra_header_columns.remove("adapter")
-
-        if len(extra_header_columns) > 0:
-            extra_units_cols_header = ["sample"] + extra_header_columns
-            extra_cols = []
-            extra_columns = list(data_columns['units'].keys())
-            for sample in samples_series:
-                extra_data = []
-                for column in extra_columns:
-                    value = data_columns['units'][column]
-                    extra_data.append(extract_value(value[1][2:], value[0], data_json['samples'][sample]))
-                extra_cols.append(extra_data)
-
-            extra_unit_cols_df = pd.DataFrame(extra_cols, columns=extra_units_cols_header)
-            units_df = pd.merge(units_df, extra_unit_cols_df, on="sample", validate="one_to_one")
 
         units_df.sort_values(by="sample", inplace=True)
         units_df.to_csv(units_file_name, index=False, sep='\t', na_rep='NA')
@@ -920,6 +916,19 @@ def extract_value(field, default, data):
         return extract_value(tail, default, data[head])
     else:
         return data[head]
+
+
+def _require_read_group_tag(read_group_dict, tag, file_path, description):
+    """
+    Return read_group_dict[tag], or log which read group tag is missing from which BAM file and exit,
+    instead of letting a bare KeyError reach the user.
+    """
+    try:
+        return read_group_dict[tag]
+    except KeyError:
+        log.error(f"The {tag} tag ({description}) is missing from the read group in the BAM header of {file_path}. "
+                  f"Tags found: {', '.join(sorted(read_group_dict)) or 'none'}")
+        exit(1)
 
 
 def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
@@ -946,6 +955,9 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
 
     bam = pysam.AlignmentFile(file_path, "rb", check_sq=False)
     header_dict = bam.header.to_dict()
+    if "RG" not in header_dict:
+        log.error(f"No read group (RG) found in the BAM header of {file_path}")
+        exit(1)
     read_group = header_dict["RG"]
     read_group_num = len(read_group)  # check for for more than one read group in the bam header
     if read_group_num > 1:
@@ -954,24 +966,30 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
 
     read_group_dict = read_group[0]
 
-    bam_platform = read_group_dict["PL"]
+    bam_platform = _require_read_group_tag(read_group_dict, "PL", file_path, "sequencing platform")
     if bam_platform != platform:
         log.error(f"The platform specified in the BAM file is not {platform}!")
         exit(1)
 
-    pu = read_group_dict["PU"]
+    pu = _require_read_group_tag(read_group_dict, "PU", file_path, "platform unit")
 
     try:  # PM tag not in some older pacbio BAM files
         machine_id = read_group_dict["PM"]
     except KeyError:
         machine_id = "NA"
 
-    read_group_description = {}
-    for desc in read_group_dict['DS'].split(' '):
-        desc_fields = desc.split("=")
-        read_group_description[desc_fields[0]] = desc_fields[1]
-
     if platform == "ONT":
+        # DS holds space separated key=value pairs, only ONT needs basecall_model and runid from it
+        read_group_description = {}
+        for desc in _require_read_group_tag(read_group_dict, "DS", file_path, "description").split(' '):
+            key, separator, value = desc.partition("=")
+            if separator:
+                read_group_description[key] = value
+        for key in ["basecall_model", "runid"]:
+            if not read_group_description.get(key):
+                log.error(f"'{key}' is missing, has no '=' or has an empty value in the DS tag of the read group "
+                          f"in the BAM header of {file_path}")
+                exit(1)
         basecall_model = read_group_description["basecall_model"]
         run_id = read_group_description["runid"]
 
@@ -992,20 +1010,22 @@ def extract_bam_information(file_path, default_barcode=None, platform="ONT"):
             try:
                 sample_id = read_group_dict["SM"]
             except KeyError:
-                sample_id = read_group_dict["LB"]
+                sample_id = _require_read_group_tag(read_group_dict, "LB", file_path,
+                                                    "library, used as sample id since al and SM are missing")
     else:
         try:
             sample_id = read_group_dict["SM"]
         except KeyError:
-            sample_id = read_group_dict["LB"]
+            sample_id = _require_read_group_tag(read_group_dict, "LB", file_path, "library, used as sample id since SM is missing")
 
     # check first read for methylation tags
-    first_read = bam.head(1)
+    methylation_tags = 'No'
+    first_read = list(bam.head(1))
+    if not first_read:
+        log.warning(f"No reads found in {file_path}, methylation is set to 'No'")
     for read in first_read:
         if read.has_tag('MM') and read.has_tag('ML'):
             methylation_tags = 'Yes'
-        else:
-            methylation_tags = 'No'
 
     rg_dict = {"sample": sample_id, "machine": machine_id,
                "pu": pu, "barcode": barcode,
@@ -1029,7 +1049,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
     :type default_barcode: string
     :param number_of_reads: number of reads that will be used to create consensus barcode
     :type number_of_reads: integer
-    :param: warning_threshold: raise a warning for char with lower occurences this value
+    :param: warning_threshold: raise a warning for char with lower occurrence than this value
     :type warning_threshold: float
     :param compare_first_and_last_read: compare first read with last read to detect merged lanes or flowcells
 
@@ -1051,7 +1071,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
 
     def count_bases(data, barcode, length):
         """
-        iterate over barcode and increate data counter
+        iterate over barcode and increase data counter
 
         :param data: data structure representing each position in the barcode,
                      ex [[{'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '+': 0} ...]
@@ -1091,7 +1111,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
 
     def create_barcode(data, length, number_of_reads, warning_threshold=0.9):
         """
-        from data a barcode will be generate. Warnings will be raised for consensus chars that have a lower occurences then
+        from data a barcode will be generated. Warnings will be raised for consensus chars that have a lower occurrence than
         the provided threshold.
 
         :param data: data structure representing each position in the barcode,
@@ -1101,7 +1121,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         :type length: integer
         :param number_of_reads: number of reads that have been use to create data
         :type number_of_reads: integer
-        :param: warning_threshold: raise a warning for char with lower occurences this value
+        :param: warning_threshold: raise a warning for char with lower occurrence than this value
         :type warning_threshold: float
 
         :return: consensus barcode
@@ -1111,10 +1131,10 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         for i in range(length):
             max_base = max(data[i], key=data[i].get)
             if list(data[i].values()).count(data[i][max_base]) > 1:
-                raise Exception("Multiple base with same occurences: {}. UNABLE to handle exiting!".format(data[i]))
+                raise Exception("Multiple bases with same occurrence: {}. UNABLE to handle, exiting!".format(data[i]))
             max_base_n = data[i][max_base]
             if max_base_n / number_of_reads < warning_threshold:
-                logging.warning('Consensus base {} occurences {:.1%} at position {} in barcode, file {}'.
+                logging.warning('Consensus base {} occurrence {:.1%} at position {} in barcode, file {}'.
                                 format(max_base, max_base_n / number_of_reads, i, file_path))
             barcode += max_base
         return barcode
@@ -1132,7 +1152,7 @@ def extract_run_information(file_path, default_barcode=None, number_of_reads=200
         if len(user_input) == 0:
             raise Exception("No input entered!!!")
         if '_' in user_input:
-            logging.warning("Replacing all occurences of '_' with '-' in {}".format(user_input))
+            logging.warning("Replacing all occurrences of '_' with '-' in {}".format(user_input))
             user_input = user_input.replace("_", "-")
         return user_input
 

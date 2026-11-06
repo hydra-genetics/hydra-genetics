@@ -36,7 +36,7 @@ def environment():
     prompt="singularity cache path",
     required=True,
     type=str,
-    help="path to where singulariy files are stored",
+    help="path to where singularity files are stored",
 )
 def container_path_update(configfile, new_configfile, singularity_cache_path):
     with open(configfile, "r") as stream:

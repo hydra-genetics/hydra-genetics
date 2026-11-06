@@ -1,9 +1,11 @@
+import json
 import unittest
 import os
 import shutil
 import tempfile
 import pandas as pd
-from hydra_genetics.commands.create import CreateLongReadInputFiles
+import pysam
+from hydra_genetics.commands.create import CreateLongReadInputFiles, extract_bam_information
 
 
 class TestCreateLongReadInputFiles(unittest.TestCase):
@@ -112,6 +114,66 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
         finally:
             os.chdir(original_cwd)
 
+    def test_init_writes_files_to_outdir_not_cwd(self):
+        multi_sample_dir = os.path.join(self.test_dir, "pacbio_multi_outdir")
+        os.makedirs(multi_sample_dir)
+        for file_name in ["m84010_220919_232145_s1.hifi_reads.bam",
+                          "m84011_220902_175841_s1.hifi_reads.bam"]:
+            shutil.copy(os.path.join(self.src_pacbio_bam_dir, file_name), multi_sample_dir)
+
+        original_cwd = os.getcwd()
+        cwd_dir = tempfile.mkdtemp()
+        os.chdir(cwd_dir)
+        try:
+            creator = CreateLongReadInputFiles(
+                directory=[multi_sample_dir], outdir=self.out_dir, platform="PACBIO", min_file_size=140000)
+            creator.init()
+        finally:
+            os.chdir(original_cwd)
+        try:
+            for file_name in ["samples.tsv", "units.tsv", "excluded_samples_mqc.tsv"]:
+                self.assertTrue(os.path.exists(os.path.join(self.out_dir, file_name)), file_name)
+            self.assertEqual(os.listdir(cwd_dir), [])
+        finally:
+            shutil.rmtree(cwd_dir)
+
+    def test_init_creates_missing_outdir(self):
+        new_outdir = os.path.join(self.out_dir, "does", "not", "exist")
+        creator = CreateLongReadInputFiles(
+            directory=[self.pacbio_test_dir], outdir=new_outdir, platform="PACBIO", min_file_size=1)
+        creator.init()
+        for file_name in ["samples.tsv", "units.tsv", "excluded_samples_mqc.tsv"]:
+            self.assertTrue(os.path.exists(os.path.join(new_outdir, file_name)), file_name)
+
+    def test_init_existing_file_in_outdir_requires_force(self):
+        kwargs = dict(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO")
+        CreateLongReadInputFiles(**kwargs).init()
+        units_path = os.path.join(self.out_dir, "units.tsv")
+        with open(units_path, "w") as fh:
+            fh.write("sentinel")
+
+        with self.assertRaises(SystemExit):
+            CreateLongReadInputFiles(**kwargs).init()
+        with open(units_path) as fh:
+            self.assertEqual(fh.read(), "sentinel")
+
+        CreateLongReadInputFiles(force=True, **kwargs).init()
+        with open(units_path) as fh:
+            self.assertNotEqual(fh.read(), "sentinel")
+
+    def test_init_relative_directory_gives_absolute_paths_in_units(self):
+        original_cwd = os.getcwd()
+        os.chdir(self.test_dir)
+        try:
+            creator = CreateLongReadInputFiles(directory=["pacbio"], outdir=self.out_dir, platform="PACBIO")
+            creator.init()
+        finally:
+            os.chdir(original_cwd)
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t")
+        for path in units_df["bam"]:
+            self.assertTrue(os.path.isabs(path), path)
+            self.assertTrue(os.path.isfile(path), path)
+
     def test_init_pacbio_bams_min_file_size_excludes_all(self):
         multi_sample_dir = os.path.join(self.test_dir, "pacbio_all_excluded")
         os.makedirs(multi_sample_dir)
@@ -165,6 +227,130 @@ class TestCreateLongReadInputFiles(unittest.TestCase):
 
         finally:
             os.chdir(original_cwd)
+
+    def _write_bam(self, read_group, name="test.bam"):
+        """Write a one-read unmapped BAM whose header has the given read group (None for no RG line)."""
+        path = os.path.join(self.test_dir, name)
+        header = {"HD": {"VN": "1.6"}}
+        if read_group is not None:
+            header["RG"] = [read_group]
+        with pysam.AlignmentFile(path, "wb", header=header) as bam:
+            read = pysam.AlignedSegment()
+            read.query_name = "read1"
+            read.query_sequence = "ACGT"
+            read.flag = 4
+            bam.write(read)
+        return path
+
+    def test_extract_bam_information_missing_tags_give_clear_error(self):
+        ont_ds = "runid=abc basecall_model=model1"
+        cases = [
+            ("no RG line", "ONT", None, "read group"),
+            ("no PL", "ONT", {"ID": "x", "PU": "pu", "DS": ont_ds, "SM": "s"}, "PL"),
+            ("no PU", "ONT", {"ID": "x", "PL": "ONT", "DS": ont_ds, "SM": "s"}, "PU"),
+            ("ONT without DS", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "SM": "s"}, "DS"),
+            ("ONT DS without runid", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model=m", "SM": "s"}, "runid"),
+            ("ONT DS runid without =", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model=m runid", "SM": "s"}, "runid"),
+            ("ONT DS runid empty", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model=m runid=", "SM": "s"}, "runid"),
+            ("ONT DS basecall_model without =", "ONT",
+             {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model runid=abc", "SM": "s"}, "basecall_model"),
+            ("ONT DS basecall_model empty", "ONT",
+             {"ID": "x", "PL": "ONT", "PU": "pu", "DS": "basecall_model= runid=abc", "SM": "s"}, "basecall_model"),
+            ("ONT without al, SM and LB", "ONT", {"ID": "x", "PL": "ONT", "PU": "pu", "DS": ont_ds}, "LB"),
+            ("PACBIO without SM and LB", "PACBIO", {"ID": "x", "PL": "PACBIO", "PU": "pu"}, "LB"),
+        ]
+        for label, platform, read_group, expected in cases:
+            with self.subTest(label):
+                path = self._write_bam(read_group)
+                with self.assertLogs("hydra_genetics.commands.create", level="ERROR") as logs:
+                    with self.assertRaises(SystemExit):
+                        extract_bam_information(path, platform=platform)
+                self.assertIn(expected, logs.output[0])
+                self.assertIn(path, logs.output[0])
+
+    def test_extract_bam_information_pacbio_does_not_need_ds(self):
+        path = self._write_bam({"ID": "x", "PL": "PACBIO", "PU": "pu1", "SM": "sample1"})
+        rg_dict = extract_bam_information(path, platform="PACBIO")
+        self.assertEqual(rg_dict["pu"], "pu1")
+        self.assertEqual(rg_dict["sample"], "sample1")
+
+    def test_extract_bam_information_bam_without_reads(self):
+        path = os.path.join(self.test_dir, "empty.bam")
+        header = {"HD": {"VN": "1.6"}, "RG": [{"ID": "x", "PL": "PACBIO", "PU": "pu1", "SM": "sample1"}]}
+        pysam.AlignmentFile(path, "wb", header=header).close()
+        with self.assertLogs("hydra_genetics.commands.create", level="WARNING") as logs:
+            rg_dict = extract_bam_information(path, platform="PACBIO")
+        self.assertEqual(rg_dict["methylation"], "No")
+        self.assertIn(path, logs.output[0])
+
+    def _data_json_args(self, samples, unit_columns):
+        """Write --data-json/--data-columns files, return them as CreateLongReadInputFiles kwargs."""
+        data_json = os.path.join(self.test_dir, "data.json")
+        data_columns = os.path.join(self.test_dir, "columns.json")
+        with open(data_json, "w") as fh:
+            json.dump({"samples": {sample: {"settings": settings} for sample, settings in samples.items()}}, fh)
+        with open(data_columns, "w") as fh:
+            json.dump({"units": ["samples.{SAMPLE}.settings." + column for column in unit_columns]}, fh)
+        return {"data_json": data_json, "data_columns": data_columns}
+
+    def test_init_pacbio_data_json_units_columns(self):
+        bam_dir = os.path.join(self.test_dir, "pacbio_data_json")
+        os.makedirs(bam_dir)
+        for file_name in ["m84010_220919_232145_s1.hifi_reads.bam",   # HG004
+                          "m84010_220919_235306_s2.hifi_reads.bam",   # HG003
+                          "m84011_220902_175841_s1.hifi_reads.bam"]:  # HG002
+            shutil.copy(os.path.join(self.src_pacbio_bam_dir, file_name), bam_dir)
+        # A second SMRT cell for HG002
+        self._write_bam({"ID": "x", "PL": "PACBIO", "PU": "second_cell", "SM": "HG002"},
+                        name=os.path.join("pacbio_data_json", "second_cell.bam"))
+        samples = {"HG002": {"type": "T", "kit": "SPRQ", "adapter": "CCCC"},
+                   "HG003": {"type": "N", "kit": "SPRQ"},
+                   "HG004": {"type": "R"}}
+
+        CreateLongReadInputFiles(directory=[bam_dir], outdir=self.out_dir, platform="PACBIO",
+                                 **self._data_json_args(samples, ["type:N", "kit:NA", "adapter:AAAA"])).init()
+
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t", keep_default_na=False)
+        self.assertEqual(sorted(units_df["sample"]), ["HG002", "HG002", "HG003", "HG004"])
+        self.assertEqual(list(units_df.columns)[-3:], ["bam", "adapter", "kit"])
+        for _, row in units_df.iterrows():
+            expected = samples[row["sample"]]
+            self.assertEqual(row["type"], expected["type"])
+            self.assertEqual(row["platform"], "PACBIO")
+            self.assertEqual(row["kit"], expected.get("kit", "NA"))
+            self.assertEqual(row["adapter"], expected.get("adapter", "AAAA"))
+
+    def test_init_data_json_platform_must_match_bam(self):
+        creator = CreateLongReadInputFiles(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO",
+                                           **self._data_json_args({"HG004": {"platform": "ONT"}}, ["platform:PACBIO"]))
+        with self.assertRaises(SystemExit):
+            creator.init()
+        self.assertFalse(os.path.exists(os.path.join(self.out_dir, "units.tsv")))
+
+    def test_init_data_json_platform_matching_bam(self):
+        CreateLongReadInputFiles(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO",
+                                 **self._data_json_args({"HG004": {"platform": "PACBIO"}}, ["platform:PACBIO"])).init()
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t")
+        self.assertEqual(units_df["platform"].tolist(), ["PACBIO"])
+
+    def test_init_ont_data_json_extra_units_column(self):
+        samples = {"sample1": {"type": "T", "kit": "LSK114", "adapter": "CCCC"}, "barcode01": {}}
+
+        CreateLongReadInputFiles(directory=[self.ont_test_dir], outdir=self.out_dir, platform="ONT",
+                                 **self._data_json_args(samples, ["type:N", "kit:NA", "adapter:AAAA"])).init()
+
+        units_df = pd.read_csv(os.path.join(self.out_dir, "units.tsv"), sep="\t", keep_default_na=False)
+        self.assertEqual(list(units_df.columns), ["sample", "type", "platform", "machine", "processing_unit", "run_id",
+                                                  "barcode", "methylation", "basecalling_model", "bam", "adapter", "kit"])
+        units_df = units_df.set_index("sample")
+        self.assertEqual(units_df.loc["sample1", ["type", "kit", "adapter"]].tolist(), ["T", "LSK114", "CCCC"])
+        self.assertEqual(units_df.loc["barcode01", ["type", "kit", "adapter"]].tolist(), ["N", "NA", "AAAA"])
+
+    def test_init_data_json_units_column_clashing_with_bam_column(self):
+        creator = CreateLongReadInputFiles(directory=[self.pacbio_test_dir], outdir=self.out_dir, platform="PACBIO",
+                                           **self._data_json_args({"HG004": {}}, ["barcode:NNNN"]))
+        with self.assertRaises(SystemExit):
+            creator.init()
 
 
 if __name__ == "__main__":

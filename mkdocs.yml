@@ -1,6 +1,7 @@
-site_name: Hydra-genetics
+site_name: hydra-genetics
 nav:
   - Introduction: index.md
+  - Installation: installation.md
   - Modules: modules.md
   - How-to make a pipeline:
     - Create a pipeline skeleton: make_pipeline/create.md
@@ -10,7 +11,6 @@ nav:
   - How-to run a pipeline:
     - Cluster profile: run_pipeline/profile.md
     - Create sample files: run_pipeline/create_sample_files.md
-    - Make a python environment: run_pipeline/environment.md
   - How-to run on a restricted cluster:
     - Preparing your pipeline: packaging_pipeline/prepare_pipeline.md
     - Packaging your pipeline: packaging_pipeline/package_pipeline.md
@@ -25,8 +25,6 @@ nav:
     - Make a simple pipeline: tutorials/simple_pipeline.md
 
 
-theme: readthedocs
-extra_css: [extra.css]
 theme: readthedocs
 extra_css: [extra.css]
 markdown_extensions:

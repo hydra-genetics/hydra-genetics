@@ -92,7 +92,7 @@ The resources and the container of the copy rules can be configured in `config.y
 key `_copy`, with the values in `default_resources` and `default_container` as defaults:
 ```yaml
 _copy:
-  container: "docker://hydragenetics/common:0.1.9"
+  container: "docker://hydragenetics/common:4.1.1"
   mem_mb: 1024
   threads: 1
 ```

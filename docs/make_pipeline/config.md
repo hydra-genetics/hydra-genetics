@@ -8,7 +8,7 @@ resources: "config/resources.yaml"                          # resources paramete
 samples: "samples.tsv"                                      # sample names
 units: "units.tsv"                                          # sample file and meta info
 output: "config/output_files.yaml"                          # rule all files
-default_container: "docker://hydragenetics/common:0.1.9"    # default container
+default_container: "docker://hydragenetics/common:4.1.1"    # default container
 reference:                                                  # list of general references
   fasta: "reference_genome.fasta"
 ```

@@ -6,13 +6,16 @@ import unittest
 
 import snakemake
 from click.testing import CliRunner
+from packaging.specifiers import SpecifierSet
 
 from hydra_genetics.__main__ import cli
 from hydra_genetics.commands.create import DEFAULT_MIN_SNAKEMAKE_VERSION, PipelineCreate, next_major_version
 
 
-def version_tuple(version):
-    return tuple(int(part) for part in re.findall(r"\d+", version)[:3])
+def satisfies(specifier, version):
+    # prereleases=True lets an installed prerelease, ex 7.9.0rc1, satisfy >=7.8.0,<8. Prereleases outside
+    # the range, ex 7.8.0rc1 (before 7.8.0) or 8.0.0rc1 (excluded by <8, PEP 440), still fail.
+    return SpecifierSet(specifier).contains(version, prereleases=True)
 
 
 class TestCreatePipeline(unittest.TestCase):
@@ -28,11 +31,12 @@ class TestCreatePipeline(unittest.TestCase):
         return outdir
 
     def snakemake_requirement(self, outdir):
+        """Return the version specifier of the snakemake line in requirements.txt, ex '>=7.8.0,<8'"""
         with open(os.path.join(outdir, "requirements.txt")) as requirements:
             for line in requirements:
-                match = re.fullmatch(r"snakemake>=([\d.]+),<([\d.]+)", line.strip())
+                match = re.fullmatch(r"snakemake(>=[\d.]+,<[\d.]+)", line.strip())
                 if match:
-                    return match.group(1), match.group(2)
+                    return match.group(1)
         self.fail("No 'snakemake>=X,<Y' line in requirements.txt")
 
     def test_next_major_version(self):
@@ -63,19 +67,26 @@ class TestCreatePipeline(unittest.TestCase):
 
     def test_min_snakemake_version_is_applied(self):
         outdir = self.create_pipeline(min_snakemake_version="7.8.3")
-        self.assertEqual(self.snakemake_requirement(outdir), ("7.8.3", "8"))
+        self.assertEqual(self.snakemake_requirement(outdir), ">=7.8.3,<8")
         with open(os.path.join(outdir, "workflow", "rules", "common.smk")) as common:
             self.assertIn('min_version("7.8.3")', common.read())
+
+    def test_requirement_version_check(self):
+        requirement = self.snakemake_requirement(self.create_pipeline(min_snakemake_version="7.8.0"))
+        for version in ["7.8.0", "7.32.4", "7.9.0rc1"]:
+            with self.subTest(version=version):
+                self.assertTrue(satisfies(requirement, version))
+        for version in ["7.7.9", "7.8.0rc1", "8.0.0rc1", "8.0.0", "9.18.1"]:
+            with self.subTest(version=version):
+                self.assertFalse(satisfies(requirement, version))
 
     def test_default_requirement_matches_installed_snakemake(self):
         # Fails when hydra-genetics moves to a new snakemake major version without
         # updating DEFAULT_MIN_SNAKEMAKE_VERSION, which would make new pipelines uninstallable.
-        min_version, max_version = self.snakemake_requirement(self.create_pipeline())
-        self.assertEqual(min_version, DEFAULT_MIN_SNAKEMAKE_VERSION)
-        installed = version_tuple(snakemake.__version__)
+        requirement = self.snakemake_requirement(self.create_pipeline())
+        self.assertTrue(requirement.startswith(f">={DEFAULT_MIN_SNAKEMAKE_VERSION},"))
         self.assertTrue(
-            version_tuple(min_version) <= installed < version_tuple(max_version),
-            f"Installed snakemake {snakemake.__version__} is outside the default pipeline requirement "
-            f"snakemake>={min_version},<{max_version}, update DEFAULT_MIN_SNAKEMAKE_VERSION "
-            f"in hydra_genetics/commands/create.py",
+            satisfies(requirement, snakemake.__version__),
+            f"Installed snakemake {snakemake.__version__} does not satisfy the default pipeline requirement "
+            f"snakemake{requirement}, update DEFAULT_MIN_SNAKEMAKE_VERSION in hydra_genetics/commands/create.py",
         )

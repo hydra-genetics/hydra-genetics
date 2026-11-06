@@ -21,6 +21,25 @@ import hydra_genetics
 
 log = logging.getLogger(__name__)
 
+DEFAULT_MIN_SNAKEMAKE_VERSION = "7.8.0"
+
+
+def next_major_version(version):
+    """
+    Return the next major version of a version string, ex 7.8.0 -> 8
+
+    :param version: version string made of one to three dot separated numbers, ex 7, 7.8 or 7.8.0
+    :type version: string
+
+    :raises ValueError: if version is not one to three dot separated numbers, ex 7.invalid
+
+    :return: next major version
+    :rtype: string
+    """
+    if not re.fullmatch(r"\d+(\.\d+){0,2}", version):
+        raise ValueError(f"Invalid version '{version}', expected MAJOR[.MINOR[.PATCH]], ex 7.8.0")
+    return str(int(version.split(".")[0]) + 1)
+
 
 class PipelineCreate(object):
     """Creates a hydra-genetics pipeline.
@@ -30,14 +49,15 @@ class PipelineCreate(object):
         author (str): Authors name
         email (str): Authors email
         version (str): Version flag. Semantic versioning only. Defaults to `1.0dev`.
-        snakemake_version (str): min snakemake version
+        min_snakemake_version (str): min snakemake version, the generated pipeline requires
+            snakemake >= min_snakemake_version and < the next major version
         git_user: (str) username on github
         no_git (bool): Prevents the creation of a local Git repository for the pipeline. Defaults to False.
         force (bool): Overwrites a given workflow directory with the same name. Defaults to False.
             May the force be with you.
         outdir (str): Path to the local output directory.
     """
-    def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version="6.10.0",
+    def __init__(self, name, description, author, email, version="0.0.1", min_snakemake_version=DEFAULT_MIN_SNAKEMAKE_VERSION,
                  git_user=None, no_git=False, force=False, outdir=None):
         self.short_name = name.lower().replace(r"/\s+/", "-").replace("hydra-genetics/", "").replace("/", "-")
         self.name = f"{self.short_name}"
@@ -46,6 +66,7 @@ class PipelineCreate(object):
         self.email = email
         self.version = version
         self.min_snakemake_version = min_snakemake_version
+        self.max_snakemake_version = next_major_version(min_snakemake_version)
         self.git_user = git_user
         self.no_git = no_git
         self.force = force

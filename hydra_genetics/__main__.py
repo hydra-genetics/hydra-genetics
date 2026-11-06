@@ -8,7 +8,13 @@ import sys
 import hydra_genetics.utils
 from hydra_genetics.commands.prep_pipeline_env import environment
 from hydra_genetics.commands.references import references
-from hydra_genetics.commands.create import PipelineCreate, RuleCreate, CreateInputFiles, CreateLongReadInputFiles
+from hydra_genetics.commands.create import (
+    DEFAULT_MIN_SNAKEMAKE_VERSION,
+    PipelineCreate,
+    RuleCreate,
+    CreateInputFiles,
+    CreateLongReadInputFiles,
+)
 import rich.console
 import rich.logging
 import rich.traceback
@@ -111,7 +117,7 @@ def validate_rule_name_prompt(ctx, opts, value):
 @click.option("-a", "--author", prompt=True, required=True, type=str, help="Name of the main author(s)")
 @click.option("-e", "--email", prompt=True, required=True, type=str, help="E-mail(s) of the main author(s)")
 @click.option("--version", type=str, default="0.0.1", help="The initial version number to use")
-@click.option("--min-snakemake-version", type=str, default="6.8.0", help="Min snakemake version")
+@click.option("--min-snakemake-version", type=str, default=DEFAULT_MIN_SNAKEMAKE_VERSION, help="Min snakemake version")
 @click.option("-g", "--git-user", prompt=True, required=True, help="User name of main git user(s)")
 @click.option("--no-git", is_flag=True, default=False, help="Do not create git repo")
 @click.option("-f", "--force", is_flag=True, default=False, help="Overwrite output directory if it already exists")

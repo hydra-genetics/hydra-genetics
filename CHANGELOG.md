@@ -1,5 +1,43 @@
 # Changelog
 
+## [4.2.2](https://github.com/hydra-genetics/hydra-genetics/compare/v4.2.1...v4.2.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* apply min snakemake version to generated requirements.txt ([42d73e0](https://github.com/hydra-genetics/hydra-genetics/commit/42d73e03f3e01b9e2f79d6860fbb4532ad7cb94e))
+* apply min snakemake version to generated requirements.txt ([27caae7](https://github.com/hydra-genetics/hydra-genetics/commit/27caae7d72d0da9b84ecda8429a39ad1badecd71)), closes [#237](https://github.com/hydra-genetics/hydra-genetics/issues/237)
+* clear errors for BAM files with missing read group tags ([5778c3f](https://github.com/hydra-genetics/hydra-genetics/commit/5778c3fd031131b9dc145eb51cf16f86192d8a8e))
+* create --outdir if missing and write absolute input paths ([413b119](https://github.com/hydra-genetics/hydra-genetics/commit/413b119757753bcb9dddad0ec67705a6861cc2da))
+* define update_config in template onstart when containers are not used ([3b843f2](https://github.com/hydra-genetics/hydra-genetics/commit/3b843f2767980201364f8009bc473198db6cd1e0))
+* give a clear error when BAM read group tags are missing ([7e1a0e4](https://github.com/hydra-genetics/hydra-genetics/commit/7e1a0e41ff57fdc98f9edad14fea61486be60ef8))
+* handle BAM files without reads in extract_bam_information ([22eadb4](https://github.com/hydra-genetics/hydra-genetics/commit/22eadb46cb66372397614e498dd8b03e5a883482))
+* keep mem_mb an integer in generated copy rules ([2c6dd6f](https://github.com/hydra-genetics/hydra-genetics/commit/2c6dd6fd22830085a30773b6129a0c685c47eaad))
+* onstart update config without containers ([5dbd3fd](https://github.com/hydra-genetics/hydra-genetics/commit/5dbd3fd16efd410199170b53253529611735492c))
+* reject DS basecall_model and runid without a value in BAM read group ([8c01104](https://github.com/hydra-genetics/hydra-genetics/commit/8c011040051cc0adb2e46b5baff9e6ee98e1a515))
+* reject invalid min snakemake versions ([b73502c](https://github.com/hydra-genetics/hydra-genetics/commit/b73502ca058c41ccc31135c82a5bf1f592db4f88))
+* resolve --data-json units columns per BAM for long-read input files ([d11a55b](https://github.com/hydra-genetics/hydra-genetics/commit/d11a55bdde21402243d08e6667d3e073bfcd35d3))
+* resolve --data-json units columns per BAM for long-read input files ([a7f5d8a](https://github.com/hydra-genetics/hydra-genetics/commit/a7f5d8ae2cbcefc68273cd358bcd14bbb217200c)), closes [#463](https://github.com/hydra-genetics/hydra-genetics/issues/463)
+* update pinned hydra-genetics version in pipeline template requirements ([39adbbe](https://github.com/hydra-genetics/hydra-genetics/commit/39adbbe7c4fb5e447b192b511a988b9896cb5adf))
+* update pipeline template defaults ([5326e52](https://github.com/hydra-genetics/hydra-genetics/commit/5326e52839a82ced712b6087c436b4a36235d94e))
+* update pipeline template defaults ([22f33fa](https://github.com/hydra-genetics/hydra-genetics/commit/22f33fae01b166f1f814be74349a4ddaafe98956)), closes [#190](https://github.com/hydra-genetics/hydra-genetics/issues/190)
+* write create-input-files output to --outdir ([e0f0a5c](https://github.com/hydra-genetics/hydra-genetics/commit/e0f0a5cca2c65c4679b3ea1232e159c94a820b93))
+* write create-input-files output to --outdir ([b30ee43](https://github.com/hydra-genetics/hydra-genetics/commit/b30ee43fa35bbfa33b5cabe50e68ea3feab44faa))
+
+
+### Documentation
+
+* add missing platforms to units schema example and fix spelling in create ([d31e2af](https://github.com/hydra-genetics/hydra-genetics/commit/d31e2af4d95efe153e483388fc2a5239b1dee955))
+* describe --data-json and --data-columns for create-input-files ([2c5080e](https://github.com/hydra-genetics/hydra-genetics/commit/2c5080ed2c41916e821b8aa81a3382eb77ae07b9))
+* fix packaging and import docs ([86e1037](https://github.com/hydra-genetics/hydra-genetics/commit/86e103718b5e8345880e86359afa6808119d3bed))
+* fix typos and grammar in help messages and docstrings ([1ad09fc](https://github.com/hydra-genetics/hydra-genetics/commit/1ad09fcc4d3c587390af2907c6e83972d73db4f4))
+* fix typos and inconsistencies ([f4959be](https://github.com/hydra-genetics/hydra-genetics/commit/f4959bee11e34c727e112586ddba4dde0fb02ccf))
+* fix typos and inconsistencies in README and docs ([aa7f88f](https://github.com/hydra-genetics/hydra-genetics/commit/aa7f88f8bdfbd38b8d9180bc9d5eee00835472d5))
+* show platform-specific units index and schema in standards ([abafe6d](https://github.com/hydra-genetics/hydra-genetics/commit/abafe6d1a566708ff68353893cca2a139094f9a5))
+* upd README.md ([a44dd77](https://github.com/hydra-genetics/hydra-genetics/commit/a44dd77d1f5b30e532adac4ae6ce68addf24798d))
+* update README.md ([b180fdf](https://github.com/hydra-genetics/hydra-genetics/commit/b180fdf0261c5a082fef1afd4bad302f5922022d))
+* wrap software version file path in a list in help_code example ([e25ec9c](https://github.com/hydra-genetics/hydra-genetics/commit/e25ec9caa4aab12f2e3e03fa36bd4c239e897682))
+
 ## [4.2.1](https://github.com/hydra-genetics/hydra-genetics/compare/v4.2.0...v4.2.1) (2026-10-26)
 
 

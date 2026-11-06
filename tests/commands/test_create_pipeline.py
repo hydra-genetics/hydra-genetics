@@ -5,7 +5,9 @@ import tempfile
 import unittest
 
 import snakemake
+from click.testing import CliRunner
 
+from hydra_genetics.__main__ import cli
 from hydra_genetics.commands.create import DEFAULT_MIN_SNAKEMAKE_VERSION, PipelineCreate, next_major_version
 
 
@@ -36,8 +38,28 @@ class TestCreatePipeline(unittest.TestCase):
     def test_next_major_version(self):
         self.assertEqual(next_major_version("7.8.0"), "8")
         self.assertEqual(next_major_version("9.18.1"), "10")
+        self.assertEqual(next_major_version("7.8"), "8")
+        self.assertEqual(next_major_version("7"), "8")
+
+    def test_next_major_version_rejects_invalid_versions(self):
+        for version in ["7.invalid", "v7.8.0", "7.", "7..0", ".7", "7.8.0.1", " 7.8.0", "7.8.0rc1", ""]:
+            with self.subTest(version=version), self.assertRaises(ValueError):
+                next_major_version(version)
+
+    def test_invalid_min_snakemake_version_fails_before_rendering(self):
+        outdir = os.path.join(self.tempdir, "pipeline")
         with self.assertRaises(ValueError):
-            next_major_version("v7.8.0")
+            PipelineCreate("test", "description", "author", "email", min_snakemake_version="7.invalid",
+                           no_git=True, outdir=outdir)
+        self.assertFalse(os.path.exists(outdir))
+
+    def test_cli_rejects_invalid_min_snakemake_version(self):
+        outdir = os.path.join(self.tempdir, "pipeline")
+        result = CliRunner().invoke(cli, ["create-pipeline", "-n", "test", "-d", "d", "-a", "a", "-e", "e", "-g", "g",
+                                          "--no-git", "-o", outdir, "--min-snakemake-version", "7.invalid"])
+        self.assertEqual(result.exit_code, 2)
+        self.assertIn("Invalid version '7.invalid'", result.output)
+        self.assertFalse(os.path.exists(outdir))
 
     def test_min_snakemake_version_is_applied(self):
         outdir = self.create_pipeline(min_snakemake_version="7.8.3")

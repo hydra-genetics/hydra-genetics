@@ -28,16 +28,17 @@ def next_major_version(version):
     """
     Return the next major version of a version string, ex 7.8.0 -> 8
 
-    :param version: version string, ex 7.8.0
+    :param version: version string made of one to three dot separated numbers, ex 7, 7.8 or 7.8.0
     :type version: string
+
+    :raises ValueError: if version is not one to three dot separated numbers, ex 7.invalid
 
     :return: next major version
     :rtype: string
     """
-    major = version.strip().split(".")[0]
-    if not major.isdigit():
-        raise ValueError(f"Unable to parse major version from '{version}'")
-    return str(int(major) + 1)
+    if not re.fullmatch(r"\d+(\.\d+){0,2}", version):
+        raise ValueError(f"Invalid version '{version}', expected MAJOR[.MINOR[.PATCH]], ex 7.8.0")
+    return str(int(version.split(".")[0]) + 1)
 
 
 class PipelineCreate(object):

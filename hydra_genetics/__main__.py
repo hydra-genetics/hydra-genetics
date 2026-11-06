@@ -14,6 +14,7 @@ from hydra_genetics.commands.create import (
     RuleCreate,
     CreateInputFiles,
     CreateLongReadInputFiles,
+    next_major_version,
 )
 import rich.console
 import rich.logging
@@ -94,6 +95,15 @@ def validate_wf_name_prompt(ctx, opts, value):
     return value
 
 
+def validate_min_snakemake_version(ctx, opts, value):
+    """Reject a min snakemake version that can not be written to the pipeline requirements"""
+    try:
+        next_major_version(value)
+    except ValueError as e:
+        raise click.BadParameter(str(e))
+    return value
+
+
 def validate_rule_name_prompt(ctx, opts, value):
     """Force the rule name to meet the hydra-core requirements"""
     if value is not None and not re.match(r"^[a-z0-9_]+$", value):
@@ -117,7 +127,13 @@ def validate_rule_name_prompt(ctx, opts, value):
 @click.option("-a", "--author", prompt=True, required=True, type=str, help="Name of the main author(s)")
 @click.option("-e", "--email", prompt=True, required=True, type=str, help="E-mail(s) of the main author(s)")
 @click.option("--version", type=str, default="0.0.1", help="The initial version number to use")
-@click.option("--min-snakemake-version", type=str, default=DEFAULT_MIN_SNAKEMAKE_VERSION, help="Min snakemake version")
+@click.option(
+    "--min-snakemake-version",
+    type=str,
+    default=DEFAULT_MIN_SNAKEMAKE_VERSION,
+    callback=validate_min_snakemake_version,
+    help="Min snakemake version, the pipeline will require snakemake >= this version and < the next major version",
+)
 @click.option("-g", "--git-user", prompt=True, required=True, help="User name of main git user(s)")
 @click.option("--no-git", is_flag=True, default=False, help="Do not create git repo")
 @click.option("-f", "--force", is_flag=True, default=False, help="Overwrite output directory if it already exists")

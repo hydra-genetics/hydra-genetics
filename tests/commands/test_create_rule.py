@@ -51,6 +51,35 @@ class TestCreateRule(unittest.TestCase):
         self.assertEqual(cm.exception.code, 6)
         self.assertEqual(self.read("workflow", "rules", "samtools.smk").count("rule samtools_sort:"), 1)
 
+    def test_rule_name_clash_in_another_file_is_rejected(self):
+        self.create_rule("sort", tool="samtools")
+        schema_before = self.read("workflow", "schemas", "rules.schema.yaml")
+        for kwargs in ({"script": True}, {}):
+            with self.subTest(**kwargs):
+                with self.assertRaises(SystemExit) as cm:
+                    self.create_rule("samtools_sort", **kwargs)
+                self.assertEqual(cm.exception.code, 6)
+                self.assertFalse(os.path.exists(self.path("workflow", "rules", "samtools_sort.smk")))
+                self.assertFalse(os.path.exists(self.path("workflow", "scripts", "samtools_sort.py")))
+                self.assertEqual(self.read("workflow", "schemas", "rules.schema.yaml"), schema_before)
+
+    def test_rule_name_clash_with_snakefile_rule_is_rejected(self):
+        with self.assertRaises(SystemExit) as cm:
+            self.create_rule("all", script=True)
+        self.assertEqual(cm.exception.code, 6)
+        self.assertFalse(os.path.exists(self.path("workflow", "rules", "all.smk")))
+
+    def test_checkpoint_and_spaced_rule_definitions_count_as_duplicates(self):
+        self.create_rule("index", tool="samtools")
+        with open(self.path("workflow", "rules", "samtools.smk"), "a") as fh:
+            fh.write('\ncheckpoint samtools_sort:\n    shell:\n        ""\n')
+            fh.write('\nif True:\n\n    rule samtools_stats :\n        shell:\n            ""\n')
+        for command in ("sort", "stats"):
+            with self.subTest(command=command):
+                with self.assertRaises(SystemExit) as cm:
+                    self.create_rule(command, tool="samtools")
+                self.assertEqual(cm.exception.code, 6)
+
     def test_script_rules_in_tool_file(self):
         self.create_rule("cnv_report", script=True)
         self.create_rule("cnv_json", tool="cnv_report", script=True)

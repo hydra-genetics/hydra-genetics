@@ -231,6 +231,17 @@ class RuleCreate(object):
             log.error(f"Rule already exists '{output_rule}'")
             sys.exit(4)
 
+        # Snakemake rule names must be unique across the whole workflow, not only within the .smk file
+        rule_definition = re.compile(rf"^\s*(rule|checkpoint)\s+{re.escape(self.name)}\s*:")
+        rule_files = sorted(pathlib.Path(output_rules).glob("**/*.smk")) + [pathlib.Path(outdir_workflow, "Snakefile")]
+        for rule_file in rule_files:
+            if not rule_file.is_file():
+                continue
+            with open(rule_file) as lines:
+                if any(rule_definition.match(line) for line in lines):
+                    log.error(f"rule {self.name} already found in file {rule_file}")
+                    sys.exit(6)
+
         output_scripts = os.path.join(outdir_workflow, "scripts")
         output_script_files = {
             "script.py.jinja": os.path.join(output_scripts, f"{self.command}.py"),
@@ -297,12 +308,6 @@ class RuleCreate(object):
         object_attrs = vars(self)
         template_files = list(pathlib.Path(template_dir).glob("**/*"))
         ignore_strs = [".pyc", "__pycache__", ".pyo", ".pyd", ".DS_Store", ".egg", ".snakemake"]
-        if self.append_rule:
-            with open(output_rule, 'r') as lines:
-                for line in lines:
-                    if re.match(rf"rule {re.escape(self.name)}:", line):
-                        log.error(f"rule {self.name} already found in file {output_rule}")
-                        exit(6)
         log.info("Adding folder and files")
         for template_fn_path_obj in template_files:
             template_fn_path = str(template_fn_path_obj)

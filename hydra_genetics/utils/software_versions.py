@@ -257,7 +257,7 @@ def export_software_version_as_file(
     with open(output_file, "w") as writer:
         writer.write(yaml.dump(versions))
         for notification in notifications:
-            writer.write(f"# {notification}")
+            writer.write(f"# {notification}\n")
     return output_file
 
 

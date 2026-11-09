@@ -191,6 +191,13 @@ class TestSoftwareVersionFiles(TempDirTestCase):
         self.assertEqual(yaml.safe_load(content), {"common_1.0.1": {"common": "1.0.1"}})
         self.assertIn(f"# {note}", content)
 
+    def test_export_writes_each_note_on_its_own_line(self):
+        versions = {"common_1.0.1": {"common": "1.0.1", "NOTE": "first"}, "bwa_0.7": {"bwa": "0.7", "NOTE": "second"}}
+        output = software_versions.export_software_version_as_file(versions, date_string="20240101")
+        with open(output) as fh:
+            comments = [line.rstrip("\n") for line in fh if line.startswith("#")]
+        self.assertEqual(comments, ["# first", "# second"])
+
     def test_touch_and_export_use_the_same_file(self):
         # the touched file is passed to multiqc before the dag is built, export must later write to the same path
         for directory in ["versions/software", "versions", ""]:

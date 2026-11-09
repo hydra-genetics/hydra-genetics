@@ -112,6 +112,21 @@ class TestCreateRule(unittest.TestCase):
                 self.assertEqual(cm.exception.code, 8)
                 self.assertFalse(os.path.exists(self.path("workflow", "rules", f"{name}.smk")))
 
+    def test_name_that_breaks_the_stubs_aborts_in_script_mode(self):
+        # json/os/shutil/snakemake: existing modules the stub import would resolve to instead
+        # test_foo: collected by pytest as a test file; input_file/output_file/tmp_path: names used inside the stubs
+        for name in ("json", "os", "shutil", "snakemake", "test_foo", "input_file", "output_file", "tmp_path"):
+            with self.subTest(name=name):
+                with self.assertRaises(SystemExit) as cm:
+                    self.create_rule(name, script=True)
+                self.assertEqual(cm.exception.code, 8)
+                self.assertFalse(os.path.exists(self.path("workflow", "rules", f"{name}.smk")))
+                self.assertFalse(os.path.exists(self.path("workflow", "scripts", f"{name}.py")))
+
+    def test_module_names_are_allowed_without_script(self):
+        self.create_rule("json")
+        self.assertIn("rule json:", self.read("workflow", "rules", "json.smk"))
+
     def test_cli_script_flag(self):
         result = CliRunner().invoke(cli, ["create-rule", "-c", "cnv_json", "-t", "cnv_report", "-m", "testmod",
                                           "-a", "a", "-e", "e", "-o", self.tempdir, "--script"])

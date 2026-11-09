@@ -9,6 +9,7 @@ import glob
 import gzip
 import logging
 import jinja2
+import importlib.util
 import json
 import keyword
 import pathlib
@@ -152,6 +153,10 @@ class PipelineCreate(object):
         )
 
 
+# Names used inside hydra_genetics/script-template, a script named after one of them would break the stubs
+SCRIPT_STUB_NAMES = {"input_file", "output_file", "tmp_path"}
+
+
 class RuleCreate(object):
     """Creates a hydra-genetics rule.
     Args:
@@ -234,6 +239,13 @@ class RuleCreate(object):
         if self.script:
             if not self.command.isidentifier() or keyword.iskeyword(self.command):
                 log.error(f"'{self.command}' is not a valid Python module/function name, required with --script")
+                sys.exit(8)
+            if self.command.startswith("test_") or self.command in SCRIPT_STUB_NAMES:
+                log.error(f"'{self.command}' can not be used with --script: it clashes with the generated script/test stubs")
+                sys.exit(8)
+            if importlib.util.find_spec(self.command) is not None:
+                log.error(f"'{self.command}' can not be used with --script: it shadows the existing Python module "
+                          f"'{self.command}', which the generated test would import instead")
                 sys.exit(8)
             for script_file in output_script_files.values():
                 if os.path.exists(script_file):

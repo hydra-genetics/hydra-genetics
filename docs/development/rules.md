@@ -24,7 +24,8 @@ hydra-genetics create-rule -c picard_mark_duplicates -t picard -m alignment -a m
 With `--script` the rule runs `workflow/scripts/<command>.py` through `script:` instead of a wrapper. The rule is named
 exactly after `--command`, and `--tool` (optional) only chooses which `.smk` file the rule is added to. Stub files
 `workflow/scripts/<command>.py` and `workflow/scripts/test_<command>.py` are created; the command fails without writing
-anything if either already exists. The command must be a valid Python name.
+anything if either already exists. The command must be a valid Python name that does not start with `test_`
+and is not the name of an existing Python module (ex `json`, `os`, `snakemake`), since the generated test imports it.
 ```bash
 hydra-genetics create-rule -c cnv_report -m cnv -a my_name -e name@email.com --script
 hydra-genetics create-rule -c cnv_json -t cnv_report -m cnv -a my_name -e name@email.com --script

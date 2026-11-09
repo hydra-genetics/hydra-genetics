@@ -151,7 +151,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     required=True,
     callback=validate_rule_name_prompt,
     type=str,
-    help="command that will be run, will be used to name the rule",
+    help="command that will be run, will be used to name the rule (with --script it is the full rule name)",
 )
 @click.option(
     "-t",
@@ -161,7 +161,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     type=str,
     default=None,
     help="tool that will be used to run the command, if provided it will be used during the naming of the "
-         "rule, e.g., samtools, optional",
+         "rule, e.g., samtools, optional. With --script it only selects the .smk file and is not added to the rule name",
 )
 @click.option(
     "-m",
@@ -192,8 +192,14 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
         "--outdir",
         type=str,
         help="Output directory where the module is located (default: current dir)")
-def create_rule(command, tool, module, author, email, outdir):
-    rule = RuleCreate(command, module, author, email, tool, outdir)
+@click.option(
+        "--script",
+        is_flag=True,
+        default=False,
+        help="create a rule that runs a Python script: the rule is named after --command, --tool (if given) only "
+             "selects the .smk file, and stub workflow/scripts/<command>.py and test_<command>.py are created")
+def create_rule(command, tool, module, author, email, outdir, script):
+    rule = RuleCreate(command, module, author, email, tool, outdir, script)
     rule.init_rule()
 
 

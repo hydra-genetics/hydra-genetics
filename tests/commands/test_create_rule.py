@@ -5,6 +5,9 @@ import sys
 import tempfile
 import unittest
 
+from click.testing import CliRunner
+
+from hydra_genetics.__main__ import cli
 from hydra_genetics.commands.create import PipelineCreate, RuleCreate
 
 
@@ -108,3 +111,10 @@ class TestCreateRule(unittest.TestCase):
                     self.create_rule(name, script=True)
                 self.assertEqual(cm.exception.code, 8)
                 self.assertFalse(os.path.exists(self.path("workflow", "rules", f"{name}.smk")))
+
+    def test_cli_script_flag(self):
+        result = CliRunner().invoke(cli, ["create-rule", "-c", "cnv_json", "-t", "cnv_report", "-m", "testmod",
+                                          "-a", "a", "-e", "e", "-o", self.tempdir, "--script"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("rule cnv_json:", self.read("workflow", "rules", "cnv_report.smk"))
+        self.assertTrue(os.path.exists(self.path("workflow", "scripts", "cnv_json.py")))

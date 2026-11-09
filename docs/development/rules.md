@@ -11,13 +11,27 @@ hydra-genetics create-rule -c picard_mark_duplicates -t picard -m alignment -a m
 ```
 | **Option** | **Description** |
 |--------|-------------|
-| -c, --command TEXT | command that will be run, will be used to name the rule [required] |
-| -t, --tool TEXT | tool that will be used to run the command, if provided it will be used during the naming of the rule, ex samtools |
+| -c, --command TEXT | command that will be run, will be used to name the rule (with `--script` it is the full rule name) [required] |
+| -t, --tool TEXT | tool that will be used to run the command, if provided it will be used during the naming of the rule, ex samtools. <br/> With `--script` it only selects the .smk file |
 | -m, --module TEXT | name module/workflow where rule will be added. Expected folder structure is module_name/workflow/, <br/> the rule will be added to a subfolder named rules, env.yaml to a subfolder named envs. [required] |
 | -a, --author TEXT | Name of the main author(s) [required] |
 | -e, --email TEXT | E-mail(s) of the main author(s) [required] |
 | -o, --outdir TEXT | Output directory for where module is located (default: current dir) |
+| --script | Create a rule that runs a Python script, see [Script rules](#script-rules) |
 | --help | Show help message |
+
+### Script rules
+With `--script` the rule runs `workflow/scripts/<command>.py` through `script:` instead of a wrapper. The rule is named
+exactly after `--command`, and `--tool` (optional) only chooses which `.smk` file the rule is added to. Stub files
+`workflow/scripts/<command>.py` and `workflow/scripts/test_<command>.py` are created; the command fails without writing
+anything if either already exists. The command must be a valid Python name that does not start with `test_`
+and is not the name of an existing Python module (ex `json`, `os`, `snakemake`), since the generated test imports it.
+```bash
+hydra-genetics create-rule -c cnv_report -m cnv -a my_name -e name@email.com --script
+hydra-genetics create-rule -c cnv_json -t cnv_report -m cnv -a my_name -e name@email.com --script
+```
+This gives the rules `cnv_report` and `cnv_json` in `workflow/rules/cnv_report.smk`, using
+`workflow/scripts/cnv_report.py` and `workflow/scripts/cnv_json.py`.
 
 ## Example rule (`workflow/rules/example_rule.smk`)
 All parts of the example rule should always be present, with `wrapper/script/shell/run` replaced by one of the execution types.

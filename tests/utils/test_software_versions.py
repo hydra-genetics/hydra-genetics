@@ -218,6 +218,8 @@ class TestPipelineVersionFiles(TempDirTestCase):
         pipeline_versions = {"pipeline": {"version": "v1.2.3", "commit_id": "abc"}}
         touched = software_versions.touch_pipeline_version_file_name(pipeline_versions, date_string="20240101")
         exported = software_versions.export_pipeline_version_as_file(pipeline_versions, date_string="20240101")
+        # the caller's dict is not modified
+        self.assertEqual(pipeline_versions, {"pipeline": {"version": "v1.2.3", "commit_id": "abc"}})
         self.assertEqual(touched, [os.path.join("versions/software_20240101", "pipeline__v1.2.3_mqc_versions.yaml")])
         self.assertEqual(exported, touched)
         with open(exported[0]) as fh:

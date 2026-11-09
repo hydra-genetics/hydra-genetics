@@ -105,3 +105,13 @@ class TestCreatePipeline(unittest.TestCase):
             with self.subTest(name=name):
                 with open(os.path.join(workflows, name)) as fh:
                     self.assertNotIn("master", fh.read())
+
+    def test_readme_instructions_match_generated_pipeline(self):
+        with open(os.path.join(self.create_pipeline(), "README.md")) as fh:
+            readme = fh.read()
+        # the Snakefile lives in workflow/, relative to .tests/integration
+        self.assertIn("snakemake -s ../../workflow/Snakefile", readme)
+        # the module example must use the pipeline's own name and a github owner/repo
+        self.assertNotIn("prealignment", readme)
+        self.assertIn("module test:", readme)
+        self.assertIn('"hydra-genetics/test",', readme)

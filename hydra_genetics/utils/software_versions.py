@@ -251,12 +251,13 @@ def export_software_version_as_file(
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
     output_file = os.path.join(directory, f"{file_name}")
+    # a NOTE is written as a yaml comment, not as a software version
+    versions = {name: {s: v for s, v in software.items() if s != "NOTE"} for name, software in software_dict.items()}
+    notifications = [software["NOTE"] for software in software_dict.values() if "NOTE" in software]
     with open(output_file, "w") as writer:
-        writer.write(yaml.dump(software_dict))
-        for name in software_dict:
-            notification = software_dict[name].pop("NOTE", None)
-            if notification is not None:
-                writer.write(f"# {notification}")
+        writer.write(yaml.dump(versions))
+        for notification in notifications:
+            writer.write(f"# {notification}\n")
     return output_file
 
 
@@ -284,7 +285,7 @@ def touch_software_version_file(config, directory="versions/software", file_name
         date_string = datetime.now().strftime("%Y%m%d")
     if directory is not None and len(directory) > 0:
         date_string = f"_{date_string}"
-        directory = f"{directory}{date_string}"
+    directory = f"{directory}{date_string}"
     if len(directory) > 0 and not os.path.isdir(directory):
         os.makedirs(directory)
     output_file = os.path.join(directory, f"{file_name}")

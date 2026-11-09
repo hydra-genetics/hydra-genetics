@@ -33,5 +33,10 @@ rule {{ name }}:
         config.get("{{ name }}", {}).get("container", config["default_container"])
     message:
         "{rule}: do stuff on {input.input1}"
+{%- if script %}
+    script:
+        "../scripts/{{ command }}.py"
+{%- else %}
     wrapper:
         "..."
+{%- endif %}

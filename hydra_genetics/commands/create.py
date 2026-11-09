@@ -10,6 +10,7 @@ import gzip
 import logging
 import jinja2
 import json
+import keyword
 import pathlib
 import os
 import re
@@ -160,12 +161,15 @@ class RuleCreate(object):
         author (str): Authors name
         email (str): Authors email
         outdir (str): Path to the local output directory.
+        script (bool): create a rule that runs workflow/scripts/<command>.py, plus a stub script and test
 
-        if a tool and command are both provided the rule will be named tool_command
+        if a tool and command are both provided the rule will be named tool_command, unless script is set:
+        then the rule is named command and tool only selects the .smk file
     """
-    def __init__(self, command, module, author, email, tool=None, outdir=None):
+    def __init__(self, command, module, author, email, tool=None, outdir=None, script=False):
         self.command = command
         self.tool = tool
+        self.script = script
         self.module_name = module
         self.author = author
         self.email = email
@@ -208,7 +212,8 @@ class RuleCreate(object):
             log.info(f"Creating rule: '{output_rules}/{self.name}.smk'")
             output_rule = os.path.join(output_rules, f"{self.name}.smk")
         else:
-            self.name = f"{self.tool}_{self.name}"
+            if not self.script:
+                self.name = f"{self.tool}_{self.name}"
             self.filename_rulename = f"{self.tool}__{self.name}"
             if os.path.exists(os.path.join(output_rules, f"{self.tool}.smk")):
                 log.info(f"Adding entry {self.name} to smk '{outdir}/{self.tool}.smk'")
@@ -220,6 +225,20 @@ class RuleCreate(object):
         if os.path.exists(output_rule) and self.tool is None:
             log.error(f"Rule already exists '{output_rule}'")
             sys.exit(4)
+
+        output_scripts = os.path.join(outdir_workflow, "scripts")
+        output_script_files = {
+            "script.py": os.path.join(output_scripts, f"{self.command}.py"),
+            "test_script.py": os.path.join(output_scripts, f"test_{self.command}.py"),
+        }
+        if self.script:
+            if not self.command.isidentifier() or keyword.iskeyword(self.command):
+                log.error(f"'{self.command}' is not a valid Python module/function name, required with --script")
+                sys.exit(8)
+            for script_file in output_script_files.values():
+                if os.path.exists(script_file):
+                    log.error(f"Script already exists '{script_file}'")
+                    sys.exit(7)
 
         if not os.path.exists(output_schemas):
             log.info(f"Creating schema folder {output_schemas}")
@@ -321,6 +340,17 @@ class RuleCreate(object):
                 with open(output_path, "w") as fh:
                     log.info(f"Writing to new output file: '{output_path}'")
                     fh.write(rendered_output)
+        if self.script:
+            if not os.path.exists(output_scripts):
+                log.info(f"Creating scripts folder {output_scripts}")
+                os.makedirs(output_scripts)
+            script_env = jinja2.Environment(
+                loader=jinja2.PackageLoader("hydra_genetics", "script-template"), keep_trailing_newline=True
+            )
+            for template_fn, output_path in output_script_files.items():
+                log.info(f"Writing script file: '{output_path}'")
+                with open(output_path, "w") as fh:
+                    fh.write(script_env.get_template(template_fn).render(object_attrs))
         snakefile = os.path.join(outdir_workflow, "Snakefile")
         with open(snakefile, 'r+') as fh:
             lines = fh.readlines()

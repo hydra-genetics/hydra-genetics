@@ -80,6 +80,23 @@ class TestCreateRule(unittest.TestCase):
                     self.create_rule(command, tool="samtools")
                 self.assertEqual(cm.exception.code, 6)
 
+    def test_wrapper_rule_layout_is_unchanged(self):
+        # pins the whitespace around the script/wrapper switch in skeleton_rule.smk
+        self.create_rule("sort", tool="samtools")
+        self.create_rule("index", tool="samtools")
+        smk = self.read("workflow", "rules", "samtools.smk")
+        tail = '    message:\n        "{rule}: do stuff on {input.input1}"\n    wrapper:\n        "..."\n'
+        self.assertIn(tail + "\n\nrule samtools_index:\n", smk)
+        self.assertTrue(smk.endswith(tail))
+
+    def test_script_rule_without_tool_rejects_existing_smk(self):
+        self.create_rule("cnv_json")
+        with self.assertRaises(SystemExit) as cm:
+            self.create_rule("cnv_json", script=True)
+        self.assertEqual(cm.exception.code, 4)
+        self.assertFalse(os.path.exists(self.path("workflow", "scripts", "cnv_json.py")))
+        self.assertFalse(os.path.exists(self.path("workflow", "scripts", "test_cnv_json.py")))
+
     def test_script_rules_in_tool_file(self):
         self.create_rule("cnv_report", script=True)
         self.create_rule("cnv_json", tool="cnv_report", script=True)
@@ -102,7 +119,7 @@ class TestCreateRule(unittest.TestCase):
         self.assertIn("rule samtools_sort:", smk)
         self.assertIn("wrapper:", smk)
         self.assertIn("rule stats_json:", smk)
-        self.assertIn('\n    script:\n        "../scripts/stats_json.py"\n', smk)
+        self.assertTrue(smk.endswith('"\n    script:\n        "../scripts/stats_json.py"\n'), repr(smk[-80:]))
         self.assertIn('\n    wrapper:\n        "..."\n', smk)
 
     def test_script_stubs_pass_pipeline_ci(self):

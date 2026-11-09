@@ -127,12 +127,13 @@ class TestCreatePipeline(unittest.TestCase):
         env = {**os.environ, "PYTHONPATH": hydra_genetics_root}
         command = [sys.executable, "-m", "snakemake", "-s", "../../workflow/Snakefile", "-j", "1",
                    "--configfiles", "../../config/config.yaml", "config/config.yaml"]
-        subprocess.run(command + ["-n"], cwd=integration, env=env, check=True, capture_output=True)
+        dry_run = subprocess.run(command + ["-n"], cwd=integration, env=env, capture_output=True, text=True)
+        self.assertEqual(dry_run.returncode, 0, dry_run.stderr)
         # with a timestamp in the path, the next parse would create a new directory
         time.sleep(1.1)
         # the job itself may fail, the template's copy rule uses GNU cp options, but the job process must have run
-        subprocess.run(command + ["--cluster", "bash"], cwd=integration, env=env, capture_output=True)
-        self.assertTrue(os.path.isfile(os.path.join(integration, "logs", "_copy__copy_samples_tsv_samples.tsv.log")))
+        run = subprocess.run(command + ["--cluster", "bash"], cwd=integration, env=env, capture_output=True, text=True)
+        self.assertTrue(os.path.isfile(os.path.join(integration, "logs", "_copy__copy_samples_tsv_samples.tsv.log")), run.stderr)
         versions = os.path.join(integration, "results", "versions")
         archives = [name for name in os.listdir(versions) if name.startswith("software_")]
         # only the run, not the dry run or the cluster job, creates an archive

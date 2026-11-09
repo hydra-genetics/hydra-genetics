@@ -55,7 +55,7 @@ The workflow repository contains a small test dataset `.tests/integration` which
 
 ```bash
 $ cd .tests/integration
-$ snakemake -s ../../Snakefile --configfiles ../../config/config.yaml config/config.yaml -j1 --use-singularity
+$ snakemake -s ../../workflow/Snakefile --configfiles ../../config/config.yaml config/config.yaml -j1 --use-singularity
 ```
 `../../config/config.yaml` is the original config-file, while `config/config.yaml` is the test config. By defining two config-files the latter overwrites any overlapping variables in the first config-file.
 ## :rocket: Usage
@@ -65,10 +65,10 @@ To use this module in your workflow, follow the description in the
 Add the module to your `Snakefile` like so:
 
 ```bash
-module prealignment:
+module {{ short_name }}:
     snakefile:
         github(
-            "{{ short_name }}",
+            "hydra-genetics/{{ short_name }}",
             path="workflow/Snakefile",
             tag="1.0.0",
         )

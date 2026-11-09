@@ -21,13 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.8
+      # the newest python snakemake 7 runs on, it can't parse f-strings in .smk files on python 3.12+
+      - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
-          python-version: 3.8
-      - name: Add conda to system path
-        run: |
-          echo $CONDA/bin >> $GITHUB_PATH
+          python-version: "3.11"
       - name: Install dependencies tests
         run: |
           pip install -e .

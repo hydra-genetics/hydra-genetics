@@ -269,7 +269,7 @@ class RuleCreate(object):
         if self.append_rule:
             with open(output_rule, 'r') as lines:
                 for line in lines:
-                    if self.name in line:
+                    if re.match(rf"rule {re.escape(self.name)}:", line):
                         log.error(f"rule {self.name} already found in file {output_rule}")
                         exit(6)
         log.info("Adding folder and files")

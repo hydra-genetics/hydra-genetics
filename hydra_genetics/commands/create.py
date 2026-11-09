@@ -228,8 +228,8 @@ class RuleCreate(object):
 
         output_scripts = os.path.join(outdir_workflow, "scripts")
         output_script_files = {
-            "script.py": os.path.join(output_scripts, f"{self.command}.py"),
-            "test_script.py": os.path.join(output_scripts, f"test_{self.command}.py"),
+            "script.py.jinja": os.path.join(output_scripts, f"{self.command}.py"),
+            "test_script.py.jinja": os.path.join(output_scripts, f"test_{self.command}.py"),
         }
         if self.script:
             if not self.command.isidentifier() or keyword.iskeyword(self.command):

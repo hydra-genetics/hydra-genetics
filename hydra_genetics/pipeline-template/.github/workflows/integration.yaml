@@ -2,7 +2,7 @@ name: small integration test
 
 # Controls when the action will run.
 on:
-   # Triggers the workflow on push or pull request events but only for the master and develop branch
+   # Triggers the workflow on push or pull request events but only for the main and develop branch
   push:
     branches:
      - develop

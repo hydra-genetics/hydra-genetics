@@ -56,7 +56,7 @@ The `workflow` folder contains the actual pipeline with all the rules, scripts, 
 │       ├── release-please.yaml
 │       ├── snakefmt.yaml
 │       ├── snakemake-dry-run.yaml
-│       └── test-build-mkdocs
+│       └── test-build-mkdocs.yaml
 ├── .gitignore
 ├── .readthedocs.yaml
 ├── .tests

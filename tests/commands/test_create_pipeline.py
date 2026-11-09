@@ -90,3 +90,18 @@ class TestCreatePipeline(unittest.TestCase):
             f"Installed snakemake {snakemake.__version__} does not satisfy the default pipeline requirement "
             f"snakemake{requirement}, update DEFAULT_MIN_SNAKEMAKE_VERSION in hydra_genetics/commands/create.py",
         )
+
+    def test_github_workflows_have_yaml_extension(self):
+        # GitHub only runs workflow files with a .yml or .yaml extension
+        workflows = os.path.join(self.create_pipeline(), ".github", "workflows")
+        for name in os.listdir(workflows):
+            with self.subTest(name=name):
+                self.assertTrue(name.endswith((".yml", ".yaml")), f"{name} will never run on GitHub")
+
+    def test_github_workflows_target_main_branch(self):
+        # create-pipeline initialises the repository with the branches main and develop, there is no master
+        workflows = os.path.join(self.create_pipeline(), ".github", "workflows")
+        for name in os.listdir(workflows):
+            with self.subTest(name=name):
+                with open(os.path.join(workflows, name)) as fh:
+                    self.assertNotIn("master", fh.read())

@@ -120,6 +120,8 @@ class TestCreatePipeline(unittest.TestCase):
         self.assertIn('"hydra-genetics/test",', readme)
 
     @unittest.skipIf(int(snakemake.__version__.split(".")[0]) >= 8, "pipelines are run with snakemake <8")
+    # snakemake 7 puts spaces inside f-strings in .smk files on python 3.12+, where f-strings are split into tokens
+    @unittest.skipIf(sys.version_info >= (3, 12), "snakemake <8 can't parse f-strings in .smk files on python 3.12+")
     def test_version_files_have_paths_independent_of_parse_time(self):
         # snakemake parses the Snakefile again for each dry run and in every cluster job, here run with "bash"
         integration = os.path.join(self.create_pipeline(), ".tests", "integration")

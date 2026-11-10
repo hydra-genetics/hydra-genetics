@@ -10,6 +10,6 @@ pycodestyle
 pysam
 pytest
 rich==10.9.0
-# snakemake 7 imports pkg_resources, which setuptools 81 removed
+# snakemake 7 imports pkg_resources, which setuptools 82 removed (81 warns and recommends <81)
 setuptools<81
 snakemake==7.32.4

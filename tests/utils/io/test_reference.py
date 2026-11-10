@@ -140,3 +140,11 @@ class TestReference(unittest.TestCase):
         self.assertEqual(fetched, [])
         self.assertEqual(failed, [os.path.join(self.outdir, "data")])
         self.assertFalse(os.path.exists(os.path.join(self.outdir, "data")))
+
+    def test_fetch_reference_data_folder_missing_content_file_is_logged(self):
+        with self.assertLogs(level="WARNING") as logs:
+            self.fetch_folder({
+                "ref/genome.fa": hashlib.md5(self.genome).hexdigest(),
+                "ref/genome.fa.fai": "0" * 32,
+            })
+        self.assertTrue(any("ref/genome.fa.fai" in m and "not found" in m for m in logs.output), logs.output)

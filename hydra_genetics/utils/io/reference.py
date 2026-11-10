@@ -367,7 +367,7 @@ def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=N
                 failed_files.append(file)
                 failed += 1
         else:
-            logging.debug(f"{full_file_path} not found")
+            logging.warning(f"{file}: listed in content_checksum but not found in {print_path_name or parent_dir or './'}")
             files_not_found.append(file)
             not_found += 1
     logging.debug(f"folder content validation, valid: {passed}, invalid {failed}, missing {not_found}")

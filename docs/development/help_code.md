@@ -42,20 +42,22 @@ pipeline_version = get_pipeline_version(workflow, pipeline_name="Twist_Solid")
 #     }
 # }
 
-date_string = datetime.now().strftime('%Y%m%d')
 # This will create a (empty) version file that can be defined as input to
-# multiqc, will be populated with version during onstart (before the pipeline starts)
-version_files = touch_pipeline_version_file_name(pipeline_version, date_string=date_string)
+# multiqc, will be populated with version during onstart (before the pipeline starts).
+# date_string="" gives a directory without a date. Snakemake parses the Snakefile again in every cluster
+# job, so a timestamp computed here would give each job its own paths.
+version_files = touch_pipeline_version_file_name(pipeline_version, date_string="")
 add_version_files_to_multiqc(config, version_files)
 
-# onstart will also prevent the functions from
-# running twice.
+# onstart only runs once, in the main process, before the pipeline starts
 onstart:
     # Additional variables that can be set
     # - directory, default value: versions/software
     # - file_name_ending, default value: mqc_versions.yaml
-    # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-    export_pipeline_version_as_file(pipeline_version, date_string=date_string)
+    # Write the file that multiqc reads and a copy in a timestamped archive for this run
+    date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+    for run_date in ["", date_string]:
+        export_pipeline_version_as_file(pipeline_version, date_string=run_date)
 ```
 
 **Folder and file structure**
@@ -63,9 +65,10 @@ onstart:
 Example:
 
 ```bash
-versions/software_20210403/
+versions/software/
 |--Twist_Solid__v1.0.0_mqc_versions.yaml
-
+versions/software_20210403--10-15-02/
+|--Twist_Solid__v1.0.0_mqc_versions.yaml
 ```
 
 ### Tool versions
@@ -81,11 +84,11 @@ from hydra_genetics.utils.software_versions import use_container
 from hydra_genetics.utils.software_versions import touch_software_version_file
 
 
-date_string = datetime.now().strftime('%Y%m%d')
 # This will create a (empty) version files that can be defined as input to
-# multiqc, will be populated with version during onstart (before the pipeline starts)
+# multiqc, will be populated with version during onstart (before the pipeline starts).
+# Use the same directory and date_string here as in export_software_version_as_file.
 if use_container(workflow):
-    version_files = [touch_software_version_file(config, date_string=date_string, directory="results/versions/software_version")]
+    version_files = [touch_software_version_file(config, date_string="")]
     add_version_files_to_multiqc(config, version_files)
 
 # Use onstart to make sure that containers have been downloaded
@@ -100,8 +103,10 @@ onstart:
         # Print all softwares used as files. Additional parameters that can be set
         # - directory, default value: versions/software
         # - file_name_ending, default value: mqc_versions.yaml
-        # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_software_version_as_file(software_info, date_string=date_string)
+        # Write the file that multiqc reads and a copy in a timestamped archive for this run
+        date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+        for run_date in ["", date_string]:
+            export_software_version_as_file(software_info, date_string=run_date)
 ```
 
 **Folder and file structure**
@@ -110,7 +115,9 @@ Example output
 
 ```bash
 # Softwares
-versions/software_20210403/
+versions/software/
+|--softwares_mqc_versions.yaml
+versions/software_20210403--10-15-02/
 |--softwares_mqc_versions.yaml
 ```
 

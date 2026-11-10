@@ -2,7 +2,6 @@ import hashlib
 import os
 import shutil
 import tempfile
-import time
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -94,6 +93,10 @@ class TestWorkflowSettings(unittest.TestCase):
         self.assertTrue(software_versions.use_container(SimpleNamespace(use_singularity=True)))
         self.assertFalse(software_versions.use_container(SimpleNamespace()))
 
+    def test_use_container_false_without_use_singularity(self):
+        # snakemake < 8 always has the attribute use_singularity, False unless --use-singularity is given
+        self.assertFalse(software_versions.use_container(SimpleNamespace(use_singularity=False)))
+
 
 class TestAddVersionFilesToMultiqc(unittest.TestCase):
     def test_files_are_added_to_every_report(self):
@@ -168,12 +171,38 @@ class TestAddSoftwareVersionToConfig(TempDirTestCase):
 
 
 class TestSoftwareVersionFiles(TempDirTestCase):
-    def test_touch_creates_and_updates_file(self):
+    def test_touch_creates_missing_file(self):
         software_versions._touch("file.txt")
         self.assertTrue(os.path.isfile("file.txt"))
+
+    def test_touch_leaves_existing_file_unchanged(self):
+        # snakemake parses the Snakefile again in every cluster job, a newer mtime would make multiqc outdated
+        with open("file.txt", "w") as fh:
+            fh.write("samtools: 1.9\n")
         os.utime("file.txt", (0, 0))
         software_versions._touch("file.txt")
-        self.assertGreater(os.path.getmtime("file.txt"), time.time() - 60)
+        self.assertEqual(os.path.getmtime("file.txt"), 0)
+        with open("file.txt") as fh:
+            self.assertEqual(fh.read(), "samtools: 1.9\n")
+
+    def test_empty_date_string_gives_directory_without_suffix(self):
+        kwargs = {"directory": "versions/software", "date_string": ""}
+        touched = software_versions.touch_software_version_file({}, **kwargs)
+        exported = software_versions.export_software_version_as_file({"common_1.0.1": {}}, **kwargs)
+        self.assertEqual(touched, os.path.join("versions/software", "softwares_mqc_versions.yaml"))
+        self.assertEqual(exported, touched)
+
+    def test_export_keeps_mtime_when_versions_are_unchanged(self):
+        # an unchanged version file must not make multiqc rerun
+        versions = {"common_1.0.1": {"samtools": "1.9"}}
+        output = software_versions.export_software_version_as_file(versions, date_string="20240101")
+        os.utime(output, (0, 0))
+        software_versions.export_software_version_as_file(versions, date_string="20240101")
+        self.assertEqual(os.path.getmtime(output), 0)
+        software_versions.export_software_version_as_file({"common_1.0.2": {"samtools": "1.10"}}, date_string="20240101")
+        self.assertGreater(os.path.getmtime(output), 0)
+        with open(output) as fh:
+            self.assertEqual(yaml.safe_load(fh), {"common_1.0.2": {"samtools": "1.10"}})
 
     def test_export_writes_versions(self):
         versions = {"common_1.0.1": {"samtools": "1.9", "picard": "2.20.1"}}
@@ -224,6 +253,21 @@ class TestPipelineVersionFiles(TempDirTestCase):
         self.assertEqual(exported, touched)
         with open(exported[0]) as fh:
             self.assertEqual(yaml.safe_load(fh), {"pipeline": "v1.2.3"})
+
+    def test_empty_date_string_gives_directory_without_suffix(self):
+        pipeline_versions = {"pipeline": {"version": "v1.2.3", "commit_id": "abc"}}
+        kwargs = {"directory": "versions/software", "date_string": ""}
+        touched = software_versions.touch_pipeline_version_file_name(pipeline_versions, **kwargs)
+        exported = software_versions.export_pipeline_version_as_file(pipeline_versions, **kwargs)
+        self.assertEqual(touched, [os.path.join("versions/software", "pipeline__v1.2.3_mqc_versions.yaml")])
+        self.assertEqual(exported, touched)
+
+    def test_export_keeps_mtime_when_version_is_unchanged(self):
+        pipeline_versions = {"pipeline": {"version": "v1.2.3", "commit_id": "abc"}}
+        output = software_versions.export_pipeline_version_as_file(pipeline_versions, date_string="20240101")[0]
+        os.utime(output, (0, 0))
+        software_versions.export_pipeline_version_as_file(pipeline_versions, date_string="20240101")
+        self.assertEqual(os.path.getmtime(output), 0)
 
 
 class TestPipelineVersion(TempDirTestCase):

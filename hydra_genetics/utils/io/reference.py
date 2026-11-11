@@ -18,6 +18,8 @@ RETRY_BACKOFF_FACTOR = 2
 RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
 # Attempts to download a file whose connection drops after the response started, which urllib3 does not retry
 DOWNLOAD_ATTEMPTS = 3
+# tarfile's extraction filters, Python 3.12+ and the 2023 security releases of 3.8-3.11
+HAS_DATA_FILTER = hasattr(tarfile, "data_filter")
 
 # Expected input file format
 # --------------------------
@@ -471,8 +473,11 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
         else:
             return False
     else:
-        with tarfile.open(temp_content_holder, mode="r|gz") as tar:
-            tar.extractall(extracted_content_path)
+        try:
+            extract_tar(temp_content_holder, extracted_content_path)
+        except tarfile.TarError as e:
+            logging.error(f"failed to extract {content_path}: {e}")
+            return False
         if 'content_checksum' in item:
             _, n_failed, n_not_found = checksum_validate_content(item['content_checksum'], extracted_content_path,
                                                                  content_path)
@@ -487,6 +492,32 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
         else:
             move_content(extracted_content_path, content_path)
             return True
+
+
+class UnsafeArchiveError(tarfile.TarError):
+    """An archive member would be written outside the destination folder, or is a link or a special file"""
+
+
+def extract_tar(archive, destination):
+    """
+    Extract a tar.gz archive into destination without writing anything outside of it.
+
+    Uses tarfile's data filter when available, otherwise checks every member first and rejects absolute paths,
+    paths that leave destination, links and special files. Raises a tarfile.TarError if the archive is unsafe or
+    can't be read.
+    """
+    with tarfile.open(archive, mode="r:gz") as tar:
+        if HAS_DATA_FILTER:
+            tar.extractall(destination, filter="data")
+        else:
+            root = os.path.realpath(destination)
+            for member in tar.getmembers():
+                path = os.path.realpath(os.path.join(root, member.name))
+                if os.path.isabs(member.name) or os.path.commonpath([root, path]) != root:
+                    raise UnsafeArchiveError(f"{member.name} would be extracted outside {destination}")
+                if not (member.isfile() or member.isdir()):
+                    raise UnsafeArchiveError(f"{member.name} is a link or a special file")
+            tar.extractall(destination)
 
 
 def move_content(old_path, new_path):

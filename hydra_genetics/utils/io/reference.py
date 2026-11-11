@@ -8,7 +8,16 @@ import tempfile
 import requests
 import time
 from requests import HTTPError
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 from urllib.parse import urlparse
+
+# Retries of failed requests, done by urllib3: connection errors, timeouts, and the status codes below
+RETRY_TOTAL = 5
+RETRY_BACKOFF_FACTOR = 2
+RETRY_STATUS_CODES = [429, 500, 502, 503, 504]
+# Attempts to download a file whose connection drops after the response started, which urllib3 does not retry
+DOWNLOAD_ATTEMPTS = 3
 
 # Expected input file format
 # --------------------------
@@ -75,7 +84,7 @@ def fetch_reference_data(validation_data, output_dir,
                         if not fetch_url_content(value['url'], temp_content_holder, tmpdirname):
                             failed.append(content_path)
                             continue
-                    except HTTPError as e:
+                    except requests.RequestException as e:
                         logging.error(f"failed to fetch resource at {value['url']}: {e}")
                         failed.append(content_path)
                         continue
@@ -138,36 +147,70 @@ def fetch_reference_data(validation_data, output_dir,
     return fetched, links, failed, skipped
 
 
+class InterruptedDownload(Exception):
+    """The connection failed while the response body was being downloaded"""
+
+
+def retrying_session():
+    """A requests session that retries connection errors, timeouts and RETRY_STATUS_CODES with exponential backoff"""
+    retry = Retry(total=RETRY_TOTAL, backoff_factor=RETRY_BACKOFF_FACTOR, status_forcelist=RETRY_STATUS_CODES,
+                  allowed_methods=["GET"], raise_on_status=False)
+    session = requests.Session()
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+
 def fetch_url_content(url, content_holder, tmpdir):
     """
     Fetch content from the provided url and make sure that the downloaded file
     has the correct md5 value.
     """
     def download_with_retry(target_url, target_path):
-        with requests.Session() as s:
-            for i in range(10):
-                r = s.get(target_url, stream=True, allow_redirects=True, timeout=60)
-                # A bot challenge (e.g. figshare) can't be passed by a script, retrying won't help
-                if "x-amzn-waf-action" in r.headers:
-                    r.close()
-                    logging.error(f"{target_url} is blocked by a bot challenge ({r.status_code}), "
-                                  "download it with a browser and place it at the entry's path")
-                    return False
-                if r.status_code == 202:
-                    logging.info(f"Server is preparing file (202). Waiting 10s... (Attempt {i+1})")
-                    r.close()
-                    time.sleep(10)
-                    continue
+        with retrying_session() as s:
+            for attempt in range(1, DOWNLOAD_ATTEMPTS + 1):
                 try:
-                    r.raise_for_status()
-                except HTTPError as e:
-                    e.status = e.response.status_code
-                    raise e
+                    return download_once(s, target_url, target_path)
+                except InterruptedDownload as e:
+                    if attempt == DOWNLOAD_ATTEMPTS:
+                        raise e.__cause__
+                    wait = RETRY_BACKOFF_FACTOR * 2 ** (attempt - 1)
+                    logging.warning(f"download of {target_url} was interrupted ({e.__cause__}), retrying in {wait}s "
+                                    f"(attempt {attempt + 1} of {DOWNLOAD_ATTEMPTS})")
+                    time.sleep(wait)
+
+    def download_once(s, target_url, target_path):
+        for i in range(10):
+            r = s.get(target_url, stream=True, allow_redirects=True, timeout=60)
+            # A bot challenge (e.g. figshare) can't be passed by a script, retrying won't help
+            if "x-amzn-waf-action" in r.headers:
+                r.close()
+                logging.error(f"{target_url} is blocked by a bot challenge ({r.status_code}), "
+                              "download it with a browser and place it at the entry's path")
+                return False
+            if r.status_code == 202:
+                logging.info(f"Server is preparing file (202). Waiting 10s... (Attempt {i+1})")
+                r.close()
+                time.sleep(10)
+                continue
+            try:
+                r.raise_for_status()
+            except HTTPError as e:
+                e.status = e.response.status_code
+                raise e
+            try:
                 with open(target_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=1024*1024):
                         if chunk:
                             f.write(chunk)
-                return True
+            except (requests.exceptions.ChunkedEncodingError, requests.ConnectionError, requests.Timeout) as e:
+                # urllib3 only retries until the response starts, a connection dropped while the body
+                # streams is retried by download_with_retry
+                raise InterruptedDownload() from e
+            finally:
+                r.close()
+            return True
         return False
 
     def copy_local_file(source_url, target_path):

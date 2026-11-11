@@ -197,7 +197,7 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
     type=bool,
     is_flag=True,
     default=False,
-    help="replace files even though they exist (skip checksum validation)",
+    help="download files again even if they exist with valid checksums (downloaded files are still validated)",
 )
 def download(validation_file, output_dir, force):
     validation_data = {}

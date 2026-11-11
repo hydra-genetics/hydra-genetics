@@ -367,7 +367,7 @@ def checksum_validate_content(file_checksums, parent_dir=None, print_path_name=N
                 failed_files.append(file)
                 failed += 1
         else:
-            logging.debug(f"{full_file_path} not found")
+            logging.warning(f"{file}: listed in content_checksum but not found in {print_path_name or parent_dir or './'}")
             files_not_found.append(file)
             not_found += 1
     logging.debug(f"folder content validation, valid: {passed}, invalid {failed}, missing {not_found}")
@@ -431,7 +431,9 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
         with tarfile.open(temp_content_holder, mode="r|gz") as tar:
             tar.extractall(extracted_content_path)
         if 'content_checksum' in item:
-            if checksum_validate_content(item['content_checksum'], extracted_content_path, content_path):
+            _, n_failed, n_not_found = checksum_validate_content(item['content_checksum'], extracted_content_path,
+                                                                 content_path)
+            if not n_failed and not n_not_found:
                 if compressed_folder is not None:
                     extracted_content_path = os.path.join(extracted_content_path, compressed_folder)
                     content_path = os.path.join(content_path, compressed_folder)

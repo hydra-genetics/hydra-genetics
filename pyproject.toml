@@ -34,6 +34,7 @@ dependencies = [
     "gitpython",
     "pyaml",
     "packaging",
+    "requests",
 ]
 
 [project.urls]

@@ -1,3 +1,5 @@
+import ast
+import inspect
 import os
 import re
 import shutil
@@ -13,12 +15,32 @@ from packaging.specifiers import SpecifierSet
 
 from hydra_genetics.__main__ import cli
 from hydra_genetics.commands.create import DEFAULT_MIN_SNAKEMAKE_VERSION, PipelineCreate, next_major_version
+from hydra_genetics.utils import samples, units
 
 
 def satisfies(specifier, version):
     # prereleases=True lets an installed prerelease, ex 7.9.0rc1, satisfy >=7.8.0,<8. Prereleases outside
     # the range, ex 7.8.0rc1 (before 7.8.0) or 8.0.0rc1 (excluded by <8, PEP 440), still fail.
     return SpecifierSet(specifier).contains(version, prereleases=True)
+
+
+def parsable_statements(source):
+    """Parse the top-level statements of a Snakefile that are plain Python, skipping Snakemake directives like onstart:"""
+    chunks, lines = [], []
+    for line in source.splitlines():
+        # a new top-level statement starts at column 0, closing brackets and comments excepted
+        if line and line[0] not in " \t)]}#" and lines:
+            chunks.append("\n".join(lines))
+            lines = []
+        lines.append(line)
+    chunks.append("\n".join(lines))
+    statements = []
+    for chunk in chunks:
+        try:
+            statements.append(ast.parse(chunk))
+        except SyntaxError:
+            pass
+    return statements
 
 
 class TestCreatePipeline(unittest.TestCase):
@@ -147,3 +169,19 @@ class TestCreatePipeline(unittest.TestCase):
         self.assertEqual(content, "test: null\n")
         with open(os.path.join(versions, archives[0], version_file)) as fh:
             self.assertEqual(fh.read(), content)
+
+    def test_common_smk_does_not_use_modules_leaked_by_star_imports(self):
+        # common.smk star-imports hydra_genetics.utils.samples and units, which also re-export the modules they import
+        leaked = {name for module in (samples, units) for name, value in vars(module).items()
+                  if inspect.ismodule(value) and not name.startswith("_")}
+        with open(os.path.join(self.create_pipeline(), "workflow", "rules", "common.smk")) as common:
+            statements = parsable_statements(common.read())
+        self.assertGreater(len(statements), 10)
+        bound, used = set(), set()
+        for statement in statements:
+            for node in ast.walk(statement):
+                if isinstance(node, (ast.Import, ast.ImportFrom)):
+                    bound.update((alias.asname or alias.name).split(".")[0] for alias in node.names)
+                elif isinstance(node, ast.Name):
+                    used.add(node.id)
+        self.assertEqual((leaked & used) - bound, set(), "common.smk uses a module it does not import itself")

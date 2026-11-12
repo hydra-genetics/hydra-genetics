@@ -1,0 +1,6 @@
+filters:
+  Mutect_SB:
+    description: "Test filter with missing information"
+    expression: "FORMAT:NA_ERROR:SB_mutect2:1 > 400"
+    soft_filter_flag: "SB_mutect2"
+    soft_filter: "True"

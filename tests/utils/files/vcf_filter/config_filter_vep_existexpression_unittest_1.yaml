@@ -1,0 +1,6 @@
+filters:
+  transcript:
+    description: "Transcript"
+    expression: "exist[XM_[0-9]+, VEP:Feature]"
+    soft_filter_flag: "transcript"
+    soft_filter: "True"

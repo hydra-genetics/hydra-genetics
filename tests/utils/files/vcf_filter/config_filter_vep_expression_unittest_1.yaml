@@ -1,0 +1,3 @@
+filters:
+  gene:
+    expression: "VEP:SYMBOL = SAMD11"

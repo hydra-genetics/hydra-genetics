@@ -43,10 +43,36 @@ def add_version_files_to_multiqc(config, file_list):
 
 
 def _touch(fname):
-    if os.path.exists(fname):
-        os.utime(fname, None)
-    else:
+    # an existing file is left as it is, snakemake parses the Snakefile again in every cluster job and
+    # a newer modification time would make the rules that use the file, ex multiqc, outdated
+    if not os.path.exists(fname):
         open(fname, "a").close()
+
+
+def _write_if_changed(fname, content):
+    # keep the modification time of a file whose content is the same, so that unchanged versions don't make
+    # the rules that use the file, ex multiqc, rerun
+    if os.path.isfile(fname):
+        with open(fname) as reader:
+            if reader.read() == content:
+                return
+    with open(fname, "w") as writer:
+        writer.write(content)
+
+
+def _version_directory(directory, date_string):
+    """
+    Return, and create, the directory version files are written to: directory followed by _date_string.
+    An empty date_string gives directory itself and None the current date.
+    """
+    if date_string is None:
+        date_string = datetime.now().strftime("%Y%m%d")
+    if directory is not None and len(directory) > 0 and len(date_string) > 0:
+        date_string = f"_{date_string}"
+    directory = f"{directory}{date_string}"
+    if len(directory) > 0 and not os.path.isdir(directory):
+        os.makedirs(directory)
+    return directory
 
 
 def get_container_prefix(workflow):
@@ -153,8 +179,8 @@ def use_container(workflow):
     Function used to check if containers are used,
     """
     if hasattr(workflow, "use_singularity"):
-        # For snakemake with version less then 8
-        return True
+        # For snakemake with version less then 8, True when run with --use-singularity
+        return bool(workflow.use_singularity)
     elif hasattr(workflow, "deployment_settings") and workflow.deployment_settings.deployment_method:
         # For snakemake with version 8 or newer
         from snakemake.settings import DeploymentMethod
@@ -241,22 +267,16 @@ def export_software_version_as_file(
     file_name: str
        file name to use for software logging
     date_string: str
-       a string that will be added to the folder name to make it unique
+       a string that will be added to the folder name to make it unique, ex a timestamp. An empty string
+       gives directory itself, None the current date
     """
-    if date_string is None:
-        date_string = datetime.now().strftime("%Y%m%d")
-    if directory is not None and len(directory) > 0:
-        date_string = f"_{date_string}"
-    directory = f"{directory}{date_string}"
-    if len(directory) > 0 and not os.path.isdir(directory):
-        os.makedirs(directory)
+    directory = _version_directory(directory, date_string)
     output_file = os.path.join(directory, f"{file_name}")
-    with open(output_file, "w") as writer:
-        writer.write(yaml.dump(software_dict))
-        for name in software_dict:
-            notification = software_dict[name].pop("NOTE", None)
-            if notification is not None:
-                writer.write(f"# {notification}")
+    # a NOTE is written as a yaml comment, not as a software version
+    versions = {name: {s: v for s, v in software.items() if s != "NOTE"} for name, software in software_dict.items()}
+    notifications = [software["NOTE"] for software in software_dict.values() if "NOTE" in software]
+    content = yaml.dump(versions) + "".join(f"# {notification}\n" for notification in notifications)
+    _write_if_changed(output_file, content)
     return output_file
 
 
@@ -277,16 +297,11 @@ def touch_software_version_file(config, directory="versions/software", file_name
     file_name: str
        file name to use for software version logging
     date_string: str
-       a string that will be added to the folder name to make it unique
+       a string that will be added to the folder name to make it unique, ex a timestamp. An empty string
+       gives directory itself, None the current date
     """
 
-    if date_string is None:
-        date_string = datetime.now().strftime("%Y%m%d")
-    if directory is not None and len(directory) > 0:
-        date_string = f"_{date_string}"
-        directory = f"{directory}{date_string}"
-    if len(directory) > 0 and not os.path.isdir(directory):
-        os.makedirs(directory)
+    directory = _version_directory(directory, date_string)
     output_file = os.path.join(directory, f"{file_name}")
     _touch(output_file)
 
@@ -362,23 +377,17 @@ def export_pipeline_version_as_file(
     file_name_ending: str
        a string that will be combined with the software name version key
     date_string: str
-       a string that will be added to the folder name to make it unique
+       a string that will be added to the folder name to make it unique, ex a timestamp. An empty string
+       gives directory itself, None the current date
     """
-    if date_string is None:
-        date_string = datetime.now().strftime("%Y%m%d")
-    if directory is not None and len(directory) > 0:
-        date_string = f"_{date_string}"
-    directory = f"{directory}{date_string}"
-    if len(directory) > 0 and not os.path.isdir(directory):
-        os.makedirs(directory)
+    directory = _version_directory(directory, date_string)
     output_file_list = []
     for pipeline_name in pipeline_version_dict:
         output_file = os.path.join(
             directory, f"{pipeline_name}__{pipeline_version_dict[pipeline_name]['version']}_{file_name_ending}"
         )
         output_file_list.append(output_file)
-        with open(output_file, "w") as writer:
-            writer.write(yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]["version"]}))
+        _write_if_changed(output_file, yaml.dump({pipeline_name: pipeline_version_dict[pipeline_name]["version"]}))
     return output_file_list
 
 
@@ -402,15 +411,10 @@ def touch_pipeline_version_file_name(
     file_name_ending: str
        a string that will be combined with the software name version key
     date_string: str
-       a string that will be added to the folder name to make it unique
+       a string that will be added to the folder name to make it unique, ex a timestamp. An empty string
+       gives directory itself, None the current date
     """
-    if date_string is None:
-        date_string = datetime.now().strftime("%Y%m%d")
-    if directory is not None and len(directory) > 0:
-        date_string = f"_{date_string}"
-    directory = f"{directory}{date_string}"
-    if len(directory) > 0 and not os.path.isdir(directory):
-        os.makedirs(directory)
+    directory = _version_directory(directory, date_string)
 
     output_file_list = []
     for pipeline_name in pipeline_version_dict:

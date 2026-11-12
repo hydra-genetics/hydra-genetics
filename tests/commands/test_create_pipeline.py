@@ -1,7 +1,12 @@
+import ast
+import inspect
 import os
 import re
 import shutil
+import subprocess
+import sys
 import tempfile
+import time
 import unittest
 
 import snakemake
@@ -10,12 +15,32 @@ from packaging.specifiers import SpecifierSet
 
 from hydra_genetics.__main__ import cli
 from hydra_genetics.commands.create import DEFAULT_MIN_SNAKEMAKE_VERSION, PipelineCreate, next_major_version
+from hydra_genetics.utils import samples, units
 
 
 def satisfies(specifier, version):
     # prereleases=True lets an installed prerelease, ex 7.9.0rc1, satisfy >=7.8.0,<8. Prereleases outside
     # the range, ex 7.8.0rc1 (before 7.8.0) or 8.0.0rc1 (excluded by <8, PEP 440), still fail.
     return SpecifierSet(specifier).contains(version, prereleases=True)
+
+
+def parsable_statements(source):
+    """Parse the top-level statements of a Snakefile that are plain Python, skipping Snakemake directives like onstart:"""
+    chunks, lines = [], []
+    for line in source.splitlines():
+        # a new top-level statement starts at column 0, closing brackets and comments excepted
+        if line and line[0] not in " \t)]}#" and lines:
+            chunks.append("\n".join(lines))
+            lines = []
+        lines.append(line)
+    chunks.append("\n".join(lines))
+    statements = []
+    for chunk in chunks:
+        try:
+            statements.append(ast.parse(chunk))
+        except SyntaxError:
+            pass
+    return statements
 
 
 class TestCreatePipeline(unittest.TestCase):
@@ -90,3 +115,73 @@ class TestCreatePipeline(unittest.TestCase):
             f"Installed snakemake {snakemake.__version__} does not satisfy the default pipeline requirement "
             f"snakemake{requirement}, update DEFAULT_MIN_SNAKEMAKE_VERSION in hydra_genetics/commands/create.py",
         )
+
+    def test_github_workflows_have_yaml_extension(self):
+        # GitHub only runs workflow files with a .yml or .yaml extension
+        workflows = os.path.join(self.create_pipeline(), ".github", "workflows")
+        for name in os.listdir(workflows):
+            with self.subTest(name=name):
+                self.assertTrue(name.endswith((".yml", ".yaml")), f"{name} will never run on GitHub")
+
+    def test_github_workflows_target_main_branch(self):
+        # create-pipeline initialises the repository with the branches main and develop, there is no master
+        workflows = os.path.join(self.create_pipeline(), ".github", "workflows")
+        for name in os.listdir(workflows):
+            with self.subTest(name=name):
+                with open(os.path.join(workflows, name)) as fh:
+                    self.assertNotIn("master", fh.read())
+
+    def test_readme_instructions_match_generated_pipeline(self):
+        with open(os.path.join(self.create_pipeline(), "README.md")) as fh:
+            readme = fh.read()
+        # the Snakefile lives in workflow/, relative to .tests/integration
+        self.assertIn("snakemake -s ../../workflow/Snakefile", readme)
+        # the module example must use the pipeline's own name and a github owner/repo
+        self.assertNotIn("prealignment", readme)
+        self.assertIn("module test:", readme)
+        self.assertIn('"hydra-genetics/test",', readme)
+
+    @unittest.skipIf(int(snakemake.__version__.split(".")[0]) >= 8, "pipelines are run with snakemake <8")
+    # snakemake 7 puts spaces inside f-strings in .smk files on python 3.12+, where f-strings are split into tokens
+    @unittest.skipIf(sys.version_info >= (3, 12), "snakemake <8 can't parse f-strings in .smk files on python 3.12+")
+    def test_version_files_have_paths_independent_of_parse_time(self):
+        # snakemake parses the Snakefile again for each dry run and in every cluster job, here run with "bash"
+        integration = os.path.join(self.create_pipeline(), ".tests", "integration")
+        hydra_genetics_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        env = {**os.environ, "PYTHONPATH": hydra_genetics_root}
+        command = [sys.executable, "-m", "snakemake", "-s", "../../workflow/Snakefile", "-j", "1",
+                   "--configfiles", "../../config/config.yaml", "config/config.yaml"]
+        dry_run = subprocess.run(command + ["-n"], cwd=integration, env=env, capture_output=True, text=True)
+        self.assertEqual(dry_run.returncode, 0, dry_run.stderr)
+        # with a timestamp in the path, the next parse would create a new directory
+        time.sleep(1.1)
+        # the job itself may fail, the template's copy rule uses GNU cp options, but the job process must have run
+        run = subprocess.run(command + ["--cluster", "bash"], cwd=integration, env=env, capture_output=True, text=True)
+        self.assertTrue(os.path.isfile(os.path.join(integration, "logs", "_copy__copy_samples_tsv_samples.tsv.log")), run.stderr)
+        versions = os.path.join(integration, "results", "versions")
+        archives = [name for name in os.listdir(versions) if name.startswith("software_")]
+        # only the run, not the dry run or the cluster job, creates an archive
+        self.assertEqual(len(archives), 1, os.listdir(versions))
+        version_file = "test__None_mqc_versions.yaml"
+        with open(os.path.join(versions, "software", version_file)) as fh:
+            content = fh.read()
+        # not a git repository, so the version is unknown
+        self.assertEqual(content, "test: null\n")
+        with open(os.path.join(versions, archives[0], version_file)) as fh:
+            self.assertEqual(fh.read(), content)
+
+    def test_common_smk_does_not_use_modules_leaked_by_star_imports(self):
+        # common.smk star-imports hydra_genetics.utils.samples and units, which also re-export the modules they import
+        leaked = {name for module in (samples, units) for name, value in vars(module).items()
+                  if inspect.ismodule(value) and not name.startswith("_")}
+        with open(os.path.join(self.create_pipeline(), "workflow", "rules", "common.smk")) as common:
+            statements = parsable_statements(common.read())
+        self.assertGreater(len(statements), 10)
+        bound, used = set(), set()
+        for statement in statements:
+            for node in ast.walk(statement):
+                if isinstance(node, (ast.Import, ast.ImportFrom)):
+                    bound.update((alias.asname or alias.name).split(".")[0] for alias in node.names)
+                elif isinstance(node, ast.Name):
+                    used.add(node.id)
+        self.assertEqual((leaked & used) - bound, set(), "common.smk uses a module it does not import itself")

@@ -15,6 +15,7 @@ from hydra_genetics.commands.create import (
     CreateInputFiles,
     CreateLongReadInputFiles,
     next_major_version,
+    _output_path,
 )
 import rich.console
 import rich.logging
@@ -56,6 +57,7 @@ def run():
 
 
 @click.group(help="CLI tool to prepare and initialize snakemake projects")
+@click.version_option(hydra_genetics.__version__, "-V", "--version", prog_name="hydra-genetics")
 @click.option("--verbose", is_flag=True, default=False, help="Print verbose output to the console.")
 @click.option("-l", "--log-file", help="Save a verbose log to a file.", metavar="<filename>")
 @click.option('--debug/--no-debug', default=False)
@@ -141,6 +143,7 @@ def validate_rule_name_prompt(ctx, opts, value):
 def create_pipeline(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir):
     pipeline = PipelineCreate(name, description, author, email, version, min_snakemake_version, git_user, no_git, force, outdir)
     pipeline.init_pipeline()
+    click.echo(f"Created pipeline '{pipeline.short_name}' in {pipeline.outdir}", err=True)
 
 
 @cli.command(short_help="add rule to project", context_settings={'show_default': True})
@@ -151,7 +154,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     required=True,
     callback=validate_rule_name_prompt,
     type=str,
-    help="command that will be run, will be used to name the rule",
+    help="command that will be run, will be used to name the rule (with --script it is the full rule name)",
 )
 @click.option(
     "-t",
@@ -161,7 +164,7 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
     type=str,
     default=None,
     help="tool that will be used to run the command, if provided it will be used during the naming of the "
-         "rule, e.g., samtools, optional",
+         "rule, e.g., samtools, optional. With --script it only selects the .smk file and is not added to the rule name",
 )
 @click.option(
     "-m",
@@ -192,9 +195,16 @@ def create_pipeline(name, description, author, email, version, min_snakemake_ver
         "--outdir",
         type=str,
         help="Output directory where the module is located (default: current dir)")
-def create_rule(command, tool, module, author, email, outdir):
-    rule = RuleCreate(command, module, author, email, tool, outdir)
+@click.option(
+        "--script",
+        is_flag=True,
+        default=False,
+        help="create a rule that runs a Python script: the rule is named after --command, --tool (if given) only "
+             "selects the .smk file, and stub workflow/scripts/<command>.py and test_<command>.py are created")
+def create_rule(command, tool, module, author, email, outdir, script):
+    rule = RuleCreate(command, module, author, email, tool, outdir, script)
     rule.init_rule()
+    click.echo(f"Created rule '{rule.name}' in module '{module}'", err=True)
 
 
 def default_adapter(platform):
@@ -335,6 +345,8 @@ def create_input_files(directory, outdir, post_file_modifier, platform, sample_t
                                        sample_regex, read_number_regex, adapters, data_json, data_columns,
                                        tc, force, default_barcode, validate, ask, th, nreads, every, min_file_size)
     input_files.init()
+    for name in ["samples", "units"]:
+        click.echo(f"Created {_output_path(input_files.outdir, name, post_file_modifier)}", err=True)
 
 
 cli.add_command(references)

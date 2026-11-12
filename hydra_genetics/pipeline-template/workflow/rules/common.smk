@@ -50,15 +50,20 @@ except WorkflowError as we:
         schema_section = ".".join(re.findall(r"\['([^']+)'\]", schema_hiearachy)[1::2])
         sys.exit(f"{error_msg} in {schema_section}")
 
-date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
 pipeline_version = get_pipeline_version(workflow, pipeline_name="{{ short_name }}")
-version_files = touch_pipeline_version_file_name(pipeline_version, date_string=date_string, directory="results/versions/software")
+# MultiQC reads the version files from a directory without a timestamp. Snakemake parses this file again
+# in every cluster job, so the paths given to MultiQC must not depend on when the file is parsed.
+version_files = touch_pipeline_version_file_name(pipeline_version, date_string="", directory="results/versions/software")
 if use_container(workflow):
-    version_files.append(touch_software_version_file(config, date_string=date_string, directory="results/versions/software"))
+    version_files.append(touch_software_version_file(config, date_string="", directory="results/versions/software"))
 add_version_files_to_multiqc(config, version_files)
 
 onstart:
-    export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/software")
+    # onstart only runs once per run, in the main process. The version files are written both to the
+    # directory MultiQC reads and to a timestamped archive, results/versions/software_<date_string>, of this run.
+    date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
+    for run_date in ["", date_string]:
+        export_pipeline_version_as_file(pipeline_version, date_string=run_date, directory="results/versions/software")
     # Without containers there is no software info to add, export the config as is
     update_config = config
     # Make sure that the user have the requested containers to be used
@@ -70,7 +75,8 @@ onstart:
         # - directory, default value: software_versions
         # - file_name_ending, default value: mqc_versions.yaml
         # date_string, a string that will be added to the folder name to make it unique (preferably a timestamp)
-        export_software_version_as_file(software_info, date_string=date_string, directory="results/versions/software")
+        for run_date in ["", date_string]:
+            export_software_version_as_file(software_info, date_string=run_date, directory="results/versions/software")
     # print config dict as a file. Additional parameters that can be set
     # output_file, default config
     # output_directory, default = None, i.e no folder
@@ -91,7 +97,7 @@ validate(samples, schema="../schemas/samples.schema.yaml")
 ### Read and validate units file
 
 units = (
-    pandas.read_table(config["units"], dtype=str)
+    pd.read_table(config["units"], dtype=str)
     .set_index(["sample", "type", "flowcell", "lane", "barcode"], drop=False)
     .sort_index()
 )

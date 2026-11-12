@@ -1,5 +1,49 @@
 # Changelog
 
+## [4.3.0](https://github.com/hydra-genetics/hydra-genetics/compare/v4.2.2...v4.3.0) (2026-11-12)
+
+
+### Features
+
+* **cli:** add --version flag and success messages for create commands ([56982ab](https://github.com/hydra-genetics/hydra-genetics/commit/56982ab7c3875f1dc04b75b423feef0d256a27a2))
+* **cli:** add --version flag and success messages for create commands ([3f8d3dd](https://github.com/hydra-genetics/hydra-genetics/commit/3f8d3dd7f8b08f7ed1aff9f83e5173ed9994eafe)), closes [#492](https://github.com/hydra-genetics/hydra-genetics/issues/492)
+* create rule script ([aaf30b7](https://github.com/hydra-genetics/hydra-genetics/commit/aaf30b7c0a78657c1d6f0a63879615c64ef370c2))
+* **create-rule:** add --script CLI flag and docs ([#239](https://github.com/hydra-genetics/hydra-genetics/issues/239)) ([b5d8bf8](https://github.com/hydra-genetics/hydra-genetics/commit/b5d8bf8da826e04460a33b2331f42e9a6425c9ec))
+* **create-rule:** add script mode that names the rule by command ([#239](https://github.com/hydra-genetics/hydra-genetics/issues/239)) ([f5a08a3](https://github.com/hydra-genetics/hydra-genetics/commit/f5a08a36e55daa5327d7757f9a6272f3a8851ce4))
+
+
+### Bug Fixes
+
+* **create-pipeline:** correct module example and Snakefile path in template README ([68920d8](https://github.com/hydra-genetics/hydra-genetics/commit/68920d8b3bb4611e5ed61b14daa5e0407f560dd5))
+* **create-pipeline:** correct module example and Snakefile path in template README ([a478bab](https://github.com/hydra-genetics/hydra-genetics/commit/a478bab6ba9b0141baa3bb6938555083252c80af)), closes [#243](https://github.com/hydra-genetics/hydra-genetics/issues/243) [#244](https://github.com/hydra-genetics/hydra-genetics/issues/244)
+* **create-pipeline:** run template workflows on main and give mkdocs workflow a .yaml extension ([0fd5950](https://github.com/hydra-genetics/hydra-genetics/commit/0fd5950fa4e34820d7f10ade72fa15494343ee1e)), closes [#242](https://github.com/hydra-genetics/hydra-genetics/issues/242)
+* **create-rule:** detect duplicate rule names across the whole module ([18957e3](https://github.com/hydra-genetics/hydra-genetics/commit/18957e39149ffae0845fbad6609a114454e0cc64))
+* **create-rule:** detect duplicate rules by exact rule name ([b908825](https://github.com/hydra-genetics/hydra-genetics/commit/b908825e7119cbd1cd62080751f611cafe6cfbd0))
+* **create-rule:** keep script templates out of repo pytest and pycodestyle runs ([8d606e1](https://github.com/hydra-genetics/hydra-genetics/commit/8d606e19653c868ea01e7bbd97c07600e0621365))
+* **create-rule:** reject --script names that would break the generated stubs ([d1a0510](https://github.com/hydra-genetics/hydra-genetics/commit/d1a0510fb4d125c567238c4e56c81f2c42d1a9fc))
+* give MultiQC version files paths that do not depend on parse time ([1627b6d](https://github.com/hydra-genetics/hydra-genetics/commit/1627b6d61741e3c5a50a445b179b2baba81d6cc7))
+* keep NOTE out of version yaml and touch the file export writes ([02a2ecf](https://github.com/hydra-genetics/hydra-genetics/commit/02a2ecf626f44fba06068d708d222d8f1114bda4))
+* **references:** don't install extracted folders whose content checksums fail ([d222299](https://github.com/hydra-genetics/hydra-genetics/commit/d2222991d97dbc640d3f2020a29075b05de948f5))
+* **references:** don't install extracted folders whose content checksums fail ([6694a2f](https://github.com/hydra-genetics/hydra-genetics/commit/6694a2fe15c7c8f478606b37c3aaa046d192948b)), closes [#466](https://github.com/hydra-genetics/hydra-genetics/issues/466)
+* **references:** extract archives without writing outside the target folder ([6eff183](https://github.com/hydra-genetics/hydra-genetics/commit/6eff18319db725b588b5e2917bc4b86f4e807dbf)), closes [#467](https://github.com/hydra-genetics/hydra-genetics/issues/467)
+* **references:** reject links in archives, fail truncated archives, require urllib3&gt;=1.26 ([65eafa0](https://github.com/hydra-genetics/hydra-genetics/commit/65eafa03acac0f93451a8cd36905470e4db6419a))
+* **references:** retry network errors and fail only the affected entry ([bacf8a9](https://github.com/hydra-genetics/hydra-genetics/commit/bacf8a924787a1eba425bc93608dabc8ca3088ba))
+* **references:** retry network errors per entry and extract archives safely ([d234180](https://github.com/hydra-genetics/hydra-genetics/commit/d234180d9a58f7de728e6e06fb4593b4dad7ad68))
+* **references:** warn about files missing from a folder's content_checksum ([696de11](https://github.com/hydra-genetics/hydra-genetics/commit/696de11a809c50145b4689e7481d95c60014817b))
+* remove implicit dependencies on star-import leaks and on snakemake's requests ([ea57087](https://github.com/hydra-genetics/hydra-genetics/commit/ea57087750935561ab83708bebe531b3118d64d3))
+* remove implicit dependencies on star-import leaks and on snakemake's requests ([d73cc0d](https://github.com/hydra-genetics/hydra-genetics/commit/d73cc0daaa8d0ca387b7f76ca5828e77e325769e)), closes [#472](https://github.com/hydra-genetics/hydra-genetics/issues/472)
+* run template workflows on main and enable mkdocs build check ([ff3e575](https://github.com/hydra-genetics/hydra-genetics/commit/ff3e5750ed9a36aa14cf6b78f86c725b3c3943e8))
+* **software-versions:** allow version directories without date and keep unchanged files ([1051d3b](https://github.com/hydra-genetics/hydra-genetics/commit/1051d3b88214f5b148b1d0cf8c8fc85ad98d4003))
+* **software-versions:** keep NOTE out of version yaml and touch the file export writes ([ff0340b](https://github.com/hydra-genetics/hydra-genetics/commit/ff0340be7508837d45c7ae1329131d1fc4693d14)), closes [#375](https://github.com/hydra-genetics/hydra-genetics/issues/375)
+* **software-versions:** write each NOTE comment on its own line ([8b2ca3f](https://github.com/hydra-genetics/hydra-genetics/commit/8b2ca3fc0ee40dc458d7b3d5faa4a465b5c54adb))
+* **template:** cap setuptools below 81 in generated pipeline requirements ([cce51a7](https://github.com/hydra-genetics/hydra-genetics/commit/cce51a7600bee8dc845b394eb3d9ccd87944a8b2))
+* **template:** give multiqc version files paths that do not depend on parse time ([3e75701](https://github.com/hydra-genetics/hydra-genetics/commit/3e7570144cf69a7f89621fca84bf3eabad5d05c2)), closes [#400](https://github.com/hydra-genetics/hydra-genetics/issues/400)
+
+
+### Documentation
+
+* **create-pipeline:** integration workflow comment says it runs on push only ([449be15](https://github.com/hydra-genetics/hydra-genetics/commit/449be151494b4b4bf4f03d82e0f4b9fab2f353b6))
+
 ## [4.2.2](https://github.com/hydra-genetics/hydra-genetics/compare/v4.2.1...v4.2.2) (2026-11-06)
 
 

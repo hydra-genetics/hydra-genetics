@@ -34,7 +34,7 @@ dependencies = [
     "gitpython",
     "pyaml",
     "packaging",
-    "urllib3",
+    "urllib3>=1.26",
 ]
 
 [project.urls]

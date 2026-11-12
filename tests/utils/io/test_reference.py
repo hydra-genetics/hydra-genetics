@@ -219,3 +219,35 @@ class TestReference(unittest.TestCase):
                 extract_tar(archive, destination)
                 with open(os.path.join(destination, "ref", "genome.fa"), "rb") as f:
                     self.assertEqual(f.read(), self.genome)
+
+    def test_fetch_reference_data_folder_truncated_archive_fails_entry(self):
+        archive = os.path.join(self.tmpdir, "truncated.tar.gz")
+        with tarfile.open(archive, "w:gz") as tar:
+            for i in range(3):
+                data = os.urandom(200000)
+                info = tarfile.TarInfo(f"ref/file{i}")
+                info.size = len(data)
+                tar.addfile(info, io.BytesIO(data))
+        with open(archive, "rb") as f:
+            content = f.read()
+        with open(archive, "wb") as f:
+            f.write(content[:len(content) // 2])
+        fetched, links, failed, skipped = self.fetch_folder({"ref/file0": "0" * 32}, archive)
+        self.assertEqual(fetched, [])
+        self.assertEqual(failed, [os.path.join(self.outdir, "data")])
+
+    def test_extract_tar_rejects_symlink_inside(self):
+        # a link inside the folder passes the data filter, but copying the folder into place would follow it
+        archive = self.make_archive(self.symlink("ref/loop", "."))
+        for has_data_filter in [True, False]:
+            with self.subTest(has_data_filter=has_data_filter), \
+                    mock.patch.object(reference, "HAS_DATA_FILTER", has_data_filter and reference.HAS_DATA_FILTER):
+                with self.assertRaises(tarfile.TarError):
+                    extract_tar(archive, tempfile.mkdtemp(dir=self.tmpdir))
+
+    def test_fetch_reference_data_folder_with_symlink_fails_entry(self):
+        archive = self.make_archive(self.symlink("ref/loop", "."))
+        fetched, links, failed, skipped = self.fetch_folder({"ref/genome.fa": hashlib.md5(self.genome).hexdigest()}, archive)
+        self.assertEqual(fetched, [])
+        self.assertEqual(failed, [os.path.join(self.outdir, "data")])
+        self.assertFalse(os.path.exists(os.path.join(self.outdir, "data")))

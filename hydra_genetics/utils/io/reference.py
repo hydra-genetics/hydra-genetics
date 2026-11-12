@@ -7,6 +7,7 @@ import tarfile
 import tempfile
 import requests
 import time
+import zlib
 from requests import HTTPError
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -475,7 +476,8 @@ def extract_compressed_data(item, content_type, content_path, temp_content_holde
     else:
         try:
             extract_tar(temp_content_holder, extracted_content_path)
-        except tarfile.TarError as e:
+        except (tarfile.TarError, EOFError, OSError, zlib.error) as e:
+            # EOFError for a truncated archive, OSError and zlib.error for other broken gzip data
             logging.error(f"failed to extract {content_path}: {e}")
             return False
         if 'content_checksum' in item:
@@ -502,21 +504,23 @@ def extract_tar(archive, destination):
     """
     Extract a tar.gz archive into destination without writing anything outside of it.
 
-    Uses tarfile's data filter when available, otherwise checks every member first and rejects absolute paths,
-    paths that leave destination, links and special files. Raises a tarfile.TarError if the archive is unsafe or
-    can't be read.
+    Only regular files and folders are accepted: links and special files are rejected, also links inside
+    destination, since copying the folder into place would follow them. Paths are checked by tarfile's data filter
+    when available, otherwise every member is checked first and absolute paths and paths that leave destination are
+    rejected. Raises a tarfile.TarError if the archive is unsafe, EOFError or OSError if it can't be read.
     """
     with tarfile.open(archive, mode="r:gz") as tar:
-        if HAS_DATA_FILTER:
-            tar.extractall(destination, filter="data")
-        else:
-            root = os.path.realpath(destination)
-            for member in tar.getmembers():
+        root = os.path.realpath(destination)
+        for member in tar.getmembers():
+            if not (member.isfile() or member.isdir()):
+                raise UnsafeArchiveError(f"{member.name} is a link or a special file")
+            if not HAS_DATA_FILTER:
                 path = os.path.realpath(os.path.join(root, member.name))
                 if os.path.isabs(member.name) or os.path.commonpath([root, path]) != root:
                     raise UnsafeArchiveError(f"{member.name} would be extracted outside {destination}")
-                if not (member.isfile() or member.isdir()):
-                    raise UnsafeArchiveError(f"{member.name} is a link or a special file")
+        if HAS_DATA_FILTER:
+            tar.extractall(destination, filter="data")
+        else:
             tar.extractall(destination)
 
 

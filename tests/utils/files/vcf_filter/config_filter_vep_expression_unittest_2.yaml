@@ -1,0 +1,4 @@
+filters:
+  gene_and_allele:
+    soft_filter_flag: "PLCH2_T"
+    expression: "VEP:SYMBOL = PLCH2 and VEP:Allele = T"

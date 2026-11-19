@@ -1,0 +1,5 @@
+filters:
+  qual_soft:
+    expression: "QUAL < 75"
+    soft_filter: "True"
+    soft_filter_flag: "qual"

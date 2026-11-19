@@ -1,0 +1,6 @@
+filters:
+  not_transcript:
+    description: "Not transcript"
+    expression: "exist[XM_[0-9]+, VEP:Feature] and exist[mutect2, INFO:CALLERS]"
+    soft_filter_flag: "not_transript"
+    soft_filter: "True"

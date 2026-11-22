@@ -3,7 +3,7 @@
 This is a one-time effort in order to make the pipeline compatible with a restricted cluster. Here we use the **Miarka** cluster as an example but can easily be changed to another cluster with some modifications.
 
 ## Make reference file configs
-These .yaml files are used for reference file download and packaging. Save files under config/references/. Example `config/references/references.hg19.yaml`. Files may be located on the local file system (see padded_regions in the examples below)  or hosted online (see svdb_query in the examples below).
+These .yaml files are used for reference file download and packaging with [`hydra-genetics references`](../commands/references.md). Save files under config/references/. Example `config/references/references.hg19.yaml`. Files may be located on the local file system (see padded_regions in the examples below)  or hosted online (see svdb_query in the examples below).
 
 ### Examples
 File on local cluster
@@ -135,7 +135,7 @@ Adjust the main config file to point at the hydra-genetics modules
 hydra_local_path: "<EXTRACT_PATH>/<PIPELINE_SHORT_NAME>/<TAG_OR_BRANCH>/hydra-genetics"
 ```
 
-Add path to local singularity images in the main config.yaml file 
+Add path to local singularity images in the main config.yaml file, using [`prepare-environment container-path-update`](../commands/prepare_environment.md#container-path-update)
 ```bash
 # config/config.yaml
 # Build new python environment if needed

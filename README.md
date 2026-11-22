@@ -45,4 +45,8 @@ hydra-genetics create-input-files -d path/dir1 -d path/dir2 -p Illumina
 # Create singularity cache
 # all containers specified in config.yaml will be included
 hydra-genetics prepare-environment create-singularity-files -o singularity_cache -c config.yaml
+
+# Download reference files listed in a validation file, then check them against the pipeline config
+hydra-genetics references download -v config/references/references.yaml -o design_and_ref_files
+hydra-genetics references validate -c config.yaml -v config/references/references.yaml -p design_and_ref_files
 ```

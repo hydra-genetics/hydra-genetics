@@ -1,7 +1,14 @@
 import click
 import logging
 import os
+import shutil
+import subprocess
+import sys
 import yaml
+
+from snakemake.common import is_local_file
+
+from hydra_genetics.utils.software_versions import iter_container_entries
 
 
 def create_docker_file_path(storage_path, container):
@@ -46,12 +53,11 @@ def container_path_update(configfile, new_configfile, singularity_cache_path):
             print(exc)
             exit(1)
 
-    for key in yaml_data:
-        if 'container' in key:
-            yaml_data[key] = create_docker_file_path(singularity_cache_path, yaml_data[key])
-        elif isinstance(yaml_data[key], dict):
-            if 'container' in yaml_data[key]:
-                yaml_data[key]['container'] = create_docker_file_path(singularity_cache_path, yaml_data[key]['container'])
+    for parent, key, value in iter_container_entries(yaml_data):
+        if is_local_file(value):
+            logging.info(f"Keeping {value}: already a local image")
+            continue
+        parent[key] = create_docker_file_path(singularity_cache_path, value)
 
     with open(new_configfile, 'w') as file:
         for key, value in yaml_data.items():
@@ -131,32 +137,48 @@ def reference_path_update(configfile, new_configfile, reference_path):
     type=str,
     help="output folder where files will be stored",
 )
-def create_singularity_files(configfile, output_folder):
+@click.option(
+    "--force",
+    is_flag=True,
+    default=False,
+    help="rebuild images that already exist in the output folder",
+)
+def create_singularity_files(configfile, output_folder, force):
     yaml_data = None
     with open(configfile, "r") as stream:
         try:
             yaml_data = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-            exit(1)
+            sys.exit(1)
 
-    containers = set()
-    for key in yaml_data:
-        if "container" in key:
-            containers.add(yaml_data[key])
-        elif isinstance(yaml_data[key], dict):
-            if 'container' in yaml_data[key]:
-                containers.add(yaml_data[key]['container'])
+    containers = sorted({value for _, _, value in iter_container_entries(yaml_data)})
 
     if os.path.exists(output_folder):
-        if os.path.isdir(output_folder):
-            pass
-        else:
+        if not os.path.isdir(output_folder):
             raise IOError(f"{output_folder} is not a folder")
     else:
-        os.mkdir(output_folder)
+        os.makedirs(output_folder)
 
+    if containers and shutil.which("singularity") is None:
+        logging.error("singularity could not be found on PATH")
+        sys.exit(1)
+
+    failed = []
     for container in containers:
+        if is_local_file(container):
+            logging.info(f"Skipping {container}: already a local image")
+            continue
         file_path = create_docker_file_path(output_folder, container)
+        if os.path.exists(file_path) and not force:
+            logging.info(f"Skipping {file_path}: already exists, use --force to rebuild")
+            continue
+        command = ["singularity", "build"] + (["--force"] if force else []) + [file_path, container]
         logging.info(f"Create singularity {file_path}")
-        os.system(f"singularity build {file_path} {container}")
+        if subprocess.run(command).returncode != 0:
+            logging.error(f"Failed to build {file_path} from {container}")
+            failed.append(container)
+
+    if failed:
+        logging.error("Failed to build singularity images for: " + ", ".join(failed))
+        sys.exit(1)

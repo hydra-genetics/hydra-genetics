@@ -1,6 +1,6 @@
 # <img src="images/hydragenetics.png" width=40 /> hydra-genetics
 
-[![Documentation](https://readthedocs.org/projects/hydra-genetics/badge/?version=latest)](https://hydra-genetics.readthedocs.io/en/latest/)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue?logo=readthedocs&logoColor=white)](https://hydra-genetics.readthedocs.io/en/latest/)
 [![Lint and Test](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/main.yaml/badge.svg?branch=develop)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/main.yaml)
 [![build mkdocs](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml/badge.svg)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml)
 ![python](https://img.shields.io/badge/python-%3E%3D3.8%2C%3C%3D3.12-blue)

@@ -1,14 +1,11 @@
 # <img src="images/hydragenetics.png" width=40 /> hydra-genetics
 
-A command-line tool that helps you create modules and pipelines, or add rules to an existing project. It can also generate the `samples.tsv` and `units.tsv` input files from FASTQ or BAM files with the `create-input-files` command. Their expected format is defined by the [units](https://github.com/hydra-genetics/hydra-genetics/blob/develop/hydra_genetics/pipeline-template/workflow/schemas/units.schema.yaml) and [samples](https://github.com/hydra-genetics/hydra-genetics/blob/develop/hydra_genetics/pipeline-template/workflow/schemas/samples.schema.yaml) schemas.
-
-Full documentation is available at [hydra-genetics.readthedocs.io](https://hydra-genetics.readthedocs.io/en/latest/).
-
+[![Documentation](https://readthedocs.org/projects/hydra-genetics/badge/?version=latest)](https://hydra-genetics.readthedocs.io/en/latest/)
 [![Lint and Test](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/main.yaml/badge.svg?branch=develop)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/main.yaml)
-
 [![build mkdocs](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml/badge.svg)](https://github.com/hydra-genetics/hydra-genetics/actions/workflows/test-build-mkdocs.yaml)
-
 ![python](https://img.shields.io/badge/python-%3E%3D3.8%2C%3C%3D3.12-blue)
+
+A command-line tool that helps you create modules and pipelines, or add rules to an existing project. It can also generate the `samples.tsv` and `units.tsv` input files from FASTQ or BAM files with the `create-input-files` command. Their expected format is defined by the [units](https://github.com/hydra-genetics/hydra-genetics/blob/develop/hydra_genetics/pipeline-template/workflow/schemas/units.schema.yaml) and [samples](https://github.com/hydra-genetics/hydra-genetics/blob/develop/hydra_genetics/pipeline-template/workflow/schemas/samples.schema.yaml) schemas.
 
 ## Installation
 

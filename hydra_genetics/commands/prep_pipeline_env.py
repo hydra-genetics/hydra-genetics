@@ -15,6 +15,31 @@ def create_docker_file_path(storage_path, container):
     return os.path.join(storage_path, container.replace('docker://', '').replace("/", "__").replace(":", "_") + ".sif")
 
 
+def map_containers_to_image_paths(containers, storage_path):
+    """
+    Map every remote container reference to its image path in storage_path.
+
+    Local images are left out. Exits with status 1 if two different
+    references map to the same image path, e.g. docker://a/b:1_2 and
+    docker://a/b_1:2, since one image would silently be used for both.
+    """
+    image_paths = {}
+    used_by = {}
+    for container in sorted(set(containers)):
+        if is_local_file(container):
+            continue
+        image_path = create_docker_file_path(storage_path, container)
+        used_by.setdefault(image_path, []).append(container)
+        image_paths[container] = image_path
+
+    collisions = {path: refs for path, refs in used_by.items() if len(refs) > 1}
+    if collisions:
+        for path, refs in collisions.items():
+            logging.error(f"{', '.join(refs)} all map to the same image file {path}")
+        sys.exit(1)
+    return image_paths
+
+
 @click.group("prepare-environment", short_help="prepare for singularity environment")
 def environment():
     pass
@@ -53,11 +78,13 @@ def container_path_update(configfile, new_configfile, singularity_cache_path):
             print(exc)
             exit(1)
 
-    for parent, key, value in iter_container_entries(yaml_data):
-        if is_local_file(value):
+    entries = list(iter_container_entries(yaml_data))
+    image_paths = map_containers_to_image_paths([value for _, _, value in entries], singularity_cache_path)
+    for parent, key, value in entries:
+        if value not in image_paths:
             logging.info(f"Keeping {value}: already a local image")
             continue
-        parent[key] = create_docker_file_path(singularity_cache_path, value)
+        parent[key] = image_paths[value]
 
     with open(new_configfile, 'w') as file:
         for key, value in yaml_data.items():
@@ -152,31 +179,48 @@ def create_singularity_files(configfile, output_folder, force):
             print(exc)
             sys.exit(1)
 
-    containers = sorted({value for _, _, value in iter_container_entries(yaml_data)})
-
     if os.path.exists(output_folder):
         if not os.path.isdir(output_folder):
             raise IOError(f"{output_folder} is not a folder")
     else:
         os.makedirs(output_folder)
 
-    if containers and shutil.which("singularity") is None:
+    containers = sorted({value for _, _, value in iter_container_entries(yaml_data)})
+    image_paths = map_containers_to_image_paths(containers, output_folder)
+
+    for container in containers:
+        if container not in image_paths:
+            logging.info(f"Skipping {container}: already a local image")
+
+    to_build = {}
+    for container, file_path in image_paths.items():
+        if os.path.exists(file_path) and not force:
+            logging.info(f"Skipping {file_path}: already exists, use --force to rebuild")
+        else:
+            to_build[container] = file_path
+
+    if not to_build:
+        return
+
+    if shutil.which("singularity") is None:
         logging.error("singularity could not be found on PATH")
         sys.exit(1)
 
     failed = []
-    for container in containers:
-        if is_local_file(container):
-            logging.info(f"Skipping {container}: already a local image")
-            continue
-        file_path = create_docker_file_path(output_folder, container)
-        if os.path.exists(file_path) and not force:
-            logging.info(f"Skipping {file_path}: already exists, use --force to rebuild")
-            continue
-        command = ["singularity", "build"] + (["--force"] if force else []) + [file_path, container]
+    for container, file_path in to_build.items():
+        # Build to a temporary file and only move it into place on success,
+        # so an interrupted or failed build never leaves an image that a
+        # later run would skip as complete.
+        tmp_path = file_path + ".tmp"
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
         logging.info(f"Create singularity {file_path}")
-        if subprocess.run(command).returncode != 0:
+        if subprocess.run(["singularity", "build", tmp_path, container]).returncode == 0:
+            os.replace(tmp_path, file_path)
+        else:
             logging.error(f"Failed to build {file_path} from {container}")
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
             failed.append(container)
 
     if failed:

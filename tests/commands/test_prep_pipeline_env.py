@@ -9,6 +9,7 @@ import yaml
 from click.testing import CliRunner
 
 from hydra_genetics.__main__ import cli
+from hydra_genetics.commands.prep_pipeline_env import create_docker_file_path
 from hydra_genetics.utils.software_versions import iter_container_entries
 
 CONFIG = {
@@ -61,6 +62,9 @@ class TestPrepareEnvironment(unittest.TestCase):
         returncodes = returncodes or {}
 
         def fake_run(command):
+            # singularity writes the image (possibly partial) to the output path,
+            # also when the build fails
+            open(command[-2], "w").close()
             return SimpleNamespace(returncode=returncodes.get(command[-1], 0))
 
         with patch("hydra_genetics.commands.prep_pipeline_env.shutil.which", return_value="/usr/bin/singularity"), \
@@ -77,13 +81,38 @@ class TestPrepareEnvironment(unittest.TestCase):
         self.assertEqual(built, REMOTE_IMAGES)
         self.assertEqual(
             run.call_args_list[0].args[0],
-            ["singularity", "build", os.path.join(self.output, "hydragenetics__bwa_0.7.17.sif"), REMOTE_IMAGES[0]],
+            ["singularity", "build", os.path.join(self.output, "hydragenetics__bwa_0.7.17.sif.tmp"), REMOTE_IMAGES[0]],
+        )
+        self.assertEqual(
+            sorted(os.listdir(self.output)),
+            sorted(os.path.basename(create_docker_file_path(self.output, image)) for image in REMOTE_IMAGES),
         )
 
     def test_failed_build_exits_non_zero_and_continues(self):
         result, run = self._build(returncodes={"docker://hydragenetics/bwa:0.7.17": 255})
         self.assertEqual(result.exit_code, 1)
         self.assertEqual(run.call_count, len(REMOTE_IMAGES))
+
+    def test_failed_build_leaves_no_image_and_is_retried(self):
+        bwa = os.path.join(self.output, "hydragenetics__bwa_0.7.17.sif")
+        result, _ = self._build(returncodes={"docker://hydragenetics/bwa:0.7.17": 255})
+        self.assertEqual(result.exit_code, 1)
+        self.assertFalse(os.path.exists(bwa))
+        self.assertFalse(os.path.exists(bwa + ".tmp"))
+
+        result, run = self._build()
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertEqual([c.args[0][-1] for c in run.call_args_list], ["docker://hydragenetics/bwa:0.7.17"])
+        self.assertTrue(os.path.exists(bwa))
+
+    def test_stale_temp_file_is_removed_before_build(self):
+        os.makedirs(self.output)
+        stale = os.path.join(self.output, "hydragenetics__bwa_0.7.17.sif.tmp")
+        with open(stale, "w") as f:
+            f.write("partial")
+        result, _ = self._build()
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertFalse(os.path.exists(stale))
 
     def test_existing_image_is_skipped_unless_forced(self):
         os.makedirs(self.output)
@@ -96,7 +125,33 @@ class TestPrepareEnvironment(unittest.TestCase):
         result, run = self._build("--force")
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertEqual(run.call_count, len(REMOTE_IMAGES))
-        self.assertTrue(all("--force" in c.args[0] for c in run.call_args_list))
+
+    def test_missing_singularity_is_fine_when_nothing_to_build(self):
+        os.makedirs(self.output)
+        for image in REMOTE_IMAGES:
+            open(create_docker_file_path(self.output, image), "w").close()
+        with patch("hydra_genetics.commands.prep_pipeline_env.shutil.which", return_value=None), \
+                patch("hydra_genetics.commands.prep_pipeline_env.subprocess.run") as run:
+            result = self.runner.invoke(
+                cli, ["prepare-environment", "create-singularity-files", "-c", self.configfile, "-o", self.output]
+            )
+        self.assertEqual(result.exit_code, 0, result.output)
+        run.assert_not_called()
+
+    def test_colliding_image_names_exit_non_zero(self):
+        with open(self.configfile, "w") as f:
+            yaml.dump({"a": {"container": "docker://example/tool:1_2"}, "b": {"container": "docker://example/tool_1:2"}}, f)
+        result, run = self._build()
+        self.assertEqual(result.exit_code, 1)
+        run.assert_not_called()
+
+        new_config = os.path.join(self.tmp, "new_config.yaml")
+        result = self.runner.invoke(
+            cli,
+            ["prepare-environment", "container-path-update", "-c", self.configfile, "-n", new_config, "-p", "/cache"],
+        )
+        self.assertEqual(result.exit_code, 1)
+        self.assertFalse(os.path.exists(new_config))
 
     def test_missing_singularity_exits_non_zero(self):
         with patch("hydra_genetics.commands.prep_pipeline_env.shutil.which", return_value=None), \

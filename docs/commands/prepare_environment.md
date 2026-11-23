@@ -102,7 +102,8 @@ hydra-genetics prepare-environment create-singularity-files -c config/config.yam
 
 # on the restricted cluster, after copying the files over
 hydra-genetics prepare-environment container-path-update -c config/config.yaml -n config/config.local.yaml -p /path/to/apptainer_cache
-# only if the config uses absolute reference paths instead of a variable such as {{REFERENCE_DATA}}
+# if the reference files are in a different folder on the cluster; this rewrites
+# direct paths and a REFERENCE_DATA variable alike
 hydra-genetics prepare-environment reference-path-update -c config/config.local.yaml -n config/config.local.yaml \
     --reference-path /old/path/to/design_and_ref_files:/path/to/design_and_ref_files
 hydra-genetics references validate -c config/config.local.yaml -v config/references/references.hg19.yaml -p /path/to/design_and_ref_files

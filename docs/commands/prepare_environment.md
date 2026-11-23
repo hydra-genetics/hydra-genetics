@@ -32,6 +32,8 @@ Each image is named after its container, with `/` replaced by `__` and `:` by `_
 | `docker://hydragenetics/common:1.0.1` | `hydragenetics__common_1.0.1.sif` |
 | `docker://hydragenetics/fastp:0.20.1` | `hydragenetics__fastp_0.20.1.sif` |
 
+Two different containers can end up with the same file name, for example `docker://example/tool:1_2` and `docker://example/tool_1:2` both become `example__tool_1_2.sif`. `create-singularity-files` and `container-path-update` check for this and exit with code 1 without building images or writing a config. The check only covers the containers in the config being processed: if several configs share one image folder, a clash between them is not detected.
+
 ## create-singularity-files
 
 ```bash
@@ -44,9 +46,10 @@ hydra-genetics prepare-environment create-singularity-files -c config/config.yam
 | `-o`, `--output-folder` | Folder to store the images in. Created if it doesn't exist. **Required.** |
 | `--force` | Rebuild images that already exist in the output folder. |
 
-Runs `singularity build` once for each container in the config. It needs `singularity` (or Apptainer's `singularity` command) on `PATH` and network access to the container registry.
+Runs `singularity build` once for each container in the config. When at least one image has to be built, it needs `singularity` (or Apptainer's `singularity` command) on `PATH` and network access to the container registry; if every image already exists or is local, neither is needed.
 
-* Images that already exist in the output folder are skipped, so the command can be re-run after a failure to build only what is missing. Use `--force` to rebuild them.
+* Images that already exist in the output folder are skipped, so the command can be re-run after a failure to build only what is missing. Use `--force` to rebuild them; if a forced rebuild fails, the existing image is kept.
+* Each image is built to `<image>.sif.tmp` and only renamed to `<image>.sif` when the build succeeds, so a failed or interrupted build never leaves an image that a later run would skip. A leftover `.tmp` file is removed before the next build.
 * If a build fails, the remaining images are still built. The failed containers are listed at the end and the command exits with code 1.
 
 ## container-path-update
@@ -99,5 +102,8 @@ hydra-genetics prepare-environment create-singularity-files -c config/config.yam
 
 # on the restricted cluster, after copying the files over
 hydra-genetics prepare-environment container-path-update -c config/config.yaml -n config/config.local.yaml -p /path/to/apptainer_cache
+# only if the config uses absolute reference paths instead of a variable such as {{REFERENCE_DATA}}
+hydra-genetics prepare-environment reference-path-update -c config/config.local.yaml -n config/config.local.yaml \
+    --reference-path /old/path/to/design_and_ref_files:/path/to/design_and_ref_files
 hydra-genetics references validate -c config/config.local.yaml -v config/references/references.hg19.yaml -p /path/to/design_and_ref_files
 ```

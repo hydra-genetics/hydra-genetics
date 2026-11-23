@@ -15,7 +15,7 @@ Entries can be nested to any depth, so they can mirror the structure of the pipe
 |---|---|---|
 | `type` | yes | `file` or `folder` |
 | `path` | yes | Where the file or folder is stored, relative to the output/reference folder. This should match the end of the path written in the pipeline config. |
-| `url` | yes | Where to get it: `https://...`, or `file:/path/on/disk` for a local copy |
+| `url` | no | Where to get it: `https://...`, or `file:/path/on/disk` for a local copy. Entries without `url` are skipped by `download` but still checked by `validate`. |
 | `checksum` | for files | md5sum of the file |
 | `compressed_checksum` | for archives | md5sum of the downloaded archive; the archive is extracted into `path` |
 | `content_checksum` | no | For folders: a mapping of `file: md5sum` for the files inside the extracted folder. Without it, only the existence of the folder is checked. |
@@ -40,7 +40,7 @@ For each entry the command:
 3. checks the checksum and, for archives, extracts them and checks `content_checksum`,
 4. creates the `link` symlink if one is defined.
 
-At the end it prints how many files were `UPDATED` and `NOT UPDATED`. If any file could not be fetched or failed its checksum, the failed files are listed and the command exits with code 1.
+If every entry succeeds, it prints how many files were `UPDATED` and `NOT UPDATED`. If any file could not be fetched or failed its checksum, the failed files are logged and the command exits with code 1 without printing the counts.
 
 ## validate
 
@@ -66,9 +66,11 @@ config\/\S+\.(json|yaml|yml|tsv|html|hg19)
 
 The command:
 
-1. collects every value in the config that looks like a file or folder path. Containers (`docker://...`, `.sif`), numbers, and per-run files such as `samples.tsv`, `units.tsv`, `resources.yaml` and `output_list.yaml` are ignored, as are values matching `--skip-regex`,
+1. collects every value in the config that looks like a file or folder path. Values containing a `:` (such as containers, `docker://...`) or ending in `.sif`, numbers, and per-run files such as `samples.tsv`, `units.tsv`, `resources.yaml` and `output_list.yaml` are ignored, as are values matching `--skip-regex`,
 2. matches those paths against the `path` of each validation entry. A config value matches when it ends with the entry's `path`, so values such as `{{REFERENCE_DATA}}/hastings/regions.bed` match an entry with `path: hastings/regions.bed`,
 3. checks that each entry exists under `--path-to-ref-data` with the expected checksum, `content_checksum`, and `link`.
+
+Because any value containing a `:` is skipped, a reference path with a `:` in it is never validated.
 
 It prints `PASS` and `FAILED` counts, and exits with code 1 if any entry fails.
 

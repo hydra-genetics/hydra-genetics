@@ -31,6 +31,8 @@ List all reference config files that should be used as arguments to the build sc
 
 An example build script can be found in the [hydra-genetics github repo](https://github.com/hydra-genetics/hydra-genetics/tree/develop/build)
 
+The script clones the pipeline and modules, builds the images with [`prepare-environment create-singularity-files`](../commands/prepare_environment.md#create-singularity-files) and fetches the reference files with [`references download`](../commands/references.md#download).
+
 ```bash
 # Example: TAG_OR_BRANCH="v0.18.3" PIPELINE_NAME="Twist_Solid" PIPELINE_GITHUB_REPO="https://github.com/genomic-medicine-sweden/Twist_Solid.git" bash build/build_conda.sh config/references/design_files.hg19.yaml config/references/novaseq.hg19.pon.yaml config/references/references.hg19.yaml
 TAG_OR_BRANCH="vX.Y.X" PIPELINE_NAME="Your_pipeline_name" PIPELINE_GITHUB_REPO="pipeline_github_repo.git" bash build/build_conda.sh config/references/<file1>.yaml config/references/<file2>.yaml

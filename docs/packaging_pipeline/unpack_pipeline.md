@@ -34,7 +34,7 @@ tar -xvf design_and_ref_files.tar.gz design_and_ref_files
 
 Validate that all design and reference files exists and haven't changed
 
-**OBS! Warnings for possible file PATH/hydra-genetics and missing tbi files in config can be ignored**
+**OBS! Warnings for possible file PATH/hydra-genetics and missing tbi files in config can be ignored** (see [what the `validate` warnings mean](../commands/references.md#validate))
 
 ```bash
 # Twist solid example for Miarka

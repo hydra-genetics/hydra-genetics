@@ -193,6 +193,29 @@ def use_container(workflow):
         return False
 
 
+CONTAINER_KEYS = ("container", "default_container")
+
+
+def iter_container_entries(config):
+    """
+    Walk a config dict recursively and yield every container definition.
+
+    Parameters:
+    config: dict
+        config dict, may contain nested dicts
+
+    Returns:
+    generator of (parent_dict, key, value) tuples, where key is one of
+    CONTAINER_KEYS and value is a non-empty string. parent_dict can be
+    used to update the value in place.
+    """
+    for key, value in config.items():
+        if isinstance(value, dict):
+            yield from iter_container_entries(value)
+        elif key in CONTAINER_KEYS and isinstance(value, str) and value:
+            yield config, key, value
+
+
 def add_software_version_to_config(config, workflow, fail_missing_versions=True):
     """
     Function that will look through the config dict to locate
@@ -220,7 +243,7 @@ def add_software_version_to_config(config, workflow, fail_missing_versions=True)
         for key, value in config.items():
             if isinstance(value, dict):
                 config[key], version_dict = _add_software_version(value, version_dict)
-            elif key in ["container", "default_container"]:
+            elif key in CONTAINER_KEYS:
                 if key == "default_container":
                     software_version_key = f"default_container_software_versions"
                 image_path = get_image_path(value, container_cache)

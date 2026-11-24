@@ -1,0 +1,4 @@
+filters:
+  ad:
+    soft_filter_flag: "PLCH2_AD>10"
+    expression: "FORMAT:AD:1 > 10 and PLCH2 = VEP:SYMBOL"

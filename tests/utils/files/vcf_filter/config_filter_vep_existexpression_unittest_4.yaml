@@ -1,0 +1,6 @@
+filters:
+  not_transcript:
+    description: "cosmic"
+    expression: "exist[COSV[0-9]+, VEP:Existing_variation]"
+    soft_filter_flag: "cosmic"
+    soft_filter: "True"

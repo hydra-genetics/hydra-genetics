@@ -1,0 +1,4 @@
+filters:
+  ad:
+    soft_filter_flag: "AD>200"
+    expression: "FORMAT:AD:1 > 200"

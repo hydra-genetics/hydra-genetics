@@ -1,5 +1,29 @@
 # Changelog
 
+## [4.3.1](https://github.com/hydra-genetics/hydra-genetics/compare/v4.3.0...v4.3.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* check validation entries against all config paths in references validate ([6b799ed](https://github.com/hydra-genetics/hydra-genetics/commit/6b799edd5d3cc5d962d495c83666d3bcf20c5c59))
+* **prepare-environment:** build images atomically and reject colliding image names ([ab5c5ee](https://github.com/hydra-genetics/hydra-genetics/commit/ab5c5eee780347ec629a450a88630af0b8f02326))
+* **prepare-environment:** fail on singularity build errors and find nested containers ([71178ed](https://github.com/hydra-genetics/hydra-genetics/commit/71178ed5a8e57a4eaa928546f2382ca5463f79ec))
+* **prepare-environment:** fail on singularity build errors and find nested containers ([50c6a71](https://github.com/hydra-genetics/hydra-genetics/commit/50c6a712af0eb8432b2d2d3a771ff4854992d69e)), closes [#468](https://github.com/hydra-genetics/hydra-genetics/issues/468)
+* report validation entries missing from config in references validate ([36e5202](https://github.com/hydra-genetics/hydra-genetics/commit/36e520236b3d107effa2451de0e52ae46515e293))
+* report validation entries missing from config in references validate ([b7ececb](https://github.com/hydra-genetics/hydra-genetics/commit/b7ececbe523ff64e3abe221a67a8d365539a973a)), closes [#469](https://github.com/hydra-genetics/hydra-genetics/issues/469)
+
+
+### Documentation
+
+* add command reference for references and prepare-environment ([64c70e1](https://github.com/hydra-genetics/hydra-genetics/commit/64c70e17029746b3804b571a4115f808752f48d7))
+* add command reference for references and prepare-environment ([1b9d16c](https://github.com/hydra-genetics/hydra-genetics/commit/1b9d16c11b1b4b4526bb1a89f1a66d3a5bbecdb5))
+* correct references details and cover prepare-environment changes from [#503](https://github.com/hydra-genetics/hydra-genetics/issues/503) ([5169107](https://github.com/hydra-genetics/hydra-genetics/commit/51691078bd90d378bc780d493480135fe588bb34))
+* label README docs badge 'latest' instead of build status ([ad85772](https://github.com/hydra-genetics/hydra-genetics/commit/ad8577295942214725617a5c6ce417036a5cac76))
+* reference-path-update step depends on moved folder, not path style ([57a702c](https://github.com/hydra-genetics/hydra-genetics/commit/57a702c7ca8176baa59f31fe94b78018e6131bab))
+* serve README docs badge from shields.io ([c4c86e0](https://github.com/hydra-genetics/hydra-genetics/commit/c4c86e03fcd203b31176718a0992d7f45389b82e))
+* serve README docs badge from shields.io ([da7266c](https://github.com/hydra-genetics/hydra-genetics/commit/da7266cdb42349050aa3c40cec57b901f6b28a6a))
+* show README badges in one row and replace docs link with a badge ([300af24](https://github.com/hydra-genetics/hydra-genetics/commit/300af24723c6e1547ebed66adf54669343063d02))
+
 ## [4.3.0](https://github.com/hydra-genetics/hydra-genetics/compare/v4.2.2...v4.3.0) (2026-11-12)
 
 

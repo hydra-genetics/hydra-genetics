@@ -95,7 +95,7 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
                 return True
             return False
 
-    def locate_possible_files_in_config(config_data, files=[], skip_regex=[]):
+    def locate_possible_files_in_config(config_data, files=None, skip_regex=()):
         '''
             function used to extract files from provided config
 
@@ -106,6 +106,7 @@ def validate(config_file, validation_file, path_to_ref_data, skip_regex):
             Returns:
                 files (list): all files found in the config dict
         '''
+        files = [] if files is None else files
         for config in config_data:
             possible_file = config_data[config]
             if isinstance(possible_file, dict):

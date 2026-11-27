@@ -47,7 +47,7 @@ HAS_DATA_FILTER = hasattr(tarfile, "data_filter")
 
 
 def fetch_reference_data(validation_data, output_dir,
-                         fetched=[], links=[], failed=[], skipped=[],
+                         fetched=None, links=None, failed=None, skipped=None,
                          force=False):
     '''
         Function used to validate entries found in validation files
@@ -63,6 +63,10 @@ def fetch_reference_data(validation_data, output_dir,
         Returns:
             (list, list, list, list): (fetched files, linked files, failed files, skipped files)
     '''
+    fetched = [] if fetched is None else fetched
+    links = [] if links is None else links
+    failed = [] if failed is None else failed
+    skipped = [] if skipped is None else skipped
     for k, value in validation_data.items():
         # If validation entry
         if "path" in value:
@@ -252,8 +256,8 @@ def fetch_url_content(url, content_holder, tmpdir):
 
 
 def validate_reference_data(validation_data, path_to_ref_data,
-                            file_list=[], not_found_in_config=[], found=[],
-                            pass_list=[], link_list=[], failed_list=[]):
+                            file_list=None, not_found_in_config=None, found=None,
+                            pass_list=None, link_list=None, failed_list=None, config_files=None):
     '''
         Validate all entries in the validation dict
 
@@ -263,9 +267,11 @@ def validate_reference_data(validation_data, path_to_ref_data,
             path_to_ref_data (str): path to where data is stored
             file_list (list): list with files in config file
             not_found_in_config (list): files in loaded validation that couldn't be found in the configuration file
+            found (list): files in loaded validation that were found in the configuration file
             pass_list (list): files/folders passed validation
             linked_list (list): defined and existing links
             failed_list (list): files/folders failed validation
+            config_files (list): all files in config file, defaults to a copy of file_list
 
         Returns:
             (list, list, list, list, list,):
@@ -276,7 +282,15 @@ def validate_reference_data(validation_data, path_to_ref_data,
                 links defined and existing
                 files failed validation
     '''
-    def track_files(path, file_list=[], not_found_in_config=[], found=[]):
+    file_list = [] if file_list is None else file_list
+    not_found_in_config = [] if not_found_in_config is None else not_found_in_config
+    found = [] if found is None else found
+    pass_list = [] if pass_list is None else pass_list
+    link_list = [] if link_list is None else link_list
+    failed_list = [] if failed_list is None else failed_list
+    config_files = list(file_list) if config_files is None else config_files
+
+    def track_files(path, file_list, not_found_in_config, found):
         if path in found:
             pass
         else:
@@ -291,12 +305,10 @@ def validate_reference_data(validation_data, path_to_ref_data,
                 for f in file_found:
                     file_list.remove(f)
                 found.append(path)
-            else:
-                for f in found:
-                    if f.endswith(f) or f in path:
-                        return file_list, not_found_in_config, found
-                if path not in found:
-                    not_found_in_config.append(path)
+            # an earlier entry may already have removed the match from file_list, so check all config paths,
+            # and entries inside an already matched entry, e.g. a file in a configured folder
+            elif not any(path in f for f in config_files) and not any(f in path for f in found):
+                not_found_in_config.append(path)
         return file_list, not_found_in_config, found
 
     def valid_link(output_dir, item):
@@ -345,7 +357,8 @@ def validate_reference_data(validation_data, path_to_ref_data,
              pass_list, link_list, failed_list) = validate_reference_data(validation_data[k],
                                                                           path_to_ref_data,
                                                                           file_list, not_found_in_config,
-                                                                          found, pass_list, link_list, failed_list)
+                                                                          found, pass_list, link_list, failed_list,
+                                                                          config_files)
     return file_list, not_found_in_config, found, pass_list, link_list, failed_list
 
 

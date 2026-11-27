@@ -15,6 +15,9 @@ nav:
     - Preparing your pipeline: packaging_pipeline/prepare_pipeline.md
     - Packaging your pipeline: packaging_pipeline/package_pipeline.md
     - Installing your pipeline on a restricted cluster: packaging_pipeline/unpack_pipeline.md
+  - Command reference:
+    - references: commands/references.md
+    - prepare-environment: commands/prepare_environment.md
   - Development:
     - Snakemake rules: development/rules.md
     - Code standards: development/standards.md

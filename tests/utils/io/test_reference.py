@@ -294,6 +294,14 @@ class TestValidateReferenceData(unittest.TestCase):
         self.assertEqual(not_in_config, [])
         self.assertEqual(found, ["ref/genome.fa"])
 
+    @unittest.expectedFailure
+    def test_entry_before_matched_folder_is_not_reported(self):
+        # shortcut: an entry inside a configured folder is only recognised after the folder entry has matched,
+        # remove expectedFailure once track_files matches entries against configured folders
+        validation_data = {"genome": {"path": "ref/bwa/genome.fa"}, "bwa": {"path": "ref/bwa"}}
+        not_in_config = self.validate(validation_data, ["/data/ref/bwa"])[1]
+        self.assertEqual(not_in_config, [])
+
     def test_folder_after_file_inside_it_is_not_reported(self):
         validation_data = {"genome": {"path": "ref/bwa/genome.fa"}, "bwa": {"path": "ref/bwa"}}
         not_in_config = self.validate(validation_data, ["/data/ref/bwa/genome.fa"])[1]

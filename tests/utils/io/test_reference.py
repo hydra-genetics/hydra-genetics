@@ -294,6 +294,21 @@ class TestValidateReferenceData(unittest.TestCase):
         self.assertEqual(not_in_config, [])
         self.assertEqual(found, ["ref/genome.fa"])
 
+    def test_folder_after_file_inside_it_is_not_reported(self):
+        validation_data = {"genome": {"path": "ref/bwa/genome.fa"}, "bwa": {"path": "ref/bwa"}}
+        not_in_config = self.validate(validation_data, ["/data/ref/bwa/genome.fa"])[1]
+        self.assertEqual(not_in_config, [])
+
+    def test_overlapping_entries_matching_one_config_file_are_not_reported(self):
+        validation_data = {"folder": {"path": "ref/genome"}, "file": {"path": "genome.fa"}}
+        not_in_config = self.validate(validation_data, ["/data/ref/genome/genome.fa"])[1]
+        self.assertEqual(not_in_config, [])
+
+    def test_nested_entry_matched_by_earlier_entry_is_not_reported(self):
+        validation_data = {"genome": {"path": "ref/bwa/genome.fa"}, "nested": {"bwa": {"path": "ref/bwa"}}}
+        not_in_config = self.validate(validation_data, ["/data/ref/bwa/genome.fa"])[1]
+        self.assertEqual(not_in_config, [])
+
     def test_default_lists_not_shared(self):
         os.makedirs(os.path.join(self.refdir, "ref"))
         open(os.path.join(self.refdir, "ref/a.fa"), "w").close()

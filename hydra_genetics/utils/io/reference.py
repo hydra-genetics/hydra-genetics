@@ -47,7 +47,7 @@ HAS_DATA_FILTER = hasattr(tarfile, "data_filter")
 
 
 def fetch_reference_data(validation_data, output_dir,
-                         fetched=[], links=[], failed=[], skipped=[],
+                         fetched=None, links=None, failed=None, skipped=None,
                          force=False):
     '''
         Function used to validate entries found in validation files
@@ -63,6 +63,10 @@ def fetch_reference_data(validation_data, output_dir,
         Returns:
             (list, list, list, list): (fetched files, linked files, failed files, skipped files)
     '''
+    fetched = [] if fetched is None else fetched
+    links = [] if links is None else links
+    failed = [] if failed is None else failed
+    skipped = [] if skipped is None else skipped
     for k, value in validation_data.items():
         # If validation entry
         if "path" in value:
@@ -252,8 +256,8 @@ def fetch_url_content(url, content_holder, tmpdir):
 
 
 def validate_reference_data(validation_data, path_to_ref_data,
-                            file_list=[], not_found_in_config=[], found=[],
-                            pass_list=[], link_list=[], failed_list=[]):
+                            file_list=None, not_found_in_config=None, found=None,
+                            pass_list=None, link_list=None, failed_list=None):
     '''
         Validate all entries in the validation dict
 
@@ -263,6 +267,7 @@ def validate_reference_data(validation_data, path_to_ref_data,
             path_to_ref_data (str): path to where data is stored
             file_list (list): list with files in config file
             not_found_in_config (list): files in loaded validation that couldn't be found in the configuration file
+            found (list): files in loaded validation that were found in the configuration file
             pass_list (list): files/folders passed validation
             linked_list (list): defined and existing links
             failed_list (list): files/folders failed validation
@@ -276,7 +281,14 @@ def validate_reference_data(validation_data, path_to_ref_data,
                 links defined and existing
                 files failed validation
     '''
-    def track_files(path, file_list=[], not_found_in_config=[], found=[]):
+    file_list = [] if file_list is None else file_list
+    not_found_in_config = [] if not_found_in_config is None else not_found_in_config
+    found = [] if found is None else found
+    pass_list = [] if pass_list is None else pass_list
+    link_list = [] if link_list is None else link_list
+    failed_list = [] if failed_list is None else failed_list
+
+    def track_files(path, file_list, not_found_in_config, found):
         if path in found:
             pass
         else:
@@ -293,7 +305,7 @@ def validate_reference_data(validation_data, path_to_ref_data,
                 found.append(path)
             else:
                 for f in found:
-                    if f.endswith(f) or f in path:
+                    if f.endswith(path) or f in path:
                         return file_list, not_found_in_config, found
                 if path not in found:
                     not_found_in_config.append(path)

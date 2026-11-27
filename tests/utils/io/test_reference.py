@@ -9,7 +9,7 @@ from unittest import mock
 from requests import HTTPError
 
 from hydra_genetics.utils.io import reference
-from hydra_genetics.utils.io.reference import extract_tar, fetch_reference_data, fetch_url_content
+from hydra_genetics.utils.io.reference import extract_tar, fetch_reference_data, fetch_url_content, validate_reference_data
 
 
 class TestReference(unittest.TestCase):
@@ -251,3 +251,54 @@ class TestReference(unittest.TestCase):
         self.assertEqual(fetched, [])
         self.assertEqual(failed, [os.path.join(self.outdir, "data")])
         self.assertFalse(os.path.exists(os.path.join(self.outdir, "data")))
+
+    def test_fetch_reference_data_default_lists_not_shared(self):
+        local_file = os.path.join(self.tmpdir, "source.txt")
+        with open(local_file, "wb") as f:
+            f.write(self.genome)
+        validation_data = {"file": {"path": "files/file.txt", "type": "file",
+                                    "checksum": hashlib.md5(self.genome).hexdigest(), "url": f"file://{local_file}"}}
+        fetched, _, _, skipped = fetch_reference_data(validation_data, self.outdir)
+        self.assertEqual((len(fetched), len(skipped)), (1, 0))
+        # The second call finds the file in place and must not report the first call's fetch
+        fetched, _, _, skipped = fetch_reference_data(validation_data, self.outdir)
+        self.assertEqual((len(fetched), len(skipped)), (0, 1))
+
+
+class TestValidateReferenceData(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.refdir = tempfile.mkdtemp()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        shutil.rmtree(self.refdir)
+
+    def validate(self, validation_data, config_files):
+        return validate_reference_data(validation_data, self.refdir, config_files, [], [], [], [], [])
+
+    def test_reports_entry_missing_from_config_after_a_match(self):
+        validation_data = {"a": {"path": "ref/a.fa"}, "b": {"path": "ref/b.fa"}}
+        not_in_config = self.validate(validation_data, ["/data/ref/a.fa"])[1]
+        self.assertEqual(not_in_config, ["ref/b.fa"])
+
+    def test_entry_inside_matched_folder_is_not_reported(self):
+        validation_data = {"bwa": {"path": "ref/bwa"}, "genome": {"path": "ref/bwa/genome.fa"}}
+        not_in_config = self.validate(validation_data, ["/data/ref/bwa"])[1]
+        self.assertEqual(not_in_config, [])
+
+    def test_config_file_matching_two_entries_reports_neither(self):
+        validation_data = {"a": {"path": "ref/genome.fa"}, "b": {"path": "genome.fa"}}
+        file_list, not_in_config, found = self.validate(validation_data, ["/data/ref/genome.fa"])[:3]
+        self.assertEqual(file_list, [])
+        self.assertEqual(not_in_config, [])
+        self.assertEqual(found, ["ref/genome.fa"])
+
+    def test_default_lists_not_shared(self):
+        os.makedirs(os.path.join(self.refdir, "ref"))
+        open(os.path.join(self.refdir, "ref/a.fa"), "w").close()
+        validation_data = {"a": {"path": "ref/a.fa"}, "b": {"path": "ref/b.fa"}}
+        first = validate_reference_data(validation_data, self.refdir, ["/data/ref/a.fa"])
+        second = validate_reference_data(validation_data, self.refdir, ["/data/ref/a.fa"])
+        self.assertEqual(first, second)
+        self.assertEqual(second[1:], (["ref/b.fa"], ["ref/a.fa"], ["ref/a.fa"], [], ["ref/b.fa"]))
